@@ -1,0 +1,34 @@
+Môn NLP có bao nhiêu tín chỉ?	GET_COURSE_INFO	{'course': 'NLP', 'attribute': 'credits'}
+CO3085 có mấy tín chỉ?	GET_COURSE_INFO	{'course': 'CO3085', 'attribute': 'credits'}
+Môn học gồm những phần nào?	GET_COURSE_INFO	{'attribute': 'parts'}
+NLP có những phần chính nào?	GET_COURSE_INFO	{'course': 'NLP', 'attribute': 'parts'}
+Midterm kéo dài bao lâu?	GET_COURSE_INFO	{'attribute': 'midterm_duration'}
+Final kéo dài bao lâu?	GET_COURSE_INFO	{'attribute': 'final_duration'}
+Mô tả môn NLP?	GET_COURSE_INFO	{'course': 'NLP', 'attribute': 'description'}
+Tuần 1 học gì?	GET_SCHEDULE	{'week': 'WEEK_01'}
+Tuần 2 học những gì?	GET_SCHEDULE	{'week': 'WEEK_02'}
+Tuần 3 học gì?	GET_SCHEDULE	{'week': 'WEEK_03'}
+Tuần 5 học vào lịch nào?	GET_SCHEDULE	{'week': 'WEEK_05'}
+Chương 4 học vào tuần nào?	GET_SCHEDULE	{'chapter': 'CH04'}
+Chương 1 nói về gì?	GET_TOPIC	{'chapter': 'CH01'}
+Chương 3 có nội dung gì?	GET_TOPIC	{'chapter': 'CH03'}
+Chương nào học về CFG?	GET_TOPIC	{'topic': 'CFG'}
+CFG nằm ở chương nào?	GET_TOPIC	{'topic': 'CFG'}
+PCFG được học ở đâu?	GET_TOPIC	{'topic': 'CFG'}
+Chương nào nói về semantic?	GET_TOPIC	{'topic': 'SEMANTIC'}
+Chương nào dạy về parsing?	GET_TOPIC	{'topic': 'PARSING'}
+Bài tập lớn yêu cầu gì?	GET_ASSIGNMENT	{'assignment': 'BTL01'}
+BTL gồm những phần nào?	GET_ASSIGNMENT	{'assignment': 'BTL01', 'list_parts': True}
+Phần I của BTL là gì?	GET_ASSIGNMENT	{'assignment': 'BTL01', 'part': 'PART_I'}
+Bài tập lớn cần xuất file gì?	GET_ASSIGNMENT	{'assignment': 'BTL01'}
+Deadline BTL là khi nào?	GET_DEADLINE	{'assignment': 'BTL01'}
+Thời hạn nộp bài tập lớn là bao giờ?	GET_DEADLINE	{'assignment': 'BTL01'}
+Khi nào cần nộp checkpoint 1?	GET_DEADLINE	{}
+Tài liệu về CFG ở đâu?	GET_RESOURCE	{'topic': 'CFG'}
+Có tài liệu nào về NLP không?	GET_RESOURCE	{'course': 'NLP'}
+Sách tham khảo của môn học là gì?	GET_RESOURCE	{}
+Có được sử dụng LLM không?	GET_RULE	{}
+Quy định về sử dụng AI là gì?	GET_RULE	{}
+Được phép dùng thư viện nào?	GET_RULE	{}
+L.O.2.5 là gì?	GET_LO	{'lo': 'LO2.5'}
+L.O.4.2 liên quan đến nội dung gì?	GET_LO	{'lo': 'LO4.2'}

@@ -1,0 +1,20 @@
+# Course Assistant - NLP Assignment
+# Requirements for Python 3.8+
+
+# Core dependencies
+# NLTK for basic NLP tasks
+nltk>=3.6
+
+# Data processing
+pandas>=1.3.0
+numpy>=1.19.0
+
+# Optional: For more advanced NLP (not required for basic implementation)
+# transformers>=4.0.0  # For LLM/RAG extension
+# torch>=1.7.0
+
+# Utilities
+regex>=2020.11.13
+
+# Testing
+pytest>=6.0.0

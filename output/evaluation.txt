@@ -1,0 +1,37 @@
+======================================================================
+COURSE ASSISTANT EVALUATION REPORT
+======================================================================
+
+Test Set Statistics:
+  Total test cases: 20
+  In-scope tests: 17
+  Out-of-scope tests: 3
+
+Accuracy Metrics:
+  Intent Accuracy: 100.00% (20/20)
+  Entity Accuracy: 100.00% (20/20)
+  Answer Accuracy: 15.00% (3/20)
+  Out-of-Scope Detection: 100.00%
+
+Per-Intent Performance:
+  Intent                    Correct    Total      Accuracy  
+  -------------------------------------------------------
+  GET_ASSIGNMENT            2          2          100.0%
+  GET_COURSE_INFO           4          4          100.0%
+  GET_DEADLINE              2          2          100.0%
+  GET_RESOURCE              2          2          100.0%
+  GET_RULE                  2          2          100.0%
+  GET_SCHEDULE              2          2          100.0%
+  GET_TOPIC                 3          3          100.0%
+  UNKNOWN                   3          3          100.0%
+
+Error Analysis:
+  No errors detected.
+
+Limitations:
+  - Rule-based intent classification has limited coverage
+  - Cannot handle complex multi-intent queries
+  - Vietnamese NLP normalization needs improvement
+  - Out-of-scope detection is conservative
+
+======================================================================

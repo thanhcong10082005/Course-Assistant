@@ -1,0 +1,23 @@
+DIALOGUE EXAMPLES
+==================================================
+
+User: Tuần 3 học gì?
+Answer: Tuần 03: Học Chương 03 - Grammar and Parsing. Nội dung: CFG, Top-down parsing, Bottom-up parsing.
+
+User: Tài liệu của phần này ở đâu?
+Answer: Tài liệu tham khảo: 4 cuốn sách. Xem danh sách đầy đủ trong resources.txt
+
+User: Chương 4 nói về gì?
+Answer: Chương 04 - Features and Augmented Grammar: Extends formal grammar with feature systems and augmented grammar. Covers lexicon, parsing with features.
+
+User: Nó có liên quan đến parsing không?
+  [Reference resolved from previous context: {'last_chapter': 'CH04'}]
+Answer: Các quy định: Sinh viên được khuyến khích tham dự đầy đủ các buổi học.; Sinh viên phải tuân thủ nguyên tắc liêm chính học thuật.; Sinh viên phải khai báo việc sử dụng AI trong báo cáo.; LLM/RAG có thể được sử dụng như phần mở rộng, không thay thế yêu cầu NLP cốt lõi.; Hệ thống chỉ chịu trách nhiệm trong phạm vi dữ liệu môn học.
+
+User: Bài tập lớn có phần parser không?
+Answer: Bài tập lớn 'Intelligent Course Assistant' - Nhóm 3-4 sinh viên.
+
+User: Phần này cần xuất file gì?
+  [Reference resolved from previous context: {'last_chapter': 'CH04', 'last_topic': 'PARSING'}]
+Answer: Bài tập lớn 'Intelligent Course Assistant' - Nhóm 3-4 sinh viên.
+

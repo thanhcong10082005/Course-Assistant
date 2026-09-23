@@ -1,0 +1,35 @@
+# NLP Course Data
+# This file contains sample data for the Course Assistant system
+
+[COURSE_INFO]
+course_id=CO3085
+course_name=Xử lý Ngôn ngữ Tự nhiên
+course_name_en=Natural Language Processing
+credits=3
+ects=6
+semester=HK261
+
+[CHAPTERS]
+CH01=Introduction to NLP
+CH02=Linguistic Background
+CH03=Grammar and Parsing
+CH04=Features and Augmented Grammar
+CH05=Grammar for Natural Language
+CH06=Ambiguity Resolution - Statistical
+CH07=Semantics and Logical Form
+CH08=Linking Syntax and Semantics
+CH09=Ambiguity Resolution
+CH10=Other Strategies for Semantic
+CH11=Knowledge Representation
+CH12=Discourse Context
+
+[PARTS]
+Part_I=Xử lý cú pháp (Syntactic Processing)
+Part_II=Diễn dịch ngữ nghĩa (Semantic Interpretation)
+Part_III=Ngữ cảnh và tri thức thế giới (Context and World Knowledge)
+
+[LEARNING_OUTCOMES]
+LO1=Tổng quan về tổ chức hệ thống NLP
+LO2=Xử lý cú pháp và parsing
+LO3=Diễn dịch ngữ nghĩa
+LO4=Ngữ nghĩa và tri thức thế giới

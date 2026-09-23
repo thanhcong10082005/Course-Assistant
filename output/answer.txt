@@ -1,0 +1,111 @@
+Query: Môn NLP có bao nhiêu tín chỉ?
+Answer: Môn Xử lý Ngôn ngữ Tự nhiên (CO3085) có 3 tín chỉ.
+
+Query: CO3085 có mấy tín chỉ?
+Answer: Môn Xử lý Ngôn ngữ Tự nhiên (CO3085) có 3 tín chỉ.
+
+Query: Môn học gồm những phần nào?
+Answer: Môn học gồm 3 phần chính: Xử lý cú pháp; Diễn dịch ngữ nghĩa; Ngữ cảnh và tri thức thế giới.
+
+Query: NLP có những phần chính nào?
+Answer: Môn học gồm 3 phần chính: Xử lý cú pháp; Diễn dịch ngữ nghĩa; Ngữ cảnh và tri thức thế giới.
+
+Query: Midterm kéo dài bao lâu?
+Answer: Midterm có thời lượng 60 phút.
+
+Query: Final kéo dài bao lâu?
+Answer: Final có thời lượng 90 phút.
+
+Query: Mô tả môn NLP?
+Answer: Môn học cung cấp các khái niệm, lý thuyết và kỹ thuật nền tảng của xử lý ngôn ngữ tự nhiên.
+
+Query: Tuần 1 học gì?
+Answer: Tuần 01: Học Chương 01 - Introduction to Natural Language Processing. Nội dung: Introduction to NLP, NLU applications.
+
+Query: Tuần 2 học những gì?
+Answer: Tuần 02: Học Chương 02 - Linguistic Background - English Syntax. Nội dung: English syntax, Noun phrases, Verb phrases.
+
+Query: Tuần 3 học gì?
+Answer: Tuần 03: Học Chương 03 - Grammar and Parsing. Nội dung: CFG, Top-down parsing, Bottom-up parsing.
+
+Query: Tuần 5 học vào lịch nào?
+Answer: Tuần 05: Học Chương 04 - Features and Augmented Grammar. Nội dung: Augmented transition networks, Unification.
+
+Query: Chương 4 học vào tuần nào?
+Answer: Chương 04 (Features and Augmented Grammar) được học vào Week 04.
+
+Query: Chương 1 nói về gì?
+Answer: Chương 01 - Introduction to Natural Language Processing: NLP studies computational methods for processing natural language. Introduces applications, levels of language analysis, representation and understanding.
+
+Query: Chương 3 có nội dung gì?
+Answer: Chương 03 - Grammar and Parsing: Introduces context-free grammar, sentence structure and parsing methods. PCFG and dependency grammar.
+
+Query: Chương nào học về CFG?
+Answer: Chương 03: Grammar and Parsing trình bày về CFG.
+
+Query: CFG nằm ở chương nào?
+Answer: Chương 03: Grammar and Parsing trình bày về CFG.
+
+Query: PCFG được học ở đâu?
+Answer: Chương 03: Grammar and Parsing trình bày về CFG.
+
+Query: Chương nào nói về semantic?
+Answer: Chương 07: Semantics and Logical Form trình bày về SEMANTIC.
+
+Query: Chương nào dạy về parsing?
+Answer: Chương 03: Grammar and Parsing trình bày về PARSING.
+
+Query: Bài tập lớn yêu cầu gì?
+Answer: Bài tập lớn 'Intelligent Course Assistant' - Nhóm 3-4 sinh viên.
+
+Query: BTL gồm những phần nào?
+Answer: Bài tập lớn 'Intelligent Course Assistant' gồm các phần: Grammar and Parser; Semantic Interpretation and QA; Local Discourse Context; Evaluation.
+
+Query: Phần I của BTL là gì?
+Answer: Grammar and Parser: Xây dựng grammar và parser
+
+Query: Bài tập lớn cần xuất file gì?
+Answer: Bài tập lớn 'Intelligent Course Assistant' - Nhóm 3-4 sinh viên.
+
+Query: Deadline BTL là khi nào?
+Answer: Thời hạn BTL:
+- checkpoint_1: Tuần 8 - Grammar và Parser
+- checkpoint_2: Tuần 12 - Semantic và QA
+- final: Tuần 15 - Nộp BTL và Demo
+
+Query: Thời hạn nộp bài tập lớn là bao giờ?
+Answer: Thời hạn BTL:
+- checkpoint_1: Tuần 8 - Grammar và Parser
+- checkpoint_2: Tuần 12 - Semantic và QA
+- final: Tuần 15 - Nộp BTL và Demo
+
+Query: Khi nào cần nộp checkpoint 1?
+Answer: Thời hạn BTL:
+- checkpoint_1: Tuần 8 - Grammar và Parser
+- checkpoint_2: Tuần 12 - Semantic và QA
+- final: Tuần 15 - Nộp BTL và Demo
+
+Query: Tài liệu về CFG ở đâu?
+Answer: Tài liệu tham khảo: 4 cuốn sách. Xem danh sách đầy đủ trong resources.txt
+
+Query: Có tài liệu nào về NLP không?
+Answer: Tài liệu tham khảo: 4 cuốn sách. Xem danh sách đầy đủ trong resources.txt
+
+Query: Sách tham khảo của môn học là gì?
+Answer: Tài liệu tham khảo: 4 cuốn sách. Xem danh sách đầy đủ trong resources.txt
+
+Query: Có được sử dụng LLM không?
+Answer: Các quy định: Sinh viên được khuyến khích tham dự đầy đủ các buổi học.; Sinh viên phải tuân thủ nguyên tắc liêm chính học thuật.; Sinh viên phải khai báo việc sử dụng AI trong báo cáo.; LLM/RAG có thể được sử dụng như phần mở rộng, không thay thế yêu cầu NLP cốt lõi.; Hệ thống chỉ chịu trách nhiệm trong phạm vi dữ liệu môn học.
+
+Query: Quy định về sử dụng AI là gì?
+Answer: Các quy định: Sinh viên được khuyến khích tham dự đầy đủ các buổi học.; Sinh viên phải tuân thủ nguyên tắc liêm chính học thuật.; Sinh viên phải khai báo việc sử dụng AI trong báo cáo.; LLM/RAG có thể được sử dụng như phần mở rộng, không thay thế yêu cầu NLP cốt lõi.; Hệ thống chỉ chịu trách nhiệm trong phạm vi dữ liệu môn học.
+
+Query: Được phép dùng thư viện nào?
+Answer: Các quy định: Sinh viên được khuyến khích tham dự đầy đủ các buổi học.; Sinh viên phải tuân thủ nguyên tắc liêm chính học thuật.; Sinh viên phải khai báo việc sử dụng AI trong báo cáo.; LLM/RAG có thể được sử dụng như phần mở rộng, không thay thế yêu cầu NLP cốt lõi.; Hệ thống chỉ chịu trách nhiệm trong phạm vi dữ liệu môn học.
+
+Query: L.O.2.5 là gì?
+Answer: LO2.5: Kiến thức xác suất để giải quyết nhập nhằng từ ở mức câu.
+
+Query: L.O.4.2 liên quan đến nội dung gì?
+Answer: LO4.2: Ngữ cảnh diễn ngôn cục bộ và sự tham chiếu.
+

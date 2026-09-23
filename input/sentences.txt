@@ -1,0 +1,52 @@
+# Sample sentences for Course Assistant
+# Format: one sentence per line
+
+# Course Info Questions
+Môn NLP có bao nhiêu tín chỉ?
+CO3085 có mấy tín chỉ?
+Môn học gồm những phần nào?
+NLP có những phần chính nào?
+Midterm kéo dài bao lâu?
+Final kéo dài bao lâu?
+Mô tả môn NLP?
+
+# Schedule Questions
+Tuần 1 học gì?
+Tuần 2 học những gì?
+Tuần 3 học gì?
+Tuần 5 học vào lịch nào?
+Chương 4 học vào tuần nào?
+
+# Topic Questions
+Chương 1 nói về gì?
+Chương 3 có nội dung gì?
+Chương nào học về CFG?
+CFG nằm ở chương nào?
+PCFG được học ở đâu?
+Chương nào nói về semantic?
+Chương nào dạy về parsing?
+
+# Assignment Questions
+Bài tập lớn yêu cầu gì?
+BTL gồm những phần nào?
+Phần I của BTL là gì?
+Bài tập lớn cần xuất file gì?
+
+# Deadline Questions
+Deadline BTL là khi nào?
+Thời hạn nộp bài tập lớn là bao giờ?
+Khi nào cần nộp checkpoint 1?
+
+# Resource Questions
+Tài liệu về CFG ở đâu?
+Có tài liệu nào về NLP không?
+Sách tham khảo của môn học là gì?
+
+# Rule Questions
+Có được sử dụng LLM không?
+Quy định về sử dụng AI là gì?
+Được phép dùng thư viện nào?
+
+# Learning Outcome Questions
+L.O.2.5 là gì?
+L.O.4.2 liên quan đến nội dung gì?

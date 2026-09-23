@@ -1,0 +1,170 @@
+Query: Môn NLP có bao nhiêu tín chỉ?
+Intent: GET_COURSE_INFO
+Entities: {'course': 'NLP', 'attribute': 'credits'}
+Logical Form: GET_COURSE_INFO(course=NLP, attribute=credits)
+
+Query: CO3085 có mấy tín chỉ?
+Intent: GET_COURSE_INFO
+Entities: {'course': 'CO3085', 'attribute': 'credits'}
+Logical Form: GET_COURSE_INFO(course=CO3085, attribute=credits)
+
+Query: Môn học gồm những phần nào?
+Intent: GET_COURSE_INFO
+Entities: {'attribute': 'parts'}
+Logical Form: GET_COURSE_INFO(attribute=parts)
+
+Query: NLP có những phần chính nào?
+Intent: GET_COURSE_INFO
+Entities: {'course': 'NLP', 'attribute': 'parts'}
+Logical Form: GET_COURSE_INFO(course=NLP, attribute=parts)
+
+Query: Midterm kéo dài bao lâu?
+Intent: GET_COURSE_INFO
+Entities: {'attribute': 'midterm_duration'}
+Logical Form: GET_COURSE_INFO(attribute=midterm_duration)
+
+Query: Final kéo dài bao lâu?
+Intent: GET_COURSE_INFO
+Entities: {'attribute': 'final_duration'}
+Logical Form: GET_COURSE_INFO(attribute=final_duration)
+
+Query: Mô tả môn NLP?
+Intent: GET_COURSE_INFO
+Entities: {'course': 'NLP', 'attribute': 'description'}
+Logical Form: GET_COURSE_INFO(course=NLP, attribute=description)
+
+Query: Tuần 1 học gì?
+Intent: GET_SCHEDULE
+Entities: {'week': 'WEEK_01'}
+Logical Form: GET_SCHEDULE(week=WEEK_01)
+
+Query: Tuần 2 học những gì?
+Intent: GET_SCHEDULE
+Entities: {'week': 'WEEK_02'}
+Logical Form: GET_SCHEDULE(week=WEEK_02)
+
+Query: Tuần 3 học gì?
+Intent: GET_SCHEDULE
+Entities: {'week': 'WEEK_03'}
+Logical Form: GET_SCHEDULE(week=WEEK_03)
+
+Query: Tuần 5 học vào lịch nào?
+Intent: GET_SCHEDULE
+Entities: {'week': 'WEEK_05'}
+Logical Form: GET_SCHEDULE(week=WEEK_05)
+
+Query: Chương 4 học vào tuần nào?
+Intent: GET_SCHEDULE
+Entities: {'chapter': 'CH04'}
+Logical Form: GET_SCHEDULE(chapter=CH04)
+
+Query: Chương 1 nói về gì?
+Intent: GET_TOPIC
+Entities: {'chapter': 'CH01'}
+Logical Form: GET_TOPIC(chapter=CH01)
+
+Query: Chương 3 có nội dung gì?
+Intent: GET_TOPIC
+Entities: {'chapter': 'CH03'}
+Logical Form: GET_TOPIC(chapter=CH03)
+
+Query: Chương nào học về CFG?
+Intent: GET_TOPIC
+Entities: {'topic': 'CFG'}
+Logical Form: GET_TOPIC(topic=CFG)
+
+Query: CFG nằm ở chương nào?
+Intent: GET_TOPIC
+Entities: {'topic': 'CFG'}
+Logical Form: GET_TOPIC(topic=CFG)
+
+Query: PCFG được học ở đâu?
+Intent: GET_TOPIC
+Entities: {'topic': 'CFG'}
+Logical Form: GET_TOPIC(topic=CFG)
+
+Query: Chương nào nói về semantic?
+Intent: GET_TOPIC
+Entities: {'topic': 'SEMANTIC'}
+Logical Form: GET_TOPIC(topic=SEMANTIC)
+
+Query: Chương nào dạy về parsing?
+Intent: GET_TOPIC
+Entities: {'topic': 'PARSING'}
+Logical Form: GET_TOPIC(topic=PARSING)
+
+Query: Bài tập lớn yêu cầu gì?
+Intent: GET_ASSIGNMENT
+Entities: {'assignment': 'BTL01'}
+Logical Form: GET_ASSIGNMENT(assignment=BTL01)
+
+Query: BTL gồm những phần nào?
+Intent: GET_ASSIGNMENT
+Entities: {'assignment': 'BTL01', 'list_parts': True}
+Logical Form: GET_ASSIGNMENT(assignment=BTL01, list_parts=True)
+
+Query: Phần I của BTL là gì?
+Intent: GET_ASSIGNMENT
+Entities: {'assignment': 'BTL01', 'part': 'PART_I'}
+Logical Form: GET_ASSIGNMENT(assignment=BTL01, part=PART_I)
+
+Query: Bài tập lớn cần xuất file gì?
+Intent: GET_ASSIGNMENT
+Entities: {'assignment': 'BTL01'}
+Logical Form: GET_ASSIGNMENT(assignment=BTL01)
+
+Query: Deadline BTL là khi nào?
+Intent: GET_DEADLINE
+Entities: {'assignment': 'BTL01'}
+Logical Form: GET_DEADLINE(assignment=BTL01)
+
+Query: Thời hạn nộp bài tập lớn là bao giờ?
+Intent: GET_DEADLINE
+Entities: {'assignment': 'BTL01'}
+Logical Form: GET_DEADLINE(assignment=BTL01)
+
+Query: Khi nào cần nộp checkpoint 1?
+Intent: GET_DEADLINE
+Entities: {}
+Logical Form: GET_DEADLINE()
+
+Query: Tài liệu về CFG ở đâu?
+Intent: GET_RESOURCE
+Entities: {'topic': 'CFG'}
+Logical Form: GET_RESOURCE(topic=CFG)
+
+Query: Có tài liệu nào về NLP không?
+Intent: GET_RESOURCE
+Entities: {'course': 'NLP'}
+Logical Form: GET_RESOURCE(course=NLP)
+
+Query: Sách tham khảo của môn học là gì?
+Intent: GET_RESOURCE
+Entities: {}
+Logical Form: GET_RESOURCE()
+
+Query: Có được sử dụng LLM không?
+Intent: GET_RULE
+Entities: {}
+Logical Form: GET_RULE()
+
+Query: Quy định về sử dụng AI là gì?
+Intent: GET_RULE
+Entities: {}
+Logical Form: GET_RULE()
+
+Query: Được phép dùng thư viện nào?
+Intent: GET_RULE
+Entities: {}
+Logical Form: GET_RULE()
+
+Query: L.O.2.5 là gì?
+Intent: GET_LO
+Entities: {'lo': 'LO2.5'}
+Logical Form: GET_LO(lo=LO2.5)
+
+Query: L.O.4.2 liên quan đến nội dung gì?
+Intent: GET_LO
+Entities: {'lo': 'LO4.2'}
+Logical Form: GET_LO(lo=LO4.2)
+

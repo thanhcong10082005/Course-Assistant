@@ -1,0 +1,102 @@
+Môn NLP có bao nhiêu tín chỉ?
+(WH_QUESTION (WH_WORD môn) (NP (COURSE_NAME nlp)) (VP (VERB có) (ADJ bao) (ADJ nhiêu) (NP (NOUN tín)) (NP (NOUN chỉ))))
+
+CO3085 có mấy tín chỉ?
+(YES_NO_QUESTION (NP (COURSE_NAME co3085)) (VP (VERB có) (ADJ mấy) (NP (NOUN tín)) (NP (NOUN chỉ))))
+
+Môn học gồm những phần nào?
+(WH_QUESTION (WH_WORD môn) (VP (VERB học) (VERB gồm) (DET những) (NOUN phần) (DET nào)))
+
+NLP có những phần chính nào?
+(YES_NO_QUESTION (NP (COURSE_NAME nlp)) (VP (VERB có) (DET những) (NOUN phần) (NOUN chính) (DET nào)))
+
+Midterm kéo dài bao lâu?
+(YES_NO_QUESTION (NP (NOUN midterm)) (VP (VERB kéo) (VERB dài) (DET bao) (NOUN lâu)))
+
+Final kéo dài bao lâu?
+(YES_NO_QUESTION (NP (NOUN final)) (VP (VERB kéo) (VERB dài) (DET bao) (NOUN lâu)))
+
+Mô tả môn NLP?
+(WH_QUESTION (NP (NOUN mô)) (NP (NOUN tả)) (WH_WORD môn) (NP (COURSE_NAME nlp)))
+
+Tuần 1 học gì?
+(WH_QUESTION (WH_WORD tuần) (NP (NUM 1)) (VP (VERB học) (ADJ gì)))
+
+Tuần 2 học những gì?
+(WH_QUESTION (WH_WORD tuần) (NP (NUM 2)) (VP (VERB học) (DET những) (DET gì)))
+
+Tuần 3 học gì?
+(WH_QUESTION (WH_WORD tuần) (NP (NUM 3)) (VP (VERB học) (ADJ gì)))
+
+Tuần 5 học vào lịch nào?
+(WH_QUESTION (WH_WORD tuần) (NP (NUM 5)) (VP (VERB học) (NOUN vào) (NOUN lịch) (DET nào)))
+
+Chương 4 học vào tuần nào?
+(WH_QUESTION (WH_WORD chương) (NP (NUM 4)) (VP (VERB học) (NOUN vào)) (WH_WORD tuần) (DET nào))
+
+Chương 1 nói về gì?
+(WH_QUESTION (WH_WORD chương) (NP (NUM 1)) (VP (VERB nói) (VERB về) (DET gì)))
+
+Chương 3 có nội dung gì?
+(WH_QUESTION (WH_WORD chương) (NP (NUM 3)) (VP (VERB có) (NOUN nội) (NOUN dung) (DET gì)))
+
+Chương nào học về CFG?
+(WH_QUESTION (WH_WORD chương) (DET nào) (VP (VERB học) (VERB về) (TOPIC cfg)))
+
+CFG nằm ở chương nào?
+(WH_QUESTION (NP (TOPIC cfg)) (NP (NOUN nằm)) (VP (VERB ở)) (WH_WORD chương) (DET nào))
+
+PCFG được học ở đâu?
+(YES_NO_QUESTION (NP (TOPIC pcfg)) (VP (VERB được) (VERB học) (VERB ở) (NOUN đâu)))
+
+Chương nào nói về semantic?
+(WH_QUESTION (WH_WORD chương) (DET nào) (VP (VERB nói) (VERB về) (TOPIC semantic)))
+
+Chương nào dạy về parsing?
+(WH_QUESTION (WH_WORD chương) (DET nào) (NP (NOUN dạy)) (VP (VERB về) (TOPIC parsing)))
+
+Bài tập lớn yêu cầu gì?
+(YES_NO_QUESTION (NP (ASSIGNMENT bài)) (NP (ASSIGNMENT tập)) (NP (ASSIGNMENT lớn)) (VP (VERB yêu) (VERB cầu) (DET gì)))
+
+BTL gồm những phần nào?
+(YES_NO_QUESTION (NP (ASSIGNMENT btl)) (VP (VERB gồm) (DET những) (NOUN phần) (DET nào)))
+
+Phần I của BTL là gì?
+(YES_NO_QUESTION (NP (NOUN phần)) (NP (NOUN i)) (VP (VERB của) (ASSIGNMENT btl) (VERB là) (DET gì)))
+
+Bài tập lớn cần xuất file gì?
+(YES_NO_QUESTION (NP (ASSIGNMENT bài)) (NP (ASSIGNMENT tập)) (NP (ASSIGNMENT lớn)) (VP (VERB cần) (VERB xuất) (NOUN file) (DET gì)))
+
+Deadline BTL là khi nào?
+(WH_QUESTION (WH_WORD deadline) (NP (ASSIGNMENT btl)) (VP (VERB là) (NOUN khi) (DET nào)))
+
+Thời hạn nộp bài tập lớn là bao giờ?
+(WH_QUESTION (WH_WORD thời) (NP (NOUN hạn)) (VP (VERB nộp) (ASSIGNMENT bài) (ASSIGNMENT tập) (ASSIGNMENT lớn) (VERB là) (DET bao) (NOUN giờ)))
+
+Khi nào cần nộp checkpoint 1?
+(YES_NO_QUESTION (NP (NOUN khi)) (DET nào) (VP (VERB cần) (VERB nộp) (NOUN checkpoint) (NUM 1)))
+
+Tài liệu về CFG ở đâu?
+(WH_QUESTION (WH_WORD tài) (NP (NOUN liệu)) (VP (VERB về) (TOPIC cfg) (VERB ở) (NOUN đâu)))
+
+Có tài liệu nào về NLP không?
+(WH_QUESTION (VP (VERB có)) (WH_WORD tài) (NP (NOUN liệu)) (DET nào) (VP (VERB về) (COURSE_NAME nlp) (ADV không)))
+
+Sách tham khảo của môn học là gì?
+(WH_QUESTION (NP (NOUN sách)) (NP (NOUN tham)) (NP (NOUN khảo)) (VP (VERB của)) (WH_WORD môn) (VP (VERB học) (VERB là) (DET gì)))
+
+Có được sử dụng LLM không?
+(YES_NO_QUESTION (VP (VERB có) (VERB được) (VERB sử) (VERB dụng) (NOUN llm) (ADV không)))
+
+Quy định về sử dụng AI là gì?
+(WH_QUESTION (WH_WORD quy) (NP (NOUN định)) (VP (VERB về) (VERB sử) (VERB dụng) (PRONOUN ai) (VERB là) (DET gì)))
+
+Được phép dùng thư viện nào?
+(YES_NO_QUESTION (VP (VERB được) (NOUN phép) (NOUN dùng) (NOUN thư) (NOUN viện) (DET nào)))
+
+L.O.2.5 là gì?
+(YES_NO_QUESTION (NP (LO_ID lo_2_5)) (VP (VERB là) (ADJ gì)))
+
+L.O.4.2 liên quan đến nội dung gì?
+(YES_NO_QUESTION (NP (LO_ID lo_4_2)) (VP (VERB liên) (VERB quan) (NOUN đến) (NOUN nội) (NOUN dung) (DET gì)))
+
