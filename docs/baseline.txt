@@ -1,0 +1,73 @@
+======================================================================
+COURSE ASSISTANT - BASELINE METRICS
+======================================================================
+
+Official test set (tests/data/sample_queries.txt): 34 cases
+  Intent accuracy:        30/34 = 88.24%
+  Entity accuracy (alias-aware): 19/34 = 55.88%
+  Entity accuracy (raw match):   16/34 = 47.06%
+  Intent + Entity accuracy: 18/34 = 52.94%
+
+  Failing cases (16):
+  [Q003] Môn học gồm những phần nào?
+      expected: GET_COURSE_INFO / CO3085
+      actual  : GET_COURSE_INFO / {'attribute': 'parts'}
+  [Q007] PCFG được học ở đâu?
+      expected: GET_TOPIC / PCFG
+      actual  : GET_TOPIC / {'topic': 'CFG'}
+  [Q008] Chương nào nói về semantic grammar?
+      expected: GET_TOPIC / SEMANTIC_GRAMMAR
+      actual  : GET_TOPIC / {'topic': 'SEMANTIC'}
+  [Q013] Bài tập lớn có phần hỏi đáp không?
+      expected: GET_ASSIGNMENT / PART_II
+      actual  : GET_ASSIGNMENT / {'assignment': 'BTL01'}
+  [Q014] Có được dùng LLM/RAG không?
+      expected: GET_RULE / LLM_RAG
+      actual  : GET_RULE / {}
+  [Q015] Quy định về sử dụng AI là gì?
+      expected: GET_RULE / AI_USAGE
+      actual  : GET_RULE / {}
+  [Q018] Tài liệu tham khảo về statistical NLP là gì?
+      expected: GET_RESOURCE / STATISTICAL_NLP
+      actual  : GET_RESOURCE / {'course': 'NLP'}
+  [Q019] Tài liệu nào liên quan đến Python NLP?
+      expected: GET_RESOURCE / PYTHON_NLP
+      actual  : GET_RESOURCE / {'course': 'NLP'}
+  [Q021] Chương nào học về reference?
+      expected: GET_TOPIC / REFERENCE
+      actual  : GET_TOPIC / {}
+  [Q022] Chương nào học về question answering?
+      expected: GET_TOPIC / QUESTION_ANSWERING
+      actual  : GET_TOPIC / {}
+  [Q023] Chương nào học về selectional restriction?
+      expected: GET_TOPIC / SELECTIONAL_RESTRICTION
+      actual  : GET_TOPIC / {}
+  [Q028] Hãy giải bài tập xác suất này giúp tôi.
+      expected: UNKNOWN / None
+      actual  : GET_ASSIGNMENT / {}
+  [Q030] Nó có liên quan đến parsing không?
+      expected: CONTEXT_DEPENDENT / CH04
+      actual  : GET_RULE / {'topic': 'PARSING'}
+  [Q032] Còn chương sau?
+      expected: CONTEXT_DEPENDENT / CH12
+      actual  : GET_TOPIC / {}
+  [Q033] Bài tập lớn có phần parser không?
+      expected: GET_ASSIGNMENT / PART_I
+      actual  : GET_ASSIGNMENT / {'assignment': 'BTL01'}
+  [Q034] Phần này cần xuất file gì?
+      expected: CONTEXT_DEPENDENT / PART_I
+      actual  : GET_ASSIGNMENT / {}
+
+Parser (on the official test set):
+  Strict recursive descent: 4/34 = 11.76%
+  Pattern fallback:        30/34 = 88.24%
+  Failure:                 0/34 = 0.00%
+
+Sentence generation:
+  Sentences generated:      10000
+  Containing '_':            0
+  Containing 'WH_PHRASE':    0
+  Bad leading token:         0
+  Missing end punctuation:   0
+
+======================================================================
