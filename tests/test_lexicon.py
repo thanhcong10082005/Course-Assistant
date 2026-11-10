@@ -1,7 +1,7 @@
 """
 Tests for the domain lexicon (``models/lexicon.json``).
 
-The lexicon is the structured lookup table that WP4 will use to map a
+The lexicon is the structured lookup table used to map a
 surface form onto a canonical entity value.  These tests validate the file
 itself: it must be valid JSON, well-formed, and free of contradictions.
 """

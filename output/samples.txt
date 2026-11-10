@@ -1,6 +1,4 @@
-# ===== GENERATED SAMPLE SENTENCES =====
-# Section 1: template-based questions (with their intent label)
-
+# Template-based sentences (with intent labels)
 Môn NLP có bao nhiêu tín chỉ?	(intent=GET_COURSE_INFO)
 Môn CO3085 có bao nhiêu tín chỉ?	(intent=GET_COURSE_INFO)
 NLP có mấy tín chỉ?	(intent=GET_COURSE_INFO)
@@ -97,9 +95,7 @@ L.O.1.1 học về gì?	(intent=GET_LO)
 L.O.2.1 học về gì?	(intent=GET_LO)
 L.O.2.5 học về gì?	(intent=GET_LO)
 
-# Section 2: sentences produced by the weighted CFG generator
-# (deterministic: seed=42)
-
+# Grammar-generated sentences (raw, no intent labels)
 ATN biết với môn xử lý ngôn ngữ tự nhiên của chương gì?
 ATN báo cáo xử lý ngôn ngữ tự nhiên có?
 ATN cho assignment ở chương gì yêu cầu học L.O.3.1?

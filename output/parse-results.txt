@@ -1,102 +1,144 @@
+PARSE RESULTS
+======================================================================
+Label: [STRICT] = parsed by the grammar-driven chart parser,
+       [FALLBACK] = outside the grammar, matched by the
+                    pattern-based fallback,
+       [INVALID]  = no tree could be produced.
+======================================================================
+
 Môn NLP có bao nhiêu tín chỉ?
+[STRICT]
 (WH_QUESTION (NP (COURSE_REF (COURSE_MOD (môn)) (COURSE_NAME (nlp)))) (VP (VERB (có)) (NP (QUANT (bao_nhiêu)) (ATTR_NOUN (tín_chỉ)))) (PUNCT (?)))
 
 CO3085 có mấy tín chỉ?
+[STRICT]
 (WH_QUESTION (NP (COURSE_REF (COURSE_NAME (co3085)))) (VP (VERB (có)) (QUANT (mấy)) (NP (ATTR_NOUN (tín_chỉ)))) (PUNCT (?)))
 
 Môn học gồm những phần nào?
+[STRICT]
 (WH_QUESTION (NP (NOMINAL (NOUN (môn_học)))) (VP (VERB (gồm)) (NP (DET (những)) (NOMINAL (NOUN (phần)) (DET (nào))))) (PUNCT (?)))
 
 NLP có những phần chính nào?
+[FALLBACK]
 (WH_QUESTION (NP (COURSE_NAME nlp)) (VP (VERB có) (DET những) (NOUN phần) (NOUN chính)) (WH_WORD nào) (PUNCT ?))
 
 Midterm kéo dài bao lâu?
+[FALLBACK]
 (WH_QUESTION (NP (NOUN midterm)) (VP (VERB kéo_dài)) (WH_WORD bao) (NP (NOUN lâu)) (PUNCT ?))
 
 Final kéo dài bao lâu?
+[FALLBACK]
 (WH_QUESTION (NP (NOUN final)) (VP (VERB kéo_dài)) (WH_WORD bao) (NP (NOUN lâu)) (PUNCT ?))
 
 Mô tả môn NLP?
+[FALLBACK]
 (YES_NO_QUESTION (NP (NOUN mô)) (NP (NOUN tả)) (NP (COURSE_NAME môn)) (NP (COURSE_NAME nlp)) (PUNCT ?))
 
 Tuần 1 học gì?
+[STRICT]
 (WH_QUESTION (NP (WEEK_REF (tuần) (WEEK_NUM (1)))) (VP (VERB (học)) (ADV (gì))) (PUNCT (?)))
 
 Tuần 2 học những gì?
+[STRICT]
 (WH_QUESTION (NP (WEEK_REF (tuần) (WEEK_NUM (2)))) (VP (VERB (học)) (NP (DET (những)) (WH_QWORD (gì)))) (PUNCT (?)))
 
 Tuần 3 học gì?
+[STRICT]
 (WH_QUESTION (NP (WEEK_REF (tuần) (WEEK_NUM (3)))) (VP (VERB (học)) (ADV (gì))) (PUNCT (?)))
 
 Tuần 5 học vào lịch nào?
+[FALLBACK]
 (WH_QUESTION (NP (NOUN tuần)) (NP (NUM 5)) (VP (VERB học) (PREP vào) (NOUN lịch)) (WH_WORD nào) (PUNCT ?))
 
 Chương 4 học vào tuần nào?
+[STRICT]
 (WH_QUESTION (NP (CHAPTER_REF (chương) (CHAPTER_NUM (4)))) (VP (VERB (học)) (PP (PREP (vào)) (NP (NOMINAL (NOUN (tuần)) (DET (nào)))))) (PUNCT (?)))
 
 Chương 1 nói về gì?
+[STRICT]
 (WH_QUESTION (NP (CHAPTER_REF (chương) (CHAPTER_NUM (1)))) (VP (VERB (nói_về)) (ADV (gì))) (PUNCT (?)))
 
 Chương 3 có nội dung gì?
+[STRICT]
 (WH_QUESTION (NP (CHAPTER_REF (chương) (CHAPTER_NUM (3)))) (VP (VERB (có)) (NP (NOMINAL (NOUN (nội_dung)) (DET (gì))))) (PUNCT (?)))
 
 Chương nào học về CFG?
+[STRICT]
 (WH_QUESTION (NP (NOMINAL (NOUN (chương)) (DET (nào)))) (VP (VERB (học_về)) (NP (TOPIC_NAME (cfg)))) (PUNCT (?)))
 
 CFG nằm ở chương nào?
+[STRICT]
 (WH_QUESTION (NP (TOPIC_NAME (cfg))) (VP (VERB (nằm)) (PP (PREP (ở)) (NP (NOMINAL (NOUN (chương)) (DET (nào)))))) (PUNCT (?)))
 
 PCFG được học ở đâu?
+[STRICT]
 (WH_QUESTION (NP (TOPIC_NAME (pcfg))) (VP (AUX (được)) (VERB (học)) (WH_QWORD (ở_đâu))) (PUNCT (?)))
 
 Chương nào nói về semantic?
+[STRICT]
 (WH_QUESTION (NP (NOMINAL (NOUN (chương)) (DET (nào)))) (VP (VERB (nói_về)) (NP (TOPIC_NAME (semantic)))) (PUNCT (?)))
 
 Chương nào dạy về parsing?
+[FALLBACK]
 (WH_QUESTION (NP (NOUN chương)) (WH_WORD nào) (NP (NOUN dạy)) (NP (NOUN về)) (NP (TOPIC parsing)) (PUNCT ?))
 
 Bài tập lớn yêu cầu gì?
+[STRICT]
 (WH_QUESTION (NP (ASSIGNMENT_NAME (bài_tập_lớn))) (VP (VERB (yêu_cầu)) (ADV (gì))) (PUNCT (?)))
 
 BTL gồm những phần nào?
+[STRICT]
 (WH_QUESTION (NP (ASSIGNMENT_NAME (btl))) (VP (VERB (gồm)) (NP (DET (những)) (NOMINAL (NOUN (phần)) (DET (nào))))) (PUNCT (?)))
 
 Phần I của BTL là gì?
+[STRICT]
 (WH_QUESTION (NP (PART_REF (NOUN (phần)) (PART_NUM (i)))) (MODS (PP (PREP (của)) (NP (ASSIGNMENT_NAME (btl))))) (VP (VERB (là)) (ADV (gì))) (PUNCT (?)))
 
 Bài tập lớn cần xuất file gì?
+[STRICT]
 (WH_QUESTION (NP (ASSIGNMENT_NAME (bài_tập_lớn))) (VP (AUX (cần)) (VERB (xuất)) (NP (NOMINAL (NOUN (file)) (DET (gì))))) (PUNCT (?)))
 
 Deadline BTL là khi nào?
+[STRICT]
 (WH_QUESTION (NP (NOMINAL (NOUN (deadline))) (NOMINAL (NOUN (btl)))) (VP (VERB (là)) (WH_QWORD (khi_nào))) (PUNCT (?)))
 
 Thời hạn nộp bài tập lớn là bao giờ?
+[FALLBACK]
 (WH_QUESTION (NP (NOUN thời_hạn)) (VP (VERB nộp) (ASSIGNMENT bài_tập_lớn) (VERB là)) (WH_WORD bao_giờ) (PUNCT ?))
 
 Khi nào cần nộp checkpoint 1?
+[FALLBACK]
 (WH_QUESTION (WH_WORD khi_nào) (VP (VERB cần) (VERB nộp) (NOUN checkpoint) (NUM 1)) (PUNCT ?))
 
 Tài liệu về CFG ở đâu?
+[FALLBACK]
 (WH_QUESTION (NP (NOUN tài_liệu)) (NP (NOUN về)) (NP (TOPIC cfg)) (WH_WORD ở_đâu) (PUNCT ?))
 
 Có tài liệu nào về NLP không?
+[STRICT]
 (YES_NO_QUESTION (VP (VERB (có)) (NP (NOMINAL (NOUN (tài_liệu)) (DET (nào))) (PP (PREP (về)) (NP (COURSE_REF (COURSE_NAME (nlp)))))) (ADV (không))) (PUNCT (?)))
 
 Sách tham khảo của môn học là gì?
+[FALLBACK]
 (WH_QUESTION (NP (NOUN sách)) (NP (NOUN tham_khảo)) (NP (NOUN của)) (NP (COURSE_NAME môn_học)) (VP (VERB là)) (WH_WORD gì) (PUNCT ?))
 
 Có được sử dụng LLM không?
+[FALLBACK]
 (YES_NO_QUESTION (VP (VERB có) (VERB được) (VERB sử_dụng) (NOUN llm) (NOUN không)) (PUNCT ?))
 
 Quy định về sử dụng AI là gì?
+[STRICT]
 (WH_QUESTION (NP (NOMINAL (NOUN (quy_định)))) (MODS (PP (PREP (về)) (NP (NOMINAL (NOUN (sử_dụng)) (WH_QWORD (ai)))))) (VP (VERB (là)) (ADV (gì))) (PUNCT (?)))
 
 Được phép dùng thư viện nào?
+[FALLBACK]
 (WH_QUESTION (VP (VERB được) (NOUN phép) (VERB dùng) (NOUN thư_viện)) (WH_WORD nào) (PUNCT ?))
 
 L.O.2.5 là gì?
+[STRICT]
 (WH_QUESTION (NP (LO_ID (l.o.2.5 L.O.2.5))) (VP (VERB (là)) (ADV (gì))) (PUNCT (?)))
 
 L.O.4.2 liên quan đến nội dung gì?
+[STRICT]
 (WH_QUESTION (NP (LO_ID (l.o.4.2 L.O.4.2))) (VP (VERB (liên_quan)) (PP (PREP (đến)) (NP (NOMINAL (NOUN (nội_dung)) (DET (gì)))))) (PUNCT (?)))
 

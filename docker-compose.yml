@@ -1,0 +1,16 @@
+version: "3.8"
+
+services:
+  course-assistant:
+    build: .
+    container_name: course-assistant
+    environment:
+      - PYTHONIOENCODING=utf-8
+      - PYTHONPATH=/app
+    volumes:
+      # The generated artefacts are written back to the host so that the
+      # team can read them without entering the container.
+      - ./output:/app/output
+    stdin_open: true
+    tty: true
+    command: ["python", "-m", "src.main", "--mode", "interactive"]

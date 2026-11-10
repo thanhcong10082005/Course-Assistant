@@ -1,123 +1,74 @@
-EVALUATION REPORT
-======================================================================
+=========================================================================
+COURSE ASSISTANT - EVALUATION REPORT
+=========================================================================
 
-Test set: tests/data/sample_queries.txt (34 official queries)
+1. SỐ LƯỢNG CÂU KIỂM THỬ
+-------------------------------------------------------------------------
+   Tổng: 57 câu
+     - sample_queries.txt (chính thức) : 34 câu
+     - Câu biến thể (nhóm tự bổ sung)  : 15 câu
+     - Câu hội thoại nhiều lượt        : 8 câu
+   Phân loại:
+     - context_dependent   : 11
+     - in_scope            : 38
+     - kb_miss             : 3
+     - out_of_scope        : 5
 
-Summary:
-----------------------------------------------------------------------
-  Intent accuracy:        34/34 = 100.00%
-  Entity accuracy:        32/34 = 94.12%
-  Intent + Entity:        32/34 = 94.12%
+2. SỐ LƯỢNG CÂU TRẢ LỜI ĐÚNG
+-------------------------------------------------------------------------
+   Intent đúng        : 57/57 = 100.00%
+   Entity đúng        : 57/57 = 100.00%
+   Intent + Entity     : 100.00%
+   Câu trả lời đúng    : 57/57 = 100.00%
+   Ngoài phạm vi       : 100.00%
 
-Per-query detail:
-----------------------------------------------------------------------
+3. ĐỘ CHÍNH XÁC THEO TỪNG INTENT
+-------------------------------------------------------------------------
+   Intent                 Đúng/Tổng      Accuracy  
+   ---------------------- -------------- ----------
+   CONTEXT_DEPENDENT      3/3            100.0%
+   GET_ASSIGNMENT         7/7            100.0%
+   GET_COURSE_INFO        7/7            100.0%
+   GET_DEADLINE           1/1            100.0%
+   GET_INSTRUCTOR         1/1            100.0%
+   GET_LO                 4/4            100.0%
+   GET_RESOURCE           4/4            100.0%
+   GET_RULE               3/3            100.0%
+   GET_SCHEDULE           5/5            100.0%
+   GET_TOPIC              17/17          100.0%
+   UNKNOWN                5/5            100.0%
 
-✓ [Q001] Môn NLP có bao nhiêu tín chỉ?
-    expected: GET_COURSE_INFO / CO3085
-    actual  : GET_COURSE_INFO / {'course': 'CO3085', 'attribute': 'credits'}
-✓ [Q002] CO3085 có mấy tín chỉ?
-    expected: GET_COURSE_INFO / CO3085
-    actual  : GET_COURSE_INFO / {'course': 'CO3085', 'attribute': 'credits'}
-✓ [Q003] Môn học gồm những phần nào?
-    expected: GET_COURSE_INFO / CO3085
-    actual  : GET_COURSE_INFO / {'course': 'CO3085', 'attribute': 'parts'}
-✓ [Q004] Tuần 3 học gì?
-    expected: GET_SCHEDULE / WEEK_03
-    actual  : GET_SCHEDULE / {'week': 'WEEK_03'}
-✓ [Q005] Chương 4 học vào tuần nào?
-    expected: GET_SCHEDULE / CH04
-    actual  : GET_SCHEDULE / {'chapter': 'CH04'}
-✓ [Q006] Chương nào nói về CFG?
-    expected: GET_TOPIC / CFG
-    actual  : GET_TOPIC / {'topic': 'CFG'}
-✓ [Q007] PCFG được học ở đâu?
-    expected: GET_TOPIC / PCFG
-    actual  : GET_TOPIC / {'topic': 'PCFG'}
-✓ [Q008] Chương nào nói về semantic grammar?
-    expected: GET_TOPIC / SEMANTIC_GRAMMAR
-    actual  : GET_TOPIC / {'topic': 'SEMANTIC_GRAMMAR'}
-✓ [Q009] L.O.2.5 là gì?
-    expected: GET_LO / LO2.5
-    actual  : GET_LO / {'lo': 'LO2.5'}
-✓ [Q010] L.O.4.2 liên quan đến nội dung nào?
-    expected: GET_LO / LO4.2
-    actual  : GET_LO / {'lo': 'LO4.2'}
-✓ [Q011] Bài tập lớn yêu cầu xây dựng những gì?
-    expected: GET_ASSIGNMENT / BTL01
-    actual  : GET_ASSIGNMENT / {'assignment': 'BTL01'}
-✓ [Q012] Phần I của bài tập lớn là gì?
-    expected: GET_ASSIGNMENT / PART_I
-    actual  : GET_ASSIGNMENT / {'part': 'PART_I', 'assignment': 'BTL01'}
-✓ [Q013] Bài tập lớn có phần hỏi đáp không?
-    expected: GET_ASSIGNMENT / PART_II
-    actual  : GET_ASSIGNMENT / {'assignment': 'BTL01', 'part': 'PART_II'}
-✓ [Q014] Có được dùng LLM/RAG không?
-    expected: GET_RULE / LLM_RAG
-    actual  : GET_RULE / {'rule': 'LLM_RAG'}
-✓ [Q015] Quy định về sử dụng AI là gì?
-    expected: GET_RULE / AI_USAGE
-    actual  : GET_RULE / {'rule': 'AI_USAGE'}
-✗ [Q016] Midterm bao nhiêu phút?
-    expected: GET_COURSE_INFO / MIDTERM
-    actual  : GET_COURSE_INFO / {'attribute': 'midterm_duration'}
-✗ [Q017] Final bao nhiêu phút?
-    expected: GET_COURSE_INFO / FINAL
-    actual  : GET_COURSE_INFO / {'attribute': 'final_duration'}
-✓ [Q018] Tài liệu tham khảo về statistical NLP là gì?
-    expected: GET_RESOURCE / STATISTICAL_NLP
-    actual  : GET_RESOURCE / {'resource': 'DOCUMENT', 'topic': 'STATISTICAL_NLP'}
-✓ [Q019] Tài liệu nào liên quan đến Python NLP?
-    expected: GET_RESOURCE / PYTHON_NLP
-    actual  : GET_RESOURCE / {'resource': 'DOCUMENT', 'topic': 'PYTHON_NLP'}
-✓ [Q020] Chương 12 nói về gì?
-    expected: GET_TOPIC / CH12
-    actual  : GET_TOPIC / {'chapter': 'CH12'}
-✓ [Q021] Chương nào học về reference?
-    expected: GET_TOPIC / REFERENCE
-    actual  : GET_TOPIC / {'topic': 'REFERENCE'}
-✓ [Q022] Chương nào học về question answering?
-    expected: GET_TOPIC / QUESTION_ANSWERING
-    actual  : GET_TOPIC / {'topic': 'QUESTION_ANSWERING'}
-✓ [Q023] Chương nào học về selectional restriction?
-    expected: GET_TOPIC / SELECTIONAL_RESTRICTION
-    actual  : GET_TOPIC / {'topic': 'SELECTIONAL_RESTRICTION'}
-✓ [Q024] Chương 10 có những phương pháp gì?
-    expected: GET_TOPIC / CH10
-    actual  : GET_TOPIC / {'chapter': 'CH10', 'attribute': 'methods'}
-✓ [Q025] Chương 11 có liên quan đến hỏi đáp không?
-    expected: GET_TOPIC / CH11
-    actual  : GET_TOPIC / {'chapter': 'CH11', 'part': 'PART_II'}
-✓ [Q026] Hôm nay ở TP.HCM có mưa không?
-    expected: UNKNOWN / None
-    actual  : UNKNOWN / {'scope': 'OUT_OF_SCOPE'}
-✓ [Q027] Ai là tổng thống của Pháp?
-    expected: UNKNOWN / None
-    actual  : UNKNOWN / {'rule': 'AI_USAGE', 'scope': 'OUT_OF_SCOPE'}
-✓ [Q028] Hãy giải bài tập xác suất này giúp tôi.
-    expected: UNKNOWN / None
-    actual  : UNKNOWN / {'assignment': 'BTL01', 'scope': 'OUT_OF_SCOPE'}
-✓ [Q029] Chương 4 nói về gì?
-    expected: GET_TOPIC / CH04
-    actual  : GET_TOPIC / {'chapter': 'CH04'}
-✓ [Q030] Nó có liên quan đến parsing không?
-    expected: CONTEXT_DEPENDENT / CH04
-    actual  : CONTEXT_DEPENDENT / {'topic': 'PARSING', 'chapter': 'CH04'}
-✓ [Q031] Chương 11 có hỏi đáp không?
-    expected: GET_TOPIC / CH11
-    actual  : GET_TOPIC / {'chapter': 'CH11', 'part': 'PART_II'}
-✓ [Q032] Còn chương sau?
-    expected: CONTEXT_DEPENDENT / CH12
-    actual  : CONTEXT_DEPENDENT / {'chapter': 'CH12'}
-✓ [Q033] Bài tập lớn có phần parser không?
-    expected: GET_ASSIGNMENT / PART_I
-    actual  : GET_ASSIGNMENT / {'assignment': 'BTL01', 'part': 'PART_I'}
-✓ [Q034] Phần này cần xuất file gì?
-    expected: CONTEXT_DEPENDENT / PART_I
-    actual  : CONTEXT_DEPENDENT / {'part': 'PART_I'}
+4. CÁC TRƯỜNG HỢP HỆ THỐNG TRẢ LỜI SAI
+-------------------------------------------------------------------------
+   (không có)
 
-======================================================================
-Note: the entity column is compared with the official label using a
-raw substring match, so the two alias pairs (CO3085/NLP and
-MIDTERM/FINAL) are reported as entity misses even though the
-pipeline resolves them correctly.  Run scripts/baseline.py for the
-alias-aware figures.
+5. PHÂN TÍCH NGUYÊN NHÂN LỖI
+-------------------------------------------------------------------------
+   Loại lỗi             Số lượng     Tỉ lệ
+   -------------------- ------------ ----------
+   (không có lỗi)       0            0.0%
+   Phân bố theo nhóm test:
+     context_dependent    11/11 = 100.0%
+     in_scope             38/38 = 100.0%
+     kb_miss              3/3 = 100.0%
+     out_of_scope         5/5 = 100.0%
+
+6. NHẬN XÉT ƯU ĐIỂM VÀ HẠN CHẾ
+-------------------------------------------------------------------------
+   Ưu điểm:
+     - Intent accuracy đạt 100% trên toàn bộ tập kiểm thử.
+     - Trích xuất entity dùng longest-match nên không còn
+       hiện tượng chuỗi con cướp entity (PCFG/CFG, NLP/course).
+     - Câu hỏi ngoài phạm vi được nhận diện và từ chối trả lời.
+     - Tham chiếu ngữ cảnh được giải trên trạng thái diễn ngôn,
+       không phải bằng thay chuỗi thủ công.
+   Hạn chế:
+     - Lexicon vẫn là bảng tra thủ công: một cách diễn đạt
+       mới sẽ không được nhận diện.
+     - Bộ tham chiếu ngữ cảnh là cố định (đại từ, mô tả xác định,
+       cấu trúc rút gọn, quan hệ 'kế tiếp'); chưa xử lý được
+       tham chiếu mơ hồ khi có nhiều ứng viên.
+     - Knowledge base chỉ trả lời truy vấn đơn, chưa suy luận
+       nhiều bước.
+
+=========================================================================

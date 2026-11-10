@@ -151,6 +151,11 @@ class Lexicon:
 
         The surfaces are matched longest-first so that the alternation itself
         already prefers the longest surface at a given position.
+
+        Every alternative is wrapped in a **look-around boundary** so that a
+        surface can only match a complete token.  Without it the surface
+        ``"chương 9"`` would also match inside ``"chương 99"`` and the
+        entity would silently become ``CH09`` instead of ``CH99``.
         """
         alternatives = sorted(
             (surface for surface in surfaces if surface),
@@ -162,7 +167,10 @@ class Lexicon:
             re.escape(surface).replace(r"\ ", r"\s+").replace("_", r"[_\s]")
             for surface in alternatives
         ]
-        return re.compile("|".join(escaped))
+        # A surface may start or end with a digit: the boundary must then
+        # assert that the neighbouring character is not a digit either.
+        pattern = "|".join(escaped)
+        return re.compile(rf"(?<![\w]){pattern}(?![\w])")
 
     # ------------------------------------------------------------------
     # Matching

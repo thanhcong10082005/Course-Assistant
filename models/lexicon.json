@@ -2,7 +2,6 @@
   "_meta": {
     "description": "Lexicon for the Course Assistant (domain: NLP course CO3085). Each entry maps a surface form to a canonical entity value and the entity type.",
     "version": "2.0",
-    "work_package": "WP0 (structure) / WP4 (consumption)",
     "normalization": "All surfaces are stored lower-case and NFC-normalised. Matching is done on the normalized text with a longest-match strategy, so 'semantic grammar' wins over 'semantic' and 'statistical nlp' wins over 'nlp'."
   },
 
@@ -121,7 +120,9 @@
     "bài tập lớn 1": "BTL01",
     "assignment": "BTL01",
     "đồ án": "BTL01",
-    "bài tập": "BTL01"
+    "bài tập": "BTL01",
+    "đề bài lớn": "BTL01",
+    "đồ án lớn": "BTL01"
   },
 
   "assignment_part": {
@@ -160,24 +161,25 @@
     "mã nguồn mở": "PART_III"
   },
 
-  "rule": {
-    "llm": "LLM_RAG",
-    "llm/rag": "LLM_RAG",
-    "llm rag": "LLM_RAG",
-    "rag": "LLM_RAG",
-    "large language model": "LLM_RAG",
-    "sử dụng ai": "AI_USAGE",
-    "dùng ai": "AI_USAGE",
-    "ai": "AI_USAGE",
-    "trợ giải": "AI_USAGE",
-    "chatgpt": "AI_USAGE",
-    "chính sách": "POLICY",
-    "bản quyền": "COPYRIGHT",
-    "chính sách bản quyền": "POLICY",
-    "liêm chính học thuật": "ACADEMIC_INTEGRITY",
-    "học thuật": "ACADEMIC_INTEGRITY",
-    "copy": "COPYRIGHT"
-  },
+    "rule": {
+        "llm": "LLM_RAG",
+        "llm/rag": "LLM_RAG",
+        "llm rag": "LLM_RAG",
+        "rag": "LLM_RAG",
+        "large language model": "LLM_RAG",
+        "sử dụng ai": "AI_USAGE",
+        "dùng ai": "AI_USAGE",
+        "trí tuệ nhân tạo": "AI_USAGE",
+        "artificial intelligence": "AI_USAGE",
+        "trợ giải": "AI_USAGE",
+        "chatgpt": "AI_USAGE",
+        "chính sách": "POLICY",
+        "bản quyền": "COPYRIGHT",
+        "chính sách bản quyền": "POLICY",
+        "liêm chính học thuật": "ACADEMIC_INTEGRITY",
+        "học thuật": "ACADEMIC_INTEGRITY",
+        "copy": "COPYRIGHT"
+    },
 
   "attribute": {
     "tín chỉ": "credits",
@@ -292,6 +294,24 @@
     "bóng đá",
     "thể thao",
     "giải phương trình",
-    "tính tích phân"
+    "tính tích phân",
+    "người sáng tác",
+    "sáng tác bài hát",
+    "bài hát",
+    "âm nhạc",
+    "diễn viên",
+    "cầu thủ",
+    "đội bóng",
+    "công thức hóa học",
+    "hóa học",
+    "vật lý",
+    "sinh học",
+    "lịch sử",
+    "địa lý",
+    "kinh tế",
+    "chứng minh",
+    "đội hình",
+    "dự báo",
+    "thời tiết"
   ]
 }

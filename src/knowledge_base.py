@@ -1,25 +1,15 @@
 """
 Knowledge Base module for Course Assistant.
 
-WP5 upgrade
------------
-Before WP5 the knowledge base knew only a handful of facts: the number of
-credits, the three parts of the course, one line per chapter and a
-four-entry FAQ.  Most of the questions of the official test set therefore
-produced a generic answer ("Không tìm thấy thông tin Chương CH04") even
-though the system had correctly detected the intent and the entity.
-
-The knowledge base implemented here
-
-* describes **every** chapter with its sub-topics, the week it is taught
-  in and the learning outcomes it serves,
-* describes **every** week of the semester,
-* describes the **four parts** of the assignment with their deliverables,
-* lists the **rules** of the course (LLM/RAG, AI usage, academic
-  integrity, copyright, out-of-scope policy) and the **resources**,
-* maps the **learning outcomes** onto the chapters, and
-* answers the *out-of-scope* and *context-dependent* cases with a clear,
-  honest message instead of a generic apology.
+Knowledge base expansion
+------------------------
+The knowledge base covers every chapter with its sub-topics, the week it is
+taught in and the learning outcomes it serves, every week of the semester,
+the four parts of the assignment with their deliverables, the rules of the
+course (LLM/RAG, AI usage, academic integrity, copyright, out-of-scope
+policy), the resources, and the mapping of the learning outcomes onto the
+chapters.  Out-of-scope and context-dependent cases are answered with a
+clear, honest message instead of a generic apology.
 """
 
 from typing import Dict, List, Optional, Any

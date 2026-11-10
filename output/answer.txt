@@ -1,49 +1,65 @@
+ANSWERS
+======================================================================
+
 Query: Môn NLP có bao nhiêu tín chỉ?
+Intent Query: GET_COURSE_INFO(course=CO3085, attribute=credits)
 Answer: Môn Xử lý Ngôn ngữ Tự nhiên (CO3085) có 3 tín chỉ, tương đương 6 ECTS.
 
 Query: CO3085 có mấy tín chỉ?
+Intent Query: GET_COURSE_INFO(course=CO3085, attribute=credits)
 Answer: Môn Xử lý Ngôn ngữ Tự nhiên (CO3085) có 3 tín chỉ, tương đương 6 ECTS.
 
 Query: Môn học gồm những phần nào?
+Intent Query: GET_COURSE_INFO(course=CO3085, attribute=parts)
 Answer: Môn học gồm 3 phần chính: Xử lý cú pháp; Diễn dịch ngữ nghĩa; Ngữ cảnh và tri thức thế giới.
 
 Query: NLP có những phần chính nào?
+Intent Query: GET_COURSE_INFO(course=NLP, attribute=parts)
 Answer: Môn học gồm 3 phần chính: Xử lý cú pháp; Diễn dịch ngữ nghĩa; Ngữ cảnh và tri thức thế giới.
 
 Query: Midterm kéo dài bao lâu?
+Intent Query: GET_COURSE_INFO(attribute=midterm_duration)
 Answer: Midterm có thời lượng 60 phút.
 
 Query: Final kéo dài bao lâu?
+Intent Query: GET_COURSE_INFO(attribute=final_duration)
 Answer: Final có thời lượng 90 phút.
 
 Query: Mô tả môn NLP?
+Intent Query: GET_COURSE_INFO(attribute=description, course=CO3085)
 Answer: Môn học cung cấp các khái niệm, lý thuyết và kỹ thuật nền tảng của xử lý ngôn ngữ tự nhiên. Nội dung đi từ mức biểu diễn văn bản, phân tích cú pháp với văn phạm, giải quyết nhập nhằng bằng xác suất, đến diễn dịch ngữ nghĩa, biểu diễn tri thức và xử lý ngữ cảnh hội thoại. Môn học kết thúc bằng một bài tập lớn theo nhóm trong đó sinh viên xây dựng một hệ thống hỏi đáp tự nhiên cho chính môn học.
 
 Query: Tuần 1 học gì?
+Intent Query: GET_SCHEDULE(week=WEEK_01)
 Answer: Tuần 01: Học Chương 01 - Introduction to Natural Language Processing.
 Nội dung: Introduction to NLP, NLU applications, Mức phân tích ngôn ngữ.
 Hoạt động: Lý thuyết.
 
 Query: Tuần 2 học những gì?
+Intent Query: GET_SCHEDULE(week=WEEK_02)
 Answer: Tuần 02: Học Chương 02 - Linguistic Background - English Syntax.
 Nội dung: English syntax, Noun phrases, Verb phrases.
 Hoạt động: Lý thuyết + thực hành.
 
 Query: Tuần 3 học gì?
+Intent Query: GET_SCHEDULE(week=WEEK_03)
 Answer: Tuần 03: Học Chương 03 - Grammar and Parsing.
 Nội dung: CFG, Top-down parsing, Bottom-up parsing.
 Hoạt động: Thực hành.
 Mốc: Checkpoint 1: nộp sơ bộ grammar.
 
 Query: Tuần 5 học vào lịch nào?
+Intent Query: GET_SCHEDULE(week=WEEK_05)
 Answer: Tuần 05: Học Chương 04 - Features and Augmented Grammar.
 Nội dung: Augmented transition networks, Unification.
 Hoạt động: Thực hành.
 
 Query: Chương 4 học vào tuần nào?
+Intent Query: GET_SCHEDULE(chapter=CH04)
 Answer: Chương 04 (Features and Augmented Grammar) được học vào Tuần 04.
 
 Query: Chương 1 nói về gì?
+Intent Query: GET_TOPIC(chapter=CH01)
 Answer: Chương 01 - Introduction to Natural Language Processing
 Thuộc phần: Introduction.
 Nội dung: NLP nghiên cứu các phương pháp tính toán để xử lý ngôn ngữ tự nhiên. Chương giới thiệu các ứng dụng, các mức phân tích ngôn ngữ, cách biểu diễn và cách đánh giá một hệ thống hiểu ngôn ngữ tự nhiên.
@@ -53,6 +69,7 @@ Phương pháp chính: Khảo sát tài liệu; Phân tích ví dụ thực tế
 Phục vụ mục tiêu học tập: LO1.1, LO1.2, LO1.3.
 
 Query: Chương 3 có nội dung gì?
+Intent Query: GET_TOPIC(chapter=CH03)
 Answer: Chương 03 - Grammar and Parsing
 Thuộc phần: Syntactic Processing.
 Nội dung: Giới thiệu văn phạm phi ngữ cảnh (CFG), cấu trúc câu và các phương pháp phân tích cú pháp: top-down, bottom-up (chart), PCFG và văn phạm phụ thuộc.
@@ -62,61 +79,75 @@ Phương pháp chính: Phân tích cú pháp từ trên xuống; Phân tích cú
 Phục vụ mục tiêu học tập: LO2.2, LO2.4.
 
 Query: Chương nào học về CFG?
+Intent Query: GET_TOPIC(topic=CFG)
 Answer: Chủ đề CFG thuộc Chương 03 - Grammar and Parsing.
 Nội dung liên quan: Context-Free Grammars; Top-down parser; Bottom-up chart parser; Probabilistic CFG; Dependency Grammar; Stanford Dependencies.
 
 Query: CFG nằm ở chương nào?
+Intent Query: GET_TOPIC(topic=CFG)
 Answer: Chủ đề CFG thuộc Chương 03 - Grammar and Parsing.
 Nội dung liên quan: Context-Free Grammars; Top-down parser; Bottom-up chart parser; Probabilistic CFG; Dependency Grammar; Stanford Dependencies.
 
 Query: PCFG được học ở đâu?
+Intent Query: GET_TOPIC(topic=PCFG)
 Answer: Chủ đề PCFG thuộc Chương 03 - Grammar and Parsing.
 Nội dung liên quan: Context-Free Grammars; Top-down parser; Bottom-up chart parser; Probabilistic CFG; Dependency Grammar; Stanford Dependencies.
 
 Query: Chương nào nói về semantic?
+Intent Query: GET_TOPIC(topic=SEMANTIC)
 Answer: Chủ đề SEMANTIC thuộc Chương 07 - Semantics and Logical Form.
 Nội dung liên quan: Semantics and logical form; Word senses and ambiguity; Basic logical form language; Encoding ambiguity in logical form; Thematic roles; Speech acts and embedded sentences.
 
 Query: Chương nào dạy về parsing?
+Intent Query: GET_TOPIC(topic=PARSING)
 Answer: Chủ đề PARSING thuộc Chương 03 - Grammar and Parsing.
 Nội dung liên quan: Context-Free Grammars; Top-down parser; Bottom-up chart parser; Probabilistic CFG; Dependency Grammar; Stanford Dependencies.
 
 Query: Bài tập lớn yêu cầu gì?
+Intent Query: GET_ASSIGNMENT(assignment=BTL01)
 Answer: Bài tập lớn 'Intelligent Course Assistant' - Nhóm 3-4 sinh viên. Mục tiêu: Xây dựng hệ thống xử lý câu hỏi tự nhiên trong miền thông tin của một môn học. Hệ thống phải trả lời được các câu hỏi về lịch học, nội dung chương, bài tập, tài liệu, quy định và mục tiêu học tập của môn học.
 
 Query: BTL gồm những phần nào?
+Intent Query: GET_ASSIGNMENT(assignment=BTL01, attribute=parts)
 Answer: Bài tập lớn 'Intelligent Course Assistant' - Nhóm 3-4 sinh viên. Mục tiêu: Xây dựng hệ thống xử lý câu hỏi tự nhiên trong miền thông tin của một môn học. Hệ thống phải trả lời được các câu hỏi về lịch học, nội dung chương, bài tập, tài liệu, quy định và mục tiêu học tập của môn học.
 
 Query: Phần I của BTL là gì?
+Intent Query: GET_ASSIGNMENT(part=PART_I, assignment=BTL01)
 Answer: Grammar and Parser: Xây dựng văn phạm (grammar) cho câu hỏi tiếng Việt về môn học và xây dựng bộ phân tích cú pháp (parser) trên văn phạm đó. Hệ thống phải sinh được tập câu hỏi mẫu và phân tích cú pháp được các câu hỏi thực tế.
 File cần xuất: grammar.txt (văn phạm dạng text); samples.txt (tập câu hỏi mẫu sinh từ văn phạm); parse-results.txt (kết quả phân tích cú pháp).
 
 Query: Bài tập lớn cần xuất file gì?
+Intent Query: GET_ASSIGNMENT(assignment=BTL01)
 Answer: Bài tập lớn 'Intelligent Course Assistant' - Nhóm 3-4 sinh viên. Mục tiêu: Xây dựng hệ thống xử lý câu hỏi tự nhiên trong miền thông tin của một môn học. Hệ thống phải trả lời được các câu hỏi về lịch học, nội dung chương, bài tập, tài liệu, quy định và mục tiêu học tập của môn học.
 
 Query: Deadline BTL là khi nào?
+Intent Query: GET_DEADLINE(attribute=deadline, assignment=BTL01)
 Answer: Thời hạn BTL:
 - checkpoint_1: Tuần 8 - Grammar và Parser
 - checkpoint_2: Tuần 12 - Semantic và QA
 - final: Tuần 15 - Nộp BTL và Demo
 
 Query: Thời hạn nộp bài tập lớn là bao giờ?
+Intent Query: GET_DEADLINE(attribute=deadline, assignment=BTL01)
 Answer: Thời hạn BTL:
 - checkpoint_1: Tuần 8 - Grammar và Parser
 - checkpoint_2: Tuần 12 - Semantic và QA
 - final: Tuần 15 - Nộp BTL và Demo
 
 Query: Khi nào cần nộp checkpoint 1?
+Intent Query: GET_DEADLINE()
 Answer: Thời hạn BTL:
 - checkpoint_1: Tuần 8 - Grammar và Parser
 - checkpoint_2: Tuần 12 - Semantic và QA
 - final: Tuần 15 - Nộp BTL và Demo
 
 Query: Tài liệu về CFG ở đâu?
+Intent Query: GET_RESOURCE(resource=DOCUMENT, topic=CFG)
 Answer: Tài liệu về CFG:
 - Foundation of Statistical NLP (Manning, Schütze, 2001) - Thống kê cho NLP: xác suất, PCFG, POS tagging
 
 Query: Có tài liệu nào về NLP không?
+Intent Query: GET_RESOURCE(resource=DOCUMENT, course=NLP)
 Answer: Tài liệu tham khảo: 7 mục.
 - Natural Language Processing with Python (Bird, Klein, Loper, 2009) [TEXTBOOK]: Thực hành với Python; phù hợp cho phần semantic và QA
 - Speech and Language Processing (Jurafsky, Martin, 2019) [TEXTBOOK]: Giáo trình chuẩn, tham khảo rộng cho toàn bộ môn học
@@ -127,6 +158,7 @@ Answer: Tài liệu tham khảo: 7 mục.
 - Ghi chú bài giảng và ví dụ thực hành (Nhóm học, 2026) [NOTES]: Ghi chú tóm tắt và bài tập mở rộng do nhóm biên soạn
 
 Query: Sách tham khảo của môn học là gì?
+Intent Query: GET_RESOURCE(resource=REFERENCE_BOOK, course=CO3085)
 Answer: Tài liệu tham khảo: 7 mục.
 - Natural Language Processing with Python (Bird, Klein, Loper, 2009) [TEXTBOOK]: Thực hành với Python; phù hợp cho phần semantic và QA
 - Speech and Language Processing (Jurafsky, Martin, 2019) [TEXTBOOK]: Giáo trình chuẩn, tham khảo rộng cho toàn bộ môn học
@@ -137,12 +169,15 @@ Answer: Tài liệu tham khảo: 7 mục.
 - Ghi chú bài giảng và ví dụ thực hành (Nhóm học, 2026) [NOTES]: Ghi chú tóm tắt và bài tập mở rộng do nhóm biên soạn
 
 Query: Có được sử dụng LLM không?
+Intent Query: GET_RULE(rule=LLM_RAG)
 Answer: LLM/RAG có thể được sử dụng như một phần mở rộng, nhưng không được thay thế yêu cầu NLP cốt lõi của bài tập lớn. Phần lõi (grammar, parser, semantic, QA) phải do sinh viên tự xây dựng và giải thích được.
 
 Query: Quy định về sử dụng AI là gì?
+Intent Query: GET_RULE(rule=AI_USAGE)
 Answer: Sinh viên được phép dùng công cụ AI hỗ trợ (LLM, RAG) nhưng phải khai báo rõ ràng trong báo cáo: mục đích sử dụng, phạm vi áp dụng và phần nào do AI sinh ra. Việc không khai báo được xem là vi phạm liêm chính học thuật.
 
 Query: Được phép dùng thư viện nào?
+Intent Query: GET_RULE()
 Answer: Các quy định của môn học:
 - attendance: Sinh viên được khuyến khích tham dự đầy đủ các buổi học.
 - academic_integrity: Sinh viên phải tuân thủ nguyên tắc liêm chính học thuật: không sao chép bài làm của nhau, phải trích dẫn nguồn khi sử dụng tài liệu của người khác và chịu trách nhiệm về toàn bộ nội dung nộp.
@@ -153,10 +188,12 @@ Answer: Các quy định của môn học:
 - out_of_scope: Hệ thống chỉ chịu trách nhiệm trong phạm vi dữ liệu môn học. Các yêu cầu ngoài phạm vi (giải bài tập khác, dịch thuật, tin tức, thời tiết...) sẽ bị từ chối.
 
 Query: L.O.2.5 là gì?
+Intent Query: GET_LO(lo=LO2.5)
 Answer: LO2.5: Kiến thức xác suất để giải quyết nhập nhằng từ ở mức câu.
 Được phục vụ bởi: Chương 06 - Ambiguity Resolution - Statistical Methods.
 
 Query: L.O.4.2 liên quan đến nội dung gì?
+Intent Query: GET_LO(lo=LO4.2)
 Answer: LO4.2: Ngữ cảnh diễn ngôn cục bộ và sự tham chiếu.
 Được phục vụ bởi: Chương 12 - Discourse Context and Reference.
 

@@ -1,3 +1,6 @@
+SEMANTIC REPRESENTATION
+======================================================================
+
 Query: Môn NLP có bao nhiêu tín chỉ?
 Intent: GET_COURSE_INFO
 Entities: {'course': 'CO3085', 'attribute': 'credits'}

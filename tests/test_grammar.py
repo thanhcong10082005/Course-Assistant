@@ -72,7 +72,7 @@ def test_every_nonterminal_is_productive(cfg):
 
 
 def test_wh_phrase_is_defined(cfg):
-    """The '?' must not be defined as a non-terminal (WP2 bug fix)."""
+    """The '?' must not be defined as a non-terminal."""
     assert "WH_PHRASE" in cfg.nonterminals
     assert "?" not in cfg.nonterminals
     assert cfg.is_terminal("?")

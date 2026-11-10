@@ -5,10 +5,10 @@ The dialogue behaviour is validated against the official sample dialogues in
 ``tests/data/dialogues.txt`` plus the context-dependent queries of the
 official test set.
 
-Until the real :class:`~src.dialogue.DialogueManager` is wired into the
-pipeline these tests describe the *target* behaviour; they are expected to
-fail before WP6 and to pass afterwards.  The failures are registered in
-``tests/known_issues.py`` so the quality gate stays green.
+The tests describe the expected behaviour of
+:class:`~src.dialogue.DialogueManager` and of the pipeline it is wired into.
+Any failure is registered in ``tests/known_issues.py`` so the quality gate
+stays green.
 """
 
 import pytest
@@ -80,7 +80,7 @@ def test_dialogue_sample_file_is_present():
 
 # ---------------------------------------------------------------------------
 # DialogueManager in isolation -- these tests describe the manager contract
-# and do not depend on the pipeline wiring (WP6).
+# and do not depend on the pipeline wiring.
 # ---------------------------------------------------------------------------
 @pytest.fixture
 def manager():
@@ -132,7 +132,7 @@ def test_manager_history_is_recorded(manager):
 
 
 # ---------------------------------------------------------------------------
-# Pipeline-level dialogue behaviour (requires WP6 wiring)
+# Pipeline-level dialogue behaviour (requires the DialogueManager wiring)
 # ---------------------------------------------------------------------------
 @pytest.mark.parametrize(
     "case", DIALOGUE_CASES, ids=[c["id"] for c in DIALOGUE_CASES]

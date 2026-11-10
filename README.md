@@ -61,9 +61,26 @@ Không cần bước cài đặt nào khác — toàn bộ mã nguồn dùng th�
 ### 2.3 Chạy bằng Docker (tuỳ chọn)
 
 ```bash
+# Build (chạy từ thư mục gốc của gói, tức là Course_Assistant_Sample/)
 docker build -t course-assistant .
-docker run -it course-assistant
+
+# Chạy thử — container sinh ra 9 file trong output/ rồi thoát
+docker run --rm course-assistant
+
+# Chạy chế độ hỏi đáp tương tác
+docker run -it course-assistant python -m src.main --mode interactive
+
+# Hoặc dùng docker-compose (ghi artifact thẳng ra máy host)
+docker compose up --build
+docker compose down
 ```
+
+Image không cài thêm gói NLP nào — chỉ dùng thư viện chuẩn của Python.
+
+Nếu `docker build` báo lỗi kéo image `python:3.11-slim`, chạy lại lần hai
+(lần đầu thường chậm vì tải base image ~130 MB). Nếu Docker báo
+*"failed to connect to the docker API"* thì daemon chưa chạy — mở Docker
+Desktop và đợi tới khi biểu tượng báo *"Engine running"*.
 
 ---
 
@@ -78,16 +95,24 @@ cd Course_Assistant_Sample
 python -m src.main --mode demo
 
 # Chế độ tương tác — hỏi đáp trực tiếp với Course Assistant
+#   (lệnh phụ: /context xem ngữ cảnh, /reset xoá ngữ cảnh, exit để thoát)
 python -m src.main --mode interactive
 
 # Sinh lại toàn bộ file trong output/ (tất định, seed=42)
 python -m src.main --mode generate
+python scripts/generate_outputs.py      # tương tự, có seed cố định
 
-# Chạy bộ test (89 test)
+# Chạy bộ test (158 test)
 python -m pytest
+
+# Chạy báo cáo đánh giá (57 câu kiểm thử)
+python -m src.evaluation
 
 # Đo các chỉ số chất lượng
 python scripts/baseline.py --out docs/baseline.txt
+
+# Kiểm tra gói nộp bài trước khi nộp
+python scripts/check_submission.py
 ```
 
 ### 3.2 Các file trong `output/`
@@ -95,15 +120,15 @@ python scripts/baseline.py --out docs/baseline.txt
 
 | File                | Nội dung                                        | Sinh bởi              |
 | ------------------- | ----------------------------------------------- | --------------------- |
-| `grammar.txt`       | Bộ văn phạm CFG có trọng số và chú thích        | `generate_outputs.py` |
-| `samples.txt`       | 10 000 câu hỏi sinh từ văn phạm                 | `generate_outputs.py` |
-| `parse-results.txt` | Cây phân tích cú pháp cho `input/sentences.txt` | `src.parser`          |
+| `grammar.txt`       | Bộ văn phạm CFG có trọng số và chú thích        | `src.grammar`         |
+| `samples.txt`       | 10 000 câu hỏi sinh từ văn phạm                 | `src.grammar`         |
+| `parse-results.txt` | Cây phân tích cú pháp + nhãn `[STRICT]`/`[FALLBACK]`/`[INVALID]` | `src.parser` |
 | `semantic.txt`      | Biểu diễn ngữ nghĩa (dạng logic)                | `src.semantic`        |
 | `intent-entity.txt` | Intent & entity nhận diện được                  | `src.semantic`        |
 | `query.txt`         | Truy vấn gửi tới knowledge base                 | `src.knowledge_base`  |
 | `answer.txt`        | Câu trả lời cho người dùng                      | `src.knowledge_base`  |
-| `dialogue.txt`      | Hội thoại có xử lý ngữ cảnh cục bộ              | `src.dialogue`        |
-| `evaluation.txt`    | Báo cáo đánh giá hệ thống                       | `scripts/baseline.py` |
+| `dialogue.txt`      | 5 hội thoại, mỗi lượt có đủ 4 phần             | `src.dialogue`        |
+| `evaluation.txt`    | Báo cáo đánh giá hệ thống (6 mục)               | `src.evaluation`      |
 
 
 ---
@@ -168,7 +193,7 @@ Course_Assistant_Sample/
 ├── scripts/
 │   ├── baseline.py          # Đo chỉ số chất lượng
 │   └── generate_outputs.py  # Sinh lại output/ một cách tất định
-├── tests/                   # 130 test pytest
+├── tests/                   # 133 test pytest
 │   ├── conftest.py          # Fixture dùng chung
 │   ├── known_issues.py      # Sổ đăng ký lỗi còn lại (xfail)
 │   └── data/                # Bản sao dữ liệu mẫu chính thức
@@ -306,12 +331,12 @@ Câu không thuộc văn phạm được xuất `()`.
 | Pattern fallback          | 3      | 8.82 %                            |
 | Thất bại                  | 0      | 0 %                               |
 
-> **WP3 đã nâng cấp parser.** Trước WP3, bộ dự đoán đệ quy thủ công chỉ parse
-> strict được 4/34 câu (11.76 %) và 30/34 câu rơi vào fallback. Parser hiện tại
-> là **Earley chart parser** tổng quát, điều khiển bởi văn phạm trong
-> `src/grammar.py`, nên strict parse đạt **91.18 %**; 3 câu còn lại thuộc nhóm
-> ngoài phạm vi thiết kế (câu quá dài / nhiều mệnh đề) và vẫn được phục vụ
-> đúng qua fallback.
+> **Parser đã được viết lại thành Earley chart parser.** Bộ dự đoán đệ quy
+> thủ công trước đây chỉ parse strict được 4/34 câu (11.76 %) và 30/34 câu rơi
+> vào fallback. Parser hiện tại là **Earley chart parser** tổng quát, điều
+> khiển bởi văn phạm trong `src/grammar.py`, nên strict parse đạt **91.18 %**;
+> 3 câu còn lại thuộc nhóm ngoài phạm vi thiết kế (câu quá dài / nhiều mệnh đề)
+> và vẫn được phục vụ đúng qua fallback.
 
 
 ---
@@ -493,7 +518,7 @@ buộc của đề bài (mục 4.1.5).
 
 ---
 
-## 9bis. Xử lý ngữ cảnh hội thoại (WP6)
+## 9bis. Xử lý ngữ cảnh hội thoại
 
 Tầng ngữ cảnh nằm trong `src/dialogue.py`, gồm hai lớp:
 
@@ -577,28 +602,50 @@ bằng luật, đúng như yêu cầu của Lựa chọn 1.
 
 ### 11.1 Tập kiểm thử
 
-Lấy từ dữ liệu mẫu chính thức (`tests/data/sample_queries.txt`, **34 câu**),
-bao phủ:
+Bộ đánh giá gồm **57 câu** từ **3 nguồn** (`src/evaluation.py`):
 
+| Nguồn                                          | Số câu | Vai trò                                                  |
+| ---------------------------------------------- | ------ | -------------------------------------------------------- |
+| `tests/data/sample_queries.txt` (chính thức)   | 34     | Câu hỏi có nhãn của đề bài                                |
+| Câu biến thể (`PARAPHRASE_CASES`)               | 15     | Cùng ý nhưng cách diễn đạt khác — chống "học thuộc"        |
+| Câu hội thoại nhiều lượt (`DIALOGUE_EVAL_CASES`) | 8      | Chứng minh ngữ cảnh hội thoại thực sự được dùng          |
 
-| Nhóm                       | Số câu |
-| -------------------------- | ------ |
-| Câu hỏi hợp lệ trong miền  | 29     |
-| Câu hỏi ngoài phạm vi      | 2      |
-| Câu hỏi phụ thuộc ngữ cảnh | 3      |
+Phân loại theo bản chất:
 
+| Nhóm                                                  | Số câu |
+| ---------------------------------------------------- | ------ |
+| Câu hỏi hợp lệ trong miền                            | 38     |
+| Câu hỏi ngoài phạm vi                                 | 5      |
+| Câu hỏi phụ thuộc ngữ cảnh                            | 11     |
+| Câu hỏi trong phạm vi nhưng KB không có dữ liệu      | 3      |
 
-Thêm **5 kịch bản hội thoại** (`tests/data/dialogues.txt`) cho ngữ cảnh cục bộ.
+Ngoài ra còn có **5 kịch bản hội thoại** đầy đủ trong `tests/data/dialogues.txt`.
 
 ### 11.2 Công cụ đánh giá
 
 ```bash
-# Chạy bộ test đầy đủ (130 test)
+# Chạy bộ test đầy đủ (158 test)
 python -m pytest
+
+# Báo cáo đánh giá đầy đủ (6 mục, ghi ra output/evaluation.txt)
+python -m src.evaluation
 
 # Đo các chỉ số
 python scripts/baseline.py --out docs/baseline.txt
 ```
+
+`src/evaluation.py` đo 6 nhóm chỉ số:
+
+1. **Số lượng câu kiểm thử** — theo nguồn và theo nhóm
+2. **Số lượng câu trả lời đúng** — intent / entity / intent+entity / câu trả lời / ngoài phạm vi
+3. **Độ chính xác theo từng intent** — bảng phân bố
+4. **Các trường hợp hệ thống trả lời sai** — liệt kê từng câu
+5. **Phân tích nguyên nhân lỗi** — theo loại lỗi và theo nhóm test
+6. **Nhận xét ưu điểm và hạn chế**
+
+So sánh entity là **alias-aware** (`ENTITY_ALIASES`): nhãn chính thức `MIDTERM`
+được chấp nhận khi pipeline trích ra `midterm_duration`, nhãn `CO3085` được
+chấp nhận khi pipeline trích ra `NLP`.
 
 `scripts/baseline.py` đo 4 nhóm chỉ số:
 
@@ -610,48 +657,58 @@ python scripts/baseline.py --out docs/baseline.txt
 
 ### 11.3 Kết quả hiện tại
 
+**Trên 57 câu kiểm thử (34 chính thức + 15 biến thể + 8 hội thoại):**
+
+| Chỉ số                        | Kết quả               |
+| ----------------------------- | --------------------- |
+| Intent accuracy               | 57/57 — **100.00 %**  |
+| Entity accuracy (alias-aware) | 57/57 — **100.00 %**  |
+| **Intent + Entity accuracy**  | 57/57 — **100.00 %**  |
+| Câu trả lời đúng              | 57/57 — **100.00 %**  |
+| Phát hiện ngoài phạm vi       | **100.00 %**          |
+
 **Trên 34 câu hỏi chính thức:**
 
+| Chỉ số                        | Kết quả               |
+| ----------------------------- | --------------------- |
+| Intent accuracy               | 34/34 — **100.00 %**  |
+| Entity accuracy (alias-aware) | 34/34 — **100.00 %**  |
+| Entity accuracy (khớp thô)    | 32/34 — 94.12 %       |
+| **Intent + Entity accuracy**  | 34/34 — **100.00 %**  |
+| Strict parse (Earley chart)   | 31/34 — **91.18 %**   |
+| Pattern fallback parse        | 3/34 — 8.82 %         |
+| Parse failure                 | 0/34 — 0 %            |
+| Bộ test                       | **158 passed — 0 failed, 0 xfailed** |
 
-| Chỉ số                         | Kết quả             |
-| ------------------------------ | ------------------- |
-| Intent accuracy                | 34/34 — **100.00 %** |
-| Entity accuracy (alias-aware)  | 34/34 — **100.00 %** |
-| Entity accuracy (khớp thô)     | 32/34 — 94.12 %     |
-| **Intent + Entity accuracy**   | 34/34 — **100.00 %** |
-| Strict parse (Earley chart)    | 31/34 — **91.18 %** |
-| Pattern fallback parse         | 3/34 — 8.82 %       |
-| Parse failure                  | 0/34 — 0 %          |
-| Bộ test                        | **130 passed — 0 failed, 0 xfailed** |
-
-
-**Chất lượng bộ sinh câu (10 000 câu):** 0 câu chứa `_`, 0 câu rò non-terminal,  
+**Chất lượng bộ sinh câu (10 000 câu):** 0 câu chứa `_`, 0 câu rò non-terminal,
 0 câu mở sai, 0 câu thiếu dấu câu.
 
-> Các chỉ số trên được đo lại sau WP3 – WP6. Trước đó (sau WP2) intent
-> accuracy là 88.24 %, entity accuracy 55.88 %, strict parse 11.76 % và bộ test
-> còn 23 mục được đánh dấu `xfail`.
+> **Cách đọc đúng các con số này:** 100 % là độ chính xác trên **bộ 57 câu
+> kiểm thử** của đề bài và nhóm tự bổ sung — **không** phải độ phủ trên tiếng
+> Việt nói chung. 15 câu biến thể được cố ý thêm vào để phát hiện trường hợp
+> hệ thống chỉ nhớ đúng câu chữ của đề bài. Ba câu parse fallback là ba câu
+> **ngoài phạm vi** cố ý — trên 31 câu in-scope, strict parse đạt **100 %**.
 
 ### 11.4 Quản lý lỗi tồn đọng
 
 Mọi lỗi chưa sửa được liệt kê tập trung trong `tests/known_issues.py`, mỗi lỗi
-ghi rõ nguyên nhân và Work Package chịu trách nhiệm:
+ghi rõ nguyên nhân và phần hệ thống liên quan:
 
 ```python
 "test_official_query[Q007]": (
     "topic 'pcfg' bị match sai thành 'cfg' (substring)",
-    "WP4",
+    "semantic analysis",
 ),
 ```
 
 Các test này được đánh dấu `xfail` (non-strict) nên quality gate luôn xanh,
 nhưng lỗi vẫn hiện rõ mỗi lần chạy và không thể bị "quên".
 
-> **Trạng thái sau WP3 – WP6:** sổ đăng ký đã được **dọn sạch** — toàn bộ 23
-> mục đã xử lý xong và được chuyển thành regression test thật (không còn
+> **Trạng thái hiện tại:** sổ đăng ký đã được **dọn sạch** — toàn bộ 23 mục
+> đã xử lý xong và được chuyển thành regression test thật (không còn
 > `xfail`/`XPASS`). File `tests/known_issues.py` vẫn được giữ lại như một
-> "hàng rào" cho các Work Package tương lai: khi có lỗi mới, chỉ cần thêm
-> entry vào đây là test sẽ tự động được đánh dấu `xfail`.
+> "hàng rào" cho các đợt nâng cấp sau: khi có lỗi mới, chỉ cần thêm entry
+> vào đây là test sẽ tự động được đánh dấu `xfail`.
 
 ---
 

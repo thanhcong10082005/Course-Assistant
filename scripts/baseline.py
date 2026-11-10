@@ -156,9 +156,20 @@ def build_report() -> str:
     from src.main import CourseAssistant
     from src.parser import Parser
     from src.grammar import CFG
-    from tests.conftest import load_official_cases
+    from src.evaluation import load_official_cases as _load_cases
 
-    cases = load_official_cases()
+    # The official cases are read with the loader of src/evaluation.py, which
+    # is self-contained: it does not need pytest, so the script also works
+    # inside the Docker image where only tests/data/ is present.
+    cases = [
+        {
+            "id": case.case_id,
+            "query": case.query,
+            "expected_intent": case.expected_intent,
+            "expected_entity": case.expected_entity,
+        }
+        for case in _load_cases()
+    ]
     assistant = CourseAssistant()
     parser = Parser()
     grammar = CFG()

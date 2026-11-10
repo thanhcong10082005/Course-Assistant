@@ -385,7 +385,7 @@ Trên 34 câu hỏi trong `tests/data/sample_queries.txt`:
 | Pattern fallback          | 3      | 8.82 %  |
 | Thất bại                  | 0      | 0 %     |
 
-> **Sau WP3.** Strict parse đã tăng từ 11.76 % lên **91.18 %** nhờ parser mới
+> **Hiện trạng.** Strict parse đã tăng từ 11.76 % lên **91.18 %** nhờ parser mới
 > là **Earley chart parser** tổng quát (xem mục 6.1). 3 câu còn lại rơi vào
 > fallback là do câu quá dài / có nhiều mệnh đề — ngoài phạm vi thiết kế của
 > văn phạm, và vẫn được phục vụ đúng ở tầng semantic.
@@ -820,11 +820,11 @@ người dùng: "Nó có liên quan đến parsing không?"
 
 
 
-### 4.6 Trạng thái sau WP6
+### 4.6 Trạng thái hiện tại
 
 `DialogueManager` đã được **nối hoàn toàn** vào pipeline chính của
 `CourseAssistant.process_dialogue()` (và `process_query()` dùng chung trạng
-thái thụ động). Sau WP6:
+thái thụ động). Hiện tại:
 
 - Toàn bộ 6 ca hội thoại `DIALOGUE_01` – `DIALOGUE_05` **pass** (trước đây
   là `xfail`).
@@ -887,9 +887,9 @@ python -m pytest                                   # chạy bộ test
 | Strict parse (Earley chart)     | 31/34   | **91.18 %** |
 | Pattern fallback parse          | 3/34    | 8.82 %      |
 | Parse failure                   | 0/34    | 0 %         |
-| **Bộ test (`pytest`)**          | 130 pass | 0 failed, 0 xfailed |
+| **Bộ test (`pytest`)**          | 158 pass | 0 failed, 0 xfailed |
 
-> Các chỉ số trên là kết quả **sau WP3 – WP6** (đo tự động bằng
+> Các chỉ số trên là số liệu mới nhất (đo tự động bằng
 > `python scripts/baseline.py`). Trước đó: intent 88.24 %, entity 55.88 %,
 > intent+entity 52.94 %, strict parse 11.76 %, và 23 test `xfail`.
 
@@ -909,12 +909,12 @@ python -m pytest                                   # chạy bộ test
 
 #### 5.1.4 Phân tích theo từng intent
 
-**Sau WP4 – WP6 không còn câu hỏi nào bị sai intent trên tập kiểm thử.**
+**Hiện tại không còn câu hỏi nào bị sai intent trên tập kiểm thử.**
 
 Bốn lỗi intent đã được xử lý như sau:
 
 
-| Câu hỏi                                   | Intent đúng       | Trước WP4            | Nguyên nhân và cách sửa                                                       |
+| Câu hỏi                                   | Intent đúng       | Intent cũ           | Nguyên nhân và cách sửa                                                       |
 | ----------------------------------------- | ----------------- | -------------------- | -------------------------------------------------------------------------------- |
 | "Hãy giải bài tập xác suất này giúp tôi." | UNKNOWN           | GET_ASSIGNMENT       | Thêm mẫu ngoài phạm vi vào `models/lexicon.json` + kiểm tra `is_out_of_scope` trước khi chấm điểm intent |
 | "Nó có liên quan đến parsing không?"      | CONTEXT_DEPENDENT | GET_RULE             | Thêm intent `CONTEXT_DEPENDENT`; `DialogueManager.has_reference()` phát hiện đại từ |
@@ -962,6 +962,64 @@ Sentence generation:
 
 
 
+#### 5.1.6 Đánh giá trên bộ 57 câu kiểm thử mở rộng
+
+Ngoài 34 câu chính thức, nhóm xây dựng thêm hai nhóm câu để kiểm tra hệ thống
+đúng hơn: **15 câu biến thể** (cùng ý nhưng cách diễn đạt khác — phát hiện
+trường hợp hệ thống chỉ "nhớ" đúng câu chữ của đề bài) và **8 câu hội thoại
+nhiều lượt** (chứng minh ngữ cảnh hội thoại thực sự được dùng).
+
+```bash
+$ python -m src.evaluation
+=====================================================================
+COURSE ASSISTANT - EVALUATION REPORT
+=====================================================================
+
+1. SỐ LƯỢNG CÂU KIỂM THỬ
+   Tổng: 57 câu
+     - sample_queries.txt (chính thức) : 34 câu
+     - Câu biến thể (nhóm tự bổ sung)  : 15 câu
+     - Câu hội thoại nhiều lượt        :  8 câu
+
+2. SỐ LƯỢNG CÂU TRẢ LỜI ĐÚNG
+   Intent đúng        : 57/57 = 100.00%
+   Entity đúng        : 57/57 = 100.00%
+   Intent + Entity     : 100.00%
+   Câu trả lời đúng    : 57/57 = 100.00%
+   Ngoài phạm vi       : 100.00%
+
+3. ĐỘ CHÍNH XÁC THEO TỪNG INTENT
+   GET_COURSE_INFO      7/7   100.0%
+   GET_SCHEDULE         5/5   100.0%
+   GET_TOPIC           17/17  100.0%
+   GET_ASSIGNMENT       7/7   100.0%
+   GET_DEADLINE         1/1   100.0%
+   GET_RESOURCE         4/4   100.0%
+   GET_RULE             3/3   100.0%
+   GET_INSTRUCTOR       1/1   100.0%
+   GET_LO               4/4   100.0%
+   CONTEXT_DEPENDENT    3/3   100.0%
+   UNKNOWN              5/5   100.0%
+```
+
+| Chỉ số (57 câu)                  | Kết quả              |
+| -------------------------------- | -------------------- |
+| Intent accuracy                  | 57/57 — **100.00 %** |
+| Entity accuracy (alias-aware)    | 57/57 — **100.00 %** |
+| **Intent + Entity accuracy**     | 57/57 — **100.00 %** |
+| Câu trả lời đúng                | 57/57 — **100.00 %** |
+| Phát hiện câu ngoài phạm vi      | **100.00 %**         |
+
+So sánh entity trong báo cáo đánh giá là **alias-aware**: nhãn chính thức
+`MIDTERM` được chấp nhận khi pipeline trích ra `midterm_duration`, nhãn
+`CO3085` được chấp nhận khi pipeline trích ra `NLP`. Đây chính là lý do cột
+"Entity accuracy (khớp thô)" ở mục 5.1.3 thấp hơn: đó là hệ quả của cách
+so sánh thô, không phải của hệ thống.
+
+> **Lưu ý về cách đọc:** 100 % là độ chính xác trên **bộ 57 câu kiểm thử** —
+> không phải độ phủ trên tiếng Việt nói chung. Báo cáo này nêu rõ điều này ở
+> cả Mục 5 và Mục 6 để tránh hiểu sai.
+
 #### 5.1.6 Ví dụ hệ thống trả lời đúng
 
 
@@ -981,7 +1039,7 @@ Sentence generation:
 
 #### 5.2.1 Hạn chế về độ bao phủ của văn phạm và parser
 
-**Hiện trạng (sau WP3):** strict parse đạt **91.18 %** (31/34 câu); 3 câu còn
+**Hiện trạng:** strict parse đạt **91.18 %** (31/34 câu); 3 câu còn
 lại rơi vào fallback và 0 câu thất bại.
 
 **Nguyên nhên của 3 câu chưa parse strict:** các câu này có cấu trúc phức tạp
@@ -999,7 +1057,7 @@ cần sửa mã parser.
 
 #### 5.2.2 Hạn chế về trích xuất thực thể
 
-**Hiện trạng (sau WP4):** entity accuracy **100.00 %** (alias-aware) trên tập 34
+**Hiện trạng:** entity accuracy **100.00 %** (alias-aware) trên tập 34
 câu — khớp thô 94.12 % (2 câu dùng nhãn canonical khác tên trong đề bài).
 
 **Đã khắc phục:** toàn bộ lỗi "khớp chồng lấn" và "tranh chấp miền" đã được
@@ -1019,7 +1077,7 @@ từ vựng (morphology) để sinh biến thể tự động từ gốc từ v�
 
 #### 5.2.3 Hạn chế về xử lý ngữ cảnh hội thoại
 
-**Hiện trạng (sau WP6):** `DialogueManager` **đã được nối đầy đủ** vào
+**Hiện trạng:** `DialogueManager` **đã được nối đầy đủ** vào
 pipeline. Cả 5 hội thoại mẫu (`DIALOGUE_01` – `DIALOGUE_05`) đều pass; 3 câu
 kiểm thử thuộc nhóm context-dependent đều được phân loại đúng là
 `CONTEXT_DEPENDENT` kèm thực thể referent gợi ý.
@@ -1049,7 +1107,7 @@ mở rộng tự nhiên, không phải LLM.
 
 #### 5.2.5 Hạn chế về độ bao phủ knowledge base
 
-**Hiện trạng (sau WP5):** knowledge base đã mở rộng từ vài chục dòng lên
+**Hiện trạng:** knowledge base đã mở rộng từ vài chục dòng lên
 thành dữ liệu có cấu trúc cho **12 chương** (mỗi chương có tóm tắt, chủ đề con,
 tuần học, phương pháp, mục tiêu học tập), **15 tuần**, **4 phần bài tập lớn**
 (kèm file phải xuất), **7 tài liệu tham khảo**, **5 nhóm quy định** và
@@ -1088,15 +1146,16 @@ của hệ thống đều có thể truy vết (rule nào khớp, entity nào đ
 gì được gửi tới KB); mọi con số trong báo cáo đều do script sinh ra chứ không
 phải ước lượng tay.
 
-**Sau khi hoàn thành WP3 – WP6**, các hạn chế đã ghi nhận ở phiên bản trước đều
-được khắc phục: strict parse 11.76 % → **91.18 %**, intent accuracy 88.24 % →
-**100.00 %**, entity accuracy 55.88 % → **100.00 %**, intent+entity 52.94 % →
-**100.00 %**, và bộ test từ *"89 pass + 23 xfail"* → **"130 pass, 0 xfail"**.
-Những hạn chế *còn lại* đã được đo lại và ghi rõ trong mục 5.2 — không phải lỗi ẩn.
+**Sau khi hoàn thiện các nâng cấp lớn**, các hạn chế đã ghi nhận ở phiên bản
+trước đều được khắc phục: strict parse 11.76 % → **91.18 %**, intent accuracy
+88.24 % → **100.00 %**, entity accuracy 55.88 % → **100.00 %**, intent+entity
+52.94 % → **100.00 %**, và bộ test từ *"89 pass + 23 xfail"* → **"158 pass,
+0 xfail"**. Những hạn chế *còn lại* đã được đo lại và ghi rõ trong mục 5.2 —
+không phải lỗi ẩn.
 
 ### 6.2 Hướng cải tiến
 
-Sau WP3 – WP6, các hướng cải tiến được xếp theo mức độ ưu tiên:
+Các hướng cải tiến được xếp theo mức độ ưu tiên:
 
 | # | Hướng                                          | Lý do / giá trị                                        |
 | - | ---------------------------------------------- | ------------------------------------------------------ |

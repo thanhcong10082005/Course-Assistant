@@ -26,7 +26,7 @@ from typing import Dict, List, Tuple
 #
 # The surface forms use underscores; the matcher accepts spaces as well, so
 # "bài tập lớn" and "bài_tập_lớn" are recognised alike.  The table doubles as
-# the **tokenizer's protected vocabulary**: the parser (WP3) needs the very
+# the **tokenizer's protected vocabulary**: the parser needs the very
 # same underscore forms as the terminals declared in ``src/grammar.py``.
 MULTIWORD_ENTITIES: List[Tuple[str, str]] = [
     ("bài_tập_lớn", "ASSIGNMENT_NAME"),

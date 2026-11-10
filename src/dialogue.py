@@ -2,20 +2,15 @@
 Course Assistant - Dialogue Context Module
 Handles local discourse context for multi-turn conversations
 
-WP6 upgrade
------------
-Before WP6 the reference resolution was a bag of ``str.replace`` calls that
-lived in :meth:`src.main.CourseAssistant.process_dialogue`.  It replaced the
-pronoun "nó" with the *topic* even when the discourse entity was a chapter,
-it did not understand the ellipsis ("Còn chương sau?"), and the state was
-stored in a plain dictionary that was not shared with the rest of the
-system.
+Discourse context
+----------------
+The reference resolution is not a bag of ``str.replace`` calls: it is driven by
+a proper **discourse state** (turn counter, last intent, last
+topic / chapter / week / part / learning outcome and a table of discourse
+entities) that is shared with the rest of the system.
 
 The module implemented here
 
-* keeps a proper **discourse state** (turn counter, last intent, last
-  topic / chapter / week / part / learning outcome and a table of discourse
-  entities),
 * resolves the four classical reference types -- **pronoun**, **demonstrative**,
   **definite description** and **ellipsis** -- against that state,
 * understands the "next" relation ("chương sau") which needs the domain
@@ -217,12 +212,39 @@ class DialogueManager:
         if self._contains_pronoun(lowered):
             return True
         for pattern in self.reference_patterns["definite_phrase"]:
-            if pattern in lowered:
+            if self._contains_definite_phrase(lowered, pattern):
                 return True
         for pattern in self.reference_patterns["next"]:
             if pattern in lowered:
                 return True
         if self._is_ellipsis(lowered):
+            return True
+        return False
+
+    @staticmethod
+    def _contains_definite_phrase(lowered: str, pattern: str) -> bool:
+        """
+        True when ``lowered`` contains the definite phrase ``pattern``.
+
+        The phrase must be a **complete** word sequence and it must not be
+        part of a longer noun phrase.  Without the second condition the
+        phrase ``"phần này"`` would be found inside ``"học phần này"``
+        ("this course module"), which is a *self-contained* question about
+        the course and not a reference to the previous turn.
+        """
+        for match in re.finditer(re.escape(pattern), lowered):
+            # The adjacent characters must not continue the word.
+            if match.start() > 0 and lowered[match.start() - 1].isalnum():
+                continue
+            if match.end() < len(lowered) and lowered[match.end()].isalnum():
+                continue
+
+            # The word in front of the phrase must not turn it into a
+            # compound noun ("học phần này" = "this course module").
+            prefix = lowered[:match.start()].rstrip()
+            if prefix.endswith("học"):
+                continue
+
             return True
         return False
 
@@ -284,7 +306,7 @@ class DialogueManager:
         # injected as an entity -- rewriting the sentence would add spurious
         # surface forms ("chương 3") that would change the intent.
         for pattern in sorted(self.reference_patterns["definite_phrase"], key=len, reverse=True):
-            if pattern not in query_lower:
+            if not self._contains_definite_phrase(query_lower, pattern):
                 continue
             has_reference = True
 

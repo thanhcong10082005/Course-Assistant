@@ -1,8 +1,8 @@
 """
-Tests for the Earley chart parser (WP3).
+Tests for the Earley chart parser.
 
 The parser used to be a hand-written recursive-descent parser that only
-handled 4/34 of the official questions *strictly*.  After WP3 it is an
+handled 4/34 of the official questions *strictly*.  It is now an
 **Earley chart parser** driven by the productions of :mod:`src.grammar`, so
 these tests check
 
@@ -75,7 +75,7 @@ COMPLETENESS_CASES = [
 def test_parse_tree_contains_every_token(parser, sentence):
     """
     Every word of the input must appear in the tree -- in order and exactly
-    once.  Before the WP3 fix the span table was keyed by ``(rule, dot)``
+    once.  The span table used to be keyed by ``(rule, dot)``
     without the token position, so the tree builder could pick a span that
     did not start where the derivation stood and tokens were dropped
     ("Chương 4" produced a tree containing only "chương").

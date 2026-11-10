@@ -1,12 +1,11 @@
 """
 Parser module for Course Assistant.
 
-WP3 upgrade -- from a hand-written recursive-descent parser to a
-**grammar-driven chart parser**.
+A **grammar-driven chart parser** built on top of an Earley recogniser.
 
 Why
 ---
-The recursive-descent parser used before WP3 hard-coded a *second* copy of
+The previous hand-written recursive-descent parser hard-coded a *second* copy of
 the language: a list of "verb indicators", a list of "WH words", a list of
 "topics".  Every new sentence pattern therefore required editing two files
 and the two copies silently drifted apart -- the parser could only handle

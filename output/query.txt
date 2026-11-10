@@ -1,3 +1,6 @@
+LOGICAL FORM / KNOWLEDGE BASE QUERY
+======================================================================
+
 Query: Môn NLP có bao nhiêu tín chỉ?
 Intent Query: GET_COURSE_INFO(course=CO3085, attribute=credits)
 

@@ -23,8 +23,8 @@ Design notes
   first tokens, mandatory domain identifier) and finally **detokenises** the
   result so that ``bài_tập_lớn`` becomes ``bài tập lớn``.
 
-WP3 upgrade
------------
+Vocabulary extension
+--------------------
 The vocabulary was extended so that the grammar also covers the *natural*
 Vietnamese question patterns of the official test set:
 

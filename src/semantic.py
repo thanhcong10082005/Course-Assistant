@@ -1,11 +1,11 @@
 """
 Semantic Representation module for Course Assistant.
 
-WP4 upgrade
------------
-Before WP4 the semantic analyzer was a pile of ad-hoc regexes and keyword
-lists that lived *next to* the domain lexicon instead of using it.  The
-consequences were visible in the metrics:
+Lexicon-driven analysis
+-----------------------
+The semantic analyzer is built on top of :mod:`src.lexicon` instead of
+ad-hoc regexes and keyword lists that lived *next to* the domain lexicon.
+The consequences of the old design were visible in the metrics:
 
 * a topic could be stolen by a shorter substring ("PCFG" -> "CFG",
   "semantic grammar" -> "semantic", "statistical NLP" -> "NLP"),
@@ -127,9 +127,10 @@ INTENT_RULES: List[Tuple[IntentType, str, int]] = [
 
     (IntentType.GET_SCHEDULE, r"tuần\s*\d+", 70),
     (IntentType.GET_SCHEDULE, r"lịch học|kế hoạch học|hôm nay học", 80),
-    (IntentType.GET_SCHEDULE, r"(chương|ch)\s*\d*\s*.*tuần nào", 85),
-    (IntentType.GET_SCHEDULE, r"(học|dạy|trình bày).*(ở|vào)\s*tuần nào", 85),
-    (IntentType.GET_SCHEDULE, r"được học ở tuần nào", 85),
+    (IntentType.GET_SCHEDULE, r"(chương|ch)\s*\d*\s*.*tuần nào", 95),
+    (IntentType.GET_SCHEDULE, r"(học|dạy|trình bày).*(ở|vào)\s*tuần nào", 95),
+    (IntentType.GET_SCHEDULE, r"tuần nào\s*(học|dạy|trình bày|được học|chương)", 95),
+    (IntentType.GET_SCHEDULE, r"được học ở tuần nào", 95),
     (IntentType.GET_SCHEDULE, r"học ở tuần", 85),
     (IntentType.GET_SCHEDULE, r"tuần nào", 60),
 
@@ -291,6 +292,23 @@ class SemanticAnalyzer:
             lo_sub = lo_match.group(2)
             lo_id = f"{lo_main}.{lo_sub}" if lo_sub else f"{lo_main}.1"
             entities['lo'] = f"LO{lo_id}"
+
+        # -- explicit numbers ---------------------------------------------
+        # The lexicon only lists the chapters and the weeks that really
+        # exist.  A query that mentions a number outside that range
+        # ("Chương 99 nói về gì?") still carries a *well formed* entity,
+        # so the number is captured here and the knowledge base will
+        # answer "not found" instead of the analyzer guessing a different
+        # chapter.
+        normalized = self.normalize_text(text)
+        chapter_match = re.search(r'chương\s*(\d+)', normalized)
+        if chapter_match:
+            number = int(chapter_match.group(1))
+            entities['chapter'] = f"CH{number:02d}"
+        week_match = re.search(r'tuần\s*(\d+)', normalized)
+        if week_match:
+            number = int(week_match.group(1))
+            entities['week'] = f"WEEK_{number:02d}"
 
         # -- out of scope -------------------------------------------------
         scope = self.lexicon.is_out_of_scope(text)

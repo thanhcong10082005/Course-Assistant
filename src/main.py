@@ -1,17 +1,15 @@
 """
 Course Assistant - Main Application
-Integrates all NLP components for the Course Assistant system
+Integrates all NLP components for the Course Assistant system.
 
 Pipeline
 --------
 ::
 
     Preprocessing  ->  Parsing  ->  Dialogue Context  ->  Semantic Analysis
-                  ->  Knowledge Base  ->  Answer
+                     ->  Knowledge Base  ->  Answer
 
-WP6 upgrade
------------
-:class:`CourseAssistant` now owns a real :class:`~src.dialogue.DialogueManager`
+:class:`CourseAssistant` owns a real :class:`~src.dialogue.DialogueManager`
 instead of a plain dictionary of strings, so that
 
 * the discourse state survives across the turns of a conversation,
@@ -19,6 +17,15 @@ instead of a plain dictionary of strings, so that
   the dialogue manager *before* the semantic analyzer runs,
 * a query whose reference cannot be resolved is answered with a request for
   clarification (``CONTEXT_DEPENDENT``) instead of a confident guess.
+
+Entry points
+------------
+``python -m src.main --mode demo``
+    A narrated walk-through of the whole pipeline.
+``python -m src.main --mode interactive``
+    A conversational session with ``/context`` and ``/reset``.
+``python -m src.main --mode generate``
+    Writes the nine artefacts of ``output/`` in one go.
 """
 
 import os
@@ -31,6 +38,74 @@ from .parser import Parser
 from .semantic import SemanticAnalyzer, SemanticRepresentation, IntentType
 from .knowledge_base import KnowledgeBase
 from .dialogue import DialogueManager
+
+# The nine artefacts required by the assignment.
+OUTPUT_FILES = (
+    "grammar.txt",
+    "samples.txt",
+    "parse-results.txt",
+    "semantic.txt",
+    "intent-entity.txt",
+    "query.txt",
+    "answer.txt",
+    "dialogue.txt",
+    "evaluation.txt",
+)
+
+# The official demonstration dialogues: (turn 1, turn 2).  The second turn
+# of each dialogue contains a contextual reference that can only be resolved
+# against the state built by the first turn.
+DEMO_DIALOGUES = (
+    ("Tuần 3 học gì?", "Tài liệu của chương này là gì?"),
+    ("Chương 4 nói về gì?", "Nó có liên quan đến parsing không?"),
+    ("Chương 11 có hỏi đáp không?", "Còn chương sau?"),
+    ("Bài tập lớn có phần parser không?", "Phần này cần xuất file gì?"),
+    ("L.O.2.5 học về gì?", "Nội dung này nằm ở chương nào?"),
+)
+
+# The sentences parsed and analysed in the output artefacts.
+ANALYSIS_SENTENCES = (
+    "Môn NLP có bao nhiêu tín chỉ?",
+    "CO3085 có mấy tín chỉ?",
+    "Môn học gồm những phần nào?",
+    "Tuần 3 học gì?",
+    "Chương 4 học vào tuần nào?",
+    "Chương nào nói về CFG?",
+    "PCFG được học ở đâu?",
+    "Chương nào nói về semantic grammar?",
+    "L.O.2.5 là gì?",
+    "L.O.4.2 liên quan đến nội dung nào?",
+    "Bài tập lớn yêu cầu xây dựng những gì?",
+    "Phần I của bài tập lớn là gì?",
+    "Bài tập lớn có phần hỏi đáp không?",
+    "Có được dùng LLM/RAG không?",
+    "Quy định về sử dụng AI là gì?",
+    "Midterm bao lâu?",
+    "Final kéo dài bao lâu?",
+    "Tài liệu tham khảo về statistical NLP là gì?",
+    "Tài liệu nào liên quan đến Python NLP?",
+    "Chương 12 nói về gì?",
+    "Chương nào học về reference?",
+    "Chương nào học về question answering?",
+    "Chương nào học về selectional restriction?",
+    "Chương 10 có những phương pháp gì?",
+    "Chương 11 có liên quan đến hỏi đáp không?",
+    "Ai là giảng viên môn này?",
+    "Hạn nộp bài tập lớn là khi nào?",
+    "Chương 4 nói về gì?",
+    "Nó có liên quan đến parsing không?",
+    "Còn chương sau?",
+    "Bài tập lớn có phần parser không?",
+    "Phần này cần xuất file gì?",
+    "Hôm nay ở TP.HCM có mưa không?",
+    "Ai là tổng thống của Pháp?",
+    "Hãy giải bài tập xác suất này giúp tôi.",
+)
+
+
+def project_root() -> str:
+    """The absolute path of the repository root."""
+    return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 class CourseAssistant:
@@ -52,7 +127,7 @@ class CourseAssistant:
         self.semantic_analyzer = SemanticAnalyzer()
         self.knowledge_base = KnowledgeBase()
 
-        # Dialogue context storage (WP6): a real dialogue manager, not a
+        # Dialogue context storage: a real dialogue manager, not a
         # dictionary of strings.  The manager needs the weekly schedule so
         # that "chương này" can be resolved to the chapter of the current
         # week ("Tuần 3 học gì?" -> "chương 3").
@@ -64,7 +139,7 @@ class CourseAssistant:
             self.data_dir = data_dir
         else:
             # Default to parent directory's data folder
-            self.data_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data')
+            self.data_dir = os.path.join(project_root(), 'data')
 
     # ------------------------------------------------------------------
     # Core pipeline
@@ -85,7 +160,7 @@ class CourseAssistant:
             Dictionary containing:
             - original_query: Original query
             - normalized_query: Normalized query
-            - parse_tree: Parse tree result
+            - parse_result: Parse tree result
             - semantic_rep: Semantic representation
             - answer: Generated answer
         """
@@ -151,17 +226,7 @@ class CourseAssistant:
         result['entities'] = sem_rep.entities
 
         # Step 4: Query Knowledge Base
-        if sem_rep.intent == IntentType.CONTEXT_DEPENDENT:
-            answer = self.knowledge_base.ask_for_clarification()
-        elif sem_rep.intent != IntentType.UNKNOWN:
-            answer = self.knowledge_base.query(
-                sem_rep.intent.value,
-                sem_rep.entities
-            )
-        else:
-            answer = self.knowledge_base.unknown_answer()
-
-        result['answer'] = answer
+        result['answer'] = self._answer_for(sem_rep.intent, sem_rep.entities)
 
         # Step 5: Remember the entities of this turn so that a later
         # question can refer to them ("Nó ...", "Phần này ...").
@@ -170,7 +235,7 @@ class CourseAssistant:
         return result
 
     # ------------------------------------------------------------------
-    # Dialogue pipeline (WP6)
+    # Dialogue pipeline
     # ------------------------------------------------------------------
     def process_dialogue(self, user_input: str, context: Dict = None) -> Tuple[str, Dict]:
         """
@@ -204,15 +269,7 @@ class CourseAssistant:
         )
 
         # Step 3: Answer.
-        if sem_rep.intent == IntentType.CONTEXT_DEPENDENT:
-            answer = self.knowledge_base.ask_for_clarification()
-        elif sem_rep.intent != IntentType.UNKNOWN:
-            answer = self.knowledge_base.query(
-                sem_rep.intent.value,
-                sem_rep.entities
-            )
-        else:
-            answer = self.knowledge_base.unknown_answer()
+        answer = self._answer_for(sem_rep.intent, sem_rep.entities)
 
         # Step 4: Update the discourse state.
         self.dialogue_manager.update_context(
@@ -239,6 +296,9 @@ class CourseAssistant:
             current_context['last_part'] = sem_rep.entities['part']
         current_context['turn'] = self.dialogue_manager.state.turn
         current_context['last_intent'] = sem_rep.intent.value
+        # The entities of the turn are exposed as well so that a caller can
+        # check what the turn was understood as.
+        current_context['entities'] = dict(sem_rep.entities)
 
         return answer, current_context
 
@@ -250,6 +310,17 @@ class CourseAssistant:
     def get_dialogue_state(self) -> Dict:
         """The summary of the current discourse state."""
         return self.dialogue_manager.get_state_summary()
+
+    # ------------------------------------------------------------------
+    # Helpers
+    # ------------------------------------------------------------------
+    def _answer_for(self, intent: IntentType, entities: Dict) -> str:
+        """The answer text for a resolved intent."""
+        if intent == IntentType.CONTEXT_DEPENDENT:
+            return self.knowledge_base.ask_for_clarification()
+        if intent == IntentType.UNKNOWN:
+            return self.knowledge_base.unknown_answer()
+        return self.knowledge_base.query(intent.value, entities)
 
     # ------------------------------------------------------------------
     # Batch helpers
@@ -287,7 +358,7 @@ class CourseAssistant:
         print("=" * 70)
         print("Course Assistant - Hệ thống hỗ trợ học tập môn NLP")
         print("=" * 70)
-        print("Gõ 'exit' hoặc 'quit' để thoát")
+        print("Lệnh: /context (xem ngữ cảnh) · /reset (xoá ngữ cảnh) · exit|quit (thoát)")
         print("-" * 70)
 
         context = {}
@@ -296,24 +367,86 @@ class CourseAssistant:
             try:
                 user_input = input("\nBạn: ").strip()
 
-                if user_input.lower() in ['exit', 'quit', 'thoát']:
-                    print("Cảm ơn bạn đã sử dụng Course Assistant!")
-                    break
-
                 if not user_input:
                     continue
+
+                command = user_input.lower()
+                if command in ('exit', 'quit', 'thoát'):
+                    print("\nCảm ơn bạn đã sử dụng Course Assistant!")
+                    break
+
+                if command == '/context':
+                    print("\n[NGỮ CẢNH HIỆN TẠI]")
+                    print(self._format_state(self.get_dialogue_state()))
+                    continue
+
+                if command == '/reset':
+                    self.reset_dialogue()
+                    context = {}
+                    print("Đã xoá ngữ cảnh.")
+                    continue
+
+                # The reference has to be resolved *before* the turn is
+                # processed: afterwards the discourse state already contains
+                # the new turn and the resolution would report the wrong
+                # referent.
+                _, resolved = self.dialogue_manager.resolve_reference(user_input)
+                reference = self._describe_reference(user_input, resolved)
 
                 # Process with dialogue context
                 answer, context = self.process_dialogue(user_input, context)
                 print(f"\nAssistant: {answer}")
 
+                if reference:
+                    print(f"  [Ngữ cảnh: {reference}]")
+
+                intent = context.get('last_intent')
+                if intent:
+                    print(f"  [Diễn giải: {intent}]")
+
             except KeyboardInterrupt:
                 print("\n\nCảm ơn bạn đã sử dụng Course Assistant!")
+                break
+            except (EOFError, OSError):
+                # The input stream was closed (piped input, CI, ...).
                 break
             except Exception as e:
                 print(f"\nLỗi: {str(e)}")
 
+    @staticmethod
+    def _format_state(state: Dict) -> str:
+        """A human readable rendering of the discourse state."""
+        if not state or not state.get('turn'):
+            return "(chưa có lượt nào)"
+        lines = [
+            f"lượt: {state.get('turn')}",
+            f"intent gần nhất: {state.get('last_intent')}",
+        ]
+        for slot in ('last_topic', 'last_chapter', 'last_week', 'last_part',
+                     'last_assignment', 'last_lo'):
+            value = state.get(slot)
+            if value:
+                lines.append(f"{slot}: {value}")
+        lines.append(f"số thực thể đang nổi bật: {state.get('entity_count', 0)}")
+        return "\n".join("  " + line for line in lines)
 
+    @staticmethod
+    def _describe_reference(user_input: str, resolved: Dict) -> Optional[str]:
+        """Describe the reference that was resolved, for the interactive log."""
+        if not resolved:
+            return None
+        inferred = resolved.get('inferred_entities') or {}
+        if not inferred:
+            return None
+        parts = ", ".join(f"{key}={value}" for key, value in sorted(inferred.items()))
+        surface = detect_reference_surface(user_input)
+        label = f'"{surface}" → ' if surface else ""
+        return f"{label}{parts} (conf={resolved.get('confidence', 1.0):.2f})"
+
+
+# ---------------------------------------------------------------------------
+# Demo modes
+# ---------------------------------------------------------------------------
 def run_pipeline_demo():
     """Demonstrate the full NLP pipeline"""
     assistant = CourseAssistant()
@@ -357,19 +490,15 @@ def run_dialogue_demo():
     print("COURSE ASSISTANT - DIALOGUE DEMO")
     print("=" * 70)
 
-    dialogues = [
-        ("Chương 4 nói về gì?", None),
-        ("Nó có liên quan đến parsing không?", None),
-        ("Còn chương sau?", None),
-        ("Bài tập lớn có phần parser không?", None),
-        ("Phần này cần xuất file gì?", None),
-    ]
-
     context = {}
-    for user_input, _ in dialogues:
-        answer, context = assistant.process_dialogue(user_input, context)
-        print(f"\nUser: {user_input}")
-        print(f"Assistant: {answer}")
+    for first, second in DEMO_DIALOGUES:
+        # Every dialogue starts from a clean discourse state.
+        assistant.reset_dialogue()
+        context = {}
+        for user_input in (first, second):
+            answer, context = assistant.process_dialogue(user_input, context)
+            print(f"\nUser: {user_input}")
+            print(f"Assistant: {answer}")
         print(f"State: {assistant.get_dialogue_state()}")
 
 
@@ -416,243 +545,316 @@ def run_parsing_demo():
         print(f"Output: {result}")
 
 
-def save_outputs(output_dir: str):
-    """Save all outputs to files"""
-    print(f"\nSaving outputs to {output_dir}...")
+# ---------------------------------------------------------------------------
+# Output artefacts
+# ---------------------------------------------------------------------------
+def load_analysis_sentences() -> List[str]:
+    """
+    The sentences analysed in the output artefacts.
 
-    assistant = CourseAssistant()
-
-    # Ensure output directory exists
-    os.makedirs(output_dir, exist_ok=True)
-
-    # 1. Generate grammar
-    print("Generating grammar...")
-    grammar = CFG()
-    grammar_content = grammar.to_string()
-    with open(os.path.join(output_dir, 'grammar.txt'), 'w', encoding='utf-8') as f:
-        f.write(grammar_content)
-
-    # 2. Generate sample sentences (from both templates and grammar)
-    print("Generating sample sentences...")
-
-    # Combine sentences from templates (with intent labels) and grammar (raw)
-    template_sentences = generate_template_sentences()
-
-    # Generate sentences from grammar
-    grammar = CFG()
-    grammar_sentences = grammar.generate_all_sentences(max_sentences=10000)
-
-    with open(os.path.join(output_dir, 'samples.txt'), 'w', encoding='utf-8') as f:
-        # First: template sentences with intent
-        f.write("# Template-based sentences (with intent labels)\n")
-        for sent, intent in template_sentences:
-            f.write(f"{sent}\t(intent={intent})\n")
-
-        # Second: grammar-generated sentences (no labels)
-        f.write("\n# Grammar-generated sentences (raw, no intent labels)\n")
-        for sent in grammar_sentences:
-            f.write(f"{sent}\n")
-
-    # 3. Parse input sentences
-    print("Parsing sentences...")
-    input_file = os.path.join(os.path.dirname(__file__), '..', 'input', 'sentences.txt')
+    ``input/sentences.txt`` is preferred when it exists; the built-in list
+    is the fallback so that the artefacts can always be regenerated.
+    """
+    input_file = os.path.join(project_root(), 'input', 'sentences.txt')
     if os.path.exists(input_file):
-        with open(input_file, 'r', encoding='utf-8') as f:
-            # Skip comments and blank lines
-            input_sentences = [
-                line.strip() for line in f
+        with open(input_file, 'r', encoding='utf-8') as fh:
+            sentences = [
+                line.strip() for line in fh
                 if line.strip() and not line.strip().startswith('#')
             ]
-    else:
-        input_sentences = [
-            "Môn NLP có bao nhiêu tín chỉ?",
-            "Tuần 3 học gì?",
-            "Chương nào học về CFG?",
-        ]
+        if sentences:
+            return sentences
+    return list(ANALYSIS_SENTENCES)
 
+
+def write_grammar(output_dir: str) -> None:
+    """Artefact 1/9 -- the CFG with its annotations."""
+    grammar = CFG()
+    with open(os.path.join(output_dir, 'grammar.txt'), 'w', encoding='utf-8') as fh:
+        fh.write(grammar.to_string())
+
+
+def write_samples(output_dir: str) -> None:
+    """Artefact 2/9 -- the template questions and the generated sentences."""
+    template_sentences = generate_template_sentences()
+    grammar_sentences = CFG().generate_all_sentences(max_sentences=10000)
+
+    with open(os.path.join(output_dir, 'samples.txt'), 'w', encoding='utf-8') as fh:
+        fh.write("# Template-based sentences (with intent labels)\n")
+        for sent, intent in template_sentences:
+            fh.write(f"{sent}\t(intent={intent})\n")
+
+        fh.write("\n# Grammar-generated sentences (raw, no intent labels)\n")
+        for sent in grammar_sentences:
+            fh.write(f"{sent}\n")
+
+
+def write_parse_results(output_dir: str, sentences: List[str]) -> None:
+    """Artefact 3/9 -- the parse trees with an explicit parse-mode label."""
     parser = Parser()
-    with open(os.path.join(output_dir, 'parse-results.txt'), 'w', encoding='utf-8') as f:
-        for sentence in input_sentences:
-            result = parser.get_parse_result(sentence)
-            f.write(f"{sentence}\n{result}\n\n")
+    with open(os.path.join(output_dir, 'parse-results.txt'), 'w', encoding='utf-8') as fh:
+        fh.write("PARSE RESULTS\n")
+        fh.write("=" * 70 + "\n")
+        fh.write("Label: [STRICT] = parsed by the grammar-driven chart parser,\n")
+        fh.write("       [FALLBACK] = outside the grammar, matched by the\n")
+        fh.write("                    pattern-based fallback,\n")
+        fh.write("       [INVALID]  = no tree could be produced.\n")
+        fh.write("=" * 70 + "\n\n")
 
-    # 4. Semantic analysis
-    print("Running semantic analysis...")
-    semantic_analyzer = SemanticAnalyzer()
-    with open(os.path.join(output_dir, 'semantic.txt'), 'w', encoding='utf-8') as f:
-        for sentence in input_sentences:
-            sem_rep = semantic_analyzer.analyze(sentence)
-            f.write(f"Query: {sentence}\n")
-            f.write(f"Intent: {sem_rep.intent.value}\n")
-            f.write(f"Entities: {sem_rep.entities}\n")
-            f.write(f"Logical Form: {sem_rep.to_logical_form()}\n\n")
+        for sentence in sentences:
+            tree, errors = parser.parse(sentence)
+            if tree is None:
+                label = "[INVALID]"
+            elif parser.parse_strict(sentence) is not None:
+                label = "[STRICT]"
+            else:
+                label = "[FALLBACK]"
 
-    # 5. Intent-Entity extraction
-    print("Extracting intent and entities...")
-    with open(os.path.join(output_dir, 'intent-entity.txt'), 'w', encoding='utf-8') as f:
-        for sentence in input_sentences:
-            sem_rep = semantic_analyzer.analyze(sentence)
-            f.write(f"{sentence}\t{sem_rep.intent.value}\t{sem_rep.entities}\n")
+            fh.write(f"{sentence}\n")
+            fh.write(f"{label}\n")
+            fh.write(f"{tree if tree is not None else '()'}\n")
+            if errors:
+                fh.write(f"Errors: {errors}\n")
+            fh.write("\n")
 
-    # 6. Query and Answer
-    print("Generating answers...")
-    kb = KnowledgeBase()
+
+def write_semantic(output_dir: str, sentences: List[str]) -> None:
+    """Artefact 4/9 -- the semantic representation of every sentence."""
+    analyzer = SemanticAnalyzer()
+    with open(os.path.join(output_dir, 'semantic.txt'), 'w', encoding='utf-8') as fh:
+        fh.write("SEMANTIC REPRESENTATION\n")
+        fh.write("=" * 70 + "\n\n")
+        for sentence in sentences:
+            sem_rep = analyzer.analyze(sentence)
+            fh.write(f"Query: {sentence}\n")
+            fh.write(f"Intent: {sem_rep.intent.value}\n")
+            fh.write(f"Entities: {sem_rep.entities}\n")
+            fh.write(f"Logical Form: {sem_rep.to_logical_form()}\n\n")
+
+
+def write_intent_entity(output_dir: str, sentences: List[str]) -> None:
+    """Artefact 5/9 -- the intent / entity table."""
+    analyzer = SemanticAnalyzer()
+    with open(os.path.join(output_dir, 'intent-entity.txt'), 'w', encoding='utf-8') as fh:
+        fh.write("INTENT - ENTITY EXTRACTION\n")
+        fh.write("=" * 70 + "\n")
+        fh.write(f"{'Query':<48} | {'Intent':<20} | Entities\n")
+        fh.write(f"{'-'*48}-+-{'-'*20}-+-{'-'*30}\n")
+        for sentence in sentences:
+            sem_rep = analyzer.analyze(sentence)
+            entities = ", ".join(f"{k}={v}" for k, v in sem_rep.entities.items())
+            fh.write(f"{sentence:<48} | {sem_rep.intent.value:<20} | {entities}\n")
+
+
+def write_query_and_answer(output_dir: str, sentences: List[str]) -> None:
+    """Artefacts 6/9 and 7/9 -- the logical query and the answer."""
+    assistant = CourseAssistant()
     with open(os.path.join(output_dir, 'query.txt'), 'w', encoding='utf-8') as qf, \
          open(os.path.join(output_dir, 'answer.txt'), 'w', encoding='utf-8') as af:
-        for sentence in input_sentences:
-            sem_rep = semantic_analyzer.analyze(sentence)
-            query = f"{sem_rep.intent.value}({', '.join(f'{k}={v}' for k, v in sem_rep.entities.items())})"
-            answer = kb.query(sem_rep.intent.value, sem_rep.entities)
+        qf.write("LOGICAL FORM / KNOWLEDGE BASE QUERY\n")
+        qf.write("=" * 70 + "\n\n")
+        af.write("ANSWERS\n")
+        af.write("=" * 70 + "\n\n")
+
+        for sentence in sentences:
+            result = assistant.process_query(sentence)
+            intent = result['intent']
+            entities = result['entities']
+            query = f"{intent}({', '.join(f'{k}={v}' for k, v in entities.items())})"
 
             qf.write(f"Query: {sentence}\n")
             qf.write(f"Intent Query: {query}\n\n")
 
             af.write(f"Query: {sentence}\n")
-            af.write(f"Answer: {answer}\n\n")
-
-    # 7. Dialogue (multi-turn examples)
-    print("Creating dialogue examples...")
-    dialogue_context = {}
-    dialogues = [
-        ("Tuần 3 học gì?", None),
-        ("Tài liệu của chương này là gì?", None),
-        ("Chương 4 nói về gì?", None),
-        ("Nó có liên quan đến parsing không?", None),
-        ("Còn chương sau?", None),
-        ("Bài tập lớn có phần parser không?", None),
-        ("Phần này cần xuất file gì?", None),
-        ("L.O.2.5 học về gì?", None),
-        ("Nội dung này nằm ở chương nào?", None),
-    ]
-
-    with open(os.path.join(output_dir, 'dialogue.txt'), 'w', encoding='utf-8') as f:
-        f.write("DIALOGUE EXAMPLES\n")
-        f.write("=" * 50 + "\n\n")
-
-        for user_input, _ in dialogues:
-            # Save previous context for display
-            prev_context = dict(dialogue_context) if dialogue_context else {}
-
-            answer, dialogue_context = assistant.process_dialogue(user_input, dialogue_context)
-
-            # Detect reference resolution
-            ref_note = ""
-            if prev_context and any(
-                marker in user_input.lower()
-                for marker in ("phần này", "nó", "chương này", "chương sau")
-            ):
-                ref_note = f"  [Reference resolved from previous context: {prev_context}]\n"
-
-            f.write(f"User: {user_input}\n")
-            if ref_note:
-                f.write(ref_note)
-            f.write(f"Answer: {answer}\n\n")
-
-    # 8. Evaluation -- the full official test set (34 queries)
-    print("Creating evaluation report...")
-    evaluation_text = build_evaluation_report(assistant)
-    with open(os.path.join(output_dir, 'evaluation.txt'), 'w', encoding='utf-8') as f:
-        f.write(evaluation_text)
-
-    print(f"Outputs saved to {output_dir}")
+            af.write(f"Intent Query: {query}\n")
+            af.write(f"Answer: {result['answer']}\n\n")
 
 
-def build_evaluation_report(assistant: CourseAssistant) -> str:
+def write_dialogue(output_dir: str) -> None:
     """
-    Build the evaluation report over the **full official test set**.
+    Artefact 8/9 -- the multi-turn dialogues.
 
-    The report contains the intent accuracy, the entity accuracy and the
-    per-case detail, so that ``output/evaluation.txt`` is a real artefact
-    of the system rather than a five-question illustration.
+    Every turn shows the four parts the assignment asks for: the user
+    utterance, the discourse context that was used, the interpretation
+    (intent + entities + resolved reference) and the answer.
+
+    Each dialogue starts from a **clean** discourse state so that the
+    examples are independent of each other.
     """
-    import re as _re
+    with open(os.path.join(output_dir, 'dialogue.txt'), 'w', encoding='utf-8') as fh:
+        fh.write("=" * 73 + "\n")
+        fh.write("DIALOGUE EXAMPLES - LOCAL DISCOURSE CONTEXT\n")
+        fh.write("=" * 73 + "\n")
+        fh.write("Mỗi lượt gồm 4 phần: câu hỏi · ngữ cảnh dùng · diễn giải · trả lời.\n")
+        fh.write("=" * 73 + "\n")
 
-    official_path = os.path.join(
-        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-        "tests", "data", "sample_queries.txt",
+        for index, (first, second) in enumerate(DEMO_DIALOGUES, start=1):
+            fh.write(f"\nDIALOGUE {index:02d}\n")
+            fh.write("-" * 73 + "\n")
+
+            # A fresh assistant: every dialogue is independent.
+            assistant = CourseAssistant()
+            context: Dict = {}
+
+            for turn, user_input in enumerate((first, second), start=1):
+                # The state *before* the turn is the context the turn uses.
+                state_before = assistant.get_dialogue_state()
+                _, resolved = assistant.dialogue_manager.resolve_reference(user_input)
+                answer, context = assistant.process_dialogue(user_input, context)
+                state_after = assistant.get_dialogue_state()
+
+                entities = context.get("entities", {}) or {}
+
+                fh.write(f"\nTurn {turn}\n")
+                fh.write(f"  User      : {user_input}\n")
+
+                # -- part 2: the context that was used -------------------
+                fh.write(f"  Context   : {describe_context(state_before)}\n")
+
+                # -- part 3: the interpretation --------------------------
+                intent = context.get('last_intent', '?')
+                if entities:
+                    entity_text = ", ".join(
+                        f"{k}={v}" for k, v in sorted(entities.items())
+                    )
+                else:
+                    entity_text = "(không có thực thể)"
+                fh.write(f"  Interpret : {intent}({entity_text})\n")
+
+                reference = describe_reference(user_input, resolved)
+                if reference:
+                    fh.write(f"  Reference : {reference}\n")
+
+                # -- part 4: the answer ---------------------------------
+                fh.write(f"  Answer    : {answer}\n")
+                fh.write(f"  State     : {describe_state_after(state_after)}\n")
+
+            fh.write("\n" + "-" * 73 + "\n")
+
+
+def describe_context(state: Dict) -> str:
+    """Render the discourse state that a turn relies on."""
+    if not state or not state.get('turn'):
+        return "(không có - lượt đầu tiên của hội thoại)"
+    parts = [f"last_intent={state.get('last_intent')}"]
+    for slot in ('last_chapter', 'last_week', 'last_part', 'last_topic',
+                 'last_assignment', 'last_lo'):
+        value = state.get(slot)
+        if value:
+            parts.append(f"{slot.replace('last_', '')}={value}")
+    return ", ".join(parts)
+
+
+def describe_state_after(state: Dict) -> str:
+    """Render the discourse state after a turn."""
+    if not state:
+        return "(rỗng)"
+    return (
+        f"turn={state.get('turn')}, "
+        f"last_intent={state.get('last_intent')}, "
+        f"entities={state.get('entity_count', 0)}"
     )
 
-    cases = []
-    if os.path.exists(official_path):
-        pattern = _re.compile(
-            r"^(?P<id>Q\d+)\s*\|\s*(?P<query>.+?)\s*\|\s*(?P<intent>[A-Z_]+)\s*"
-            r"\|\s*(?P<entity>.+?)\s*$"
-        )
-        with open(official_path, "r", encoding="utf-8") as fh:
-            for raw in fh:
-                line = raw.strip()
-                if not line or line.startswith(("#", "-")):
-                    continue
-                match = pattern.match(line)
-                if not match:
-                    continue
-                entity = match.group("entity").strip()
-                cases.append(
-                    {
-                        "id": match.group("id"),
-                        "query": match.group("query").strip(),
-                        "expected_intent": match.group("intent"),
-                        "expected_entity": None if entity == "OUT_OF_SCOPE" else entity,
-                    }
-                )
 
-    if not cases:
-        return "EVALUATION REPORT\n\nNo official test set found.\n"
+# The surface forms that carry a contextual reference, longest first.
+REFERENCE_SURFACES = (
+    "nội dung này", "phần này", "chương này", "tuần này", "bài này",
+    "đề này", "cái này", "chương sau", "tuần sau", "phần sau",
+    "tiếp theo", "nó", "hắn", "chúng",
+)
 
-    intent_ok = 0
-    entity_ok = 0
-    combined_ok = 0
-    detail = []
+# The pronouns of the reference set.
+REFERENCE_PRONOUNS = ("nó", "hắn", "chúng")
 
-    # A *fresh* assistant: the evaluation must not be influenced by the
-    # dialogue state that the earlier demo steps have built up.
-    evaluator_assistant = CourseAssistant()
 
-    for case in cases:
-        result = evaluator_assistant.process_query(case["query"])
-        i_ok = result["intent"] == case["expected_intent"]
-        e_ok = True
-        if case["expected_entity"]:
-            e_ok = case["expected_entity"] in str(result["entities"])
+def detect_reference_surface(user_input: str) -> str:
+    """
+    The surface form of the contextual reference inside ``user_input``.
 
-        intent_ok += i_ok
-        entity_ok += e_ok
-        combined_ok += i_ok and e_ok
+    The longest form wins so that ``"phần này"`` is preferred over the
+    pronoun ``"nó"``.  An empty string is returned when the question does
+    not contain a reference.
+    """
+    lowered = (user_input or "").lower()
+    for surface in REFERENCE_SURFACES:
+        if surface in lowered:
+            return surface
+    return ""
 
-        detail.append(
-            f"{'✓' if (i_ok and e_ok) else '✗'} [{case['id']}] {case['query']}\n"
-            f"    expected: {case['expected_intent']} / {case['expected_entity']}\n"
-            f"    actual  : {result['intent']} / {result['entities']}"
-        )
 
-    total = len(cases)
-    lines = [
-        "EVALUATION REPORT",
-        "=" * 70,
-        "",
-        f"Test set: tests/data/sample_queries.txt ({total} official queries)",
-        "",
-        "Summary:",
-        "-" * 70,
-        f"  Intent accuracy:        {intent_ok}/{total} = {intent_ok / total * 100:.2f}%",
-        f"  Entity accuracy:        {entity_ok}/{total} = {entity_ok / total * 100:.2f}%",
-        f"  Intent + Entity:        {combined_ok}/{total} = {combined_ok / total * 100:.2f}%",
-        "",
-        "Per-query detail:",
-        "-" * 70,
-        "",
-    ]
-    lines.extend(detail)
-    lines.extend([
-        "",
-        "=" * 70,
-        "Note: the entity column is compared with the official label using a",
-        "raw substring match, so the two alias pairs (CO3085/NLP and",
-        "MIDTERM/FINAL) are reported as entity misses even though the",
-        "pipeline resolves them correctly.  Run scripts/baseline.py for the",
-        "alias-aware figures.",
-    ])
-    return "\n".join(lines) + "\n"
+def describe_reference(user_input: str, resolved: Dict) -> str:
+    """Render the resolved reference of a turn."""
+    if not resolved:
+        return ""
+    inferred = resolved.get('inferred_entities') or {}
+    if not inferred:
+        if resolved.get('unresolved_reference'):
+            return "không giải được - cần hỏi lại người dùng"
+        return ""
+
+    surface = detect_reference_surface(user_input)
+
+    if surface in REFERENCE_PRONOUNS:
+        kind = "pronoun"
+    elif surface.endswith("sau") or surface == "tiếp theo":
+        kind = "next"
+    else:
+        kind = "definite"
+
+    targets = ", ".join(f"{k}={v}" for k, v in sorted(inferred.items()))
+    confidence = resolved.get('confidence', 1.0)
+    return (
+        f'"{surface}" → {targets} '
+        f"(loại: {kind} | nguồn: discourse state | độ tin cậy: {confidence:.2f})"
+    )
+
+
+def write_evaluation(output_dir: str) -> None:
+    """Artefact 9/9 -- the evaluation report."""
+    from .evaluation import build_full_report
+
+    with open(os.path.join(output_dir, 'evaluation.txt'), 'w', encoding='utf-8') as fh:
+        fh.write(build_full_report())
+
+
+def save_outputs(output_dir: str, seed: int = 42):
+    """
+    Write the nine artefacts of ``output/``.
+
+    The function is deterministic: running it twice produces byte-identical
+    files, which makes the artefacts safe to regenerate before a demo.
+    """
+    os.makedirs(output_dir, exist_ok=True)
+    sentences = load_analysis_sentences()
+
+    print(f"Generating the {len(OUTPUT_FILES)} output artefacts in {output_dir} ...")
+
+    print("  [1/9] grammar.txt")
+    write_grammar(output_dir)
+
+    print("  [2/9] samples.txt")
+    write_samples(output_dir)
+
+    print("  [3/9] parse-results.txt")
+    write_parse_results(output_dir, sentences)
+
+    print("  [4/9] semantic.txt")
+    write_semantic(output_dir, sentences)
+
+    print("  [5/9] intent-entity.txt")
+    write_intent_entity(output_dir, sentences)
+
+    print("  [6/9] query.txt")
+    print("  [7/9] answer.txt")
+    write_query_and_answer(output_dir, sentences)
+
+    print("  [8/9] dialogue.txt")
+    write_dialogue(output_dir)
+
+    print("  [9/9] evaluation.txt")
+    write_evaluation(output_dir)
+
+    print(f"Done. {len(OUTPUT_FILES)} output files written.")
 
 
 def main():
@@ -662,7 +864,7 @@ def main():
     parser = argparse.ArgumentParser(description='Course Assistant - NLP Assignment')
     parser.add_argument('--mode', choices=['demo', 'interactive', 'generate'], default='demo',
                         help='Run mode: demo, interactive, or generate outputs')
-    parser.add_argument('--output', default='../output', help='Output directory')
+    parser.add_argument('--output', default='output', help='Output directory')
 
     args = parser.parse_args()
 
@@ -677,10 +879,9 @@ def main():
     elif args.mode == 'generate':
         # The output directory is resolved relative to the project root so
         # that ``python -m src.main --mode generate`` works from anywhere.
-        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        output_dir = os.path.abspath(args.output)
-        if not os.path.isabs(args.output):
-            output_dir = os.path.join(project_root, args.output)
+        output_dir = args.output
+        if not os.path.isabs(output_dir):
+            output_dir = os.path.join(project_root(), output_dir)
         save_outputs(output_dir)
 
 
