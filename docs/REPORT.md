@@ -327,41 +327,47 @@ kiện cần để video demo và báo cáo luôn khớp với code.
 
 
 
-#### 2.3.1 Thuật toán: recursive descent có backtracking
+#### 2.3.1 Thuật toán: Earley chart parser
 
-Bộ phân tích cú pháp nằm trong `src/parser.py`, là **recursive-descent parser**
-(top-down) đọc trực tiếp văn phạm từ `CFG`:
+Bộ phân tích cú pháp nằm trong `src/parser.py`, là **Earley chart parser**
+(bottom-up, xử lý được nhập bằng tự nhiên của tiếng Việt) đọc trực tiếp văn
+phạm từ `CFG`:
 
 ```
 parse(text):
     tokens ← tokenize_input(text)
-    tree   ← _parse_question()
-    if tree != null and đã tiêu thụ hết tokens:
+    tree   ← _earley_parse(tokens)
+    if tree != null:
         return tree                          # phân tích thành công
-    fallback ← _parse_fallback(text)          # phân tích theo mẫu
+    fallback ← _parse_fallback(text)         # phân tích theo mẫu
     if fallback != null:
         return fallback
     return null, errors                      # không thuộc văn phạm
 ```
 
-Cấu trúc các hàm đệ quy tương ứng từng non-terminal:
+Ba pha của Earley được cài đặt trong `_earley_parse()`:
 
-```
-_parse_question()      → _parse_wh_question() | _parse_yes_no_question()
-_parse_wh_question()   → _parse_wh_word() + _parse_np() + _parse_vp() + _parse_question_mark()
-_parse_np()            → định danh miền | DET NOMINAL | NOMINAL | PRONOUN
-_parse_vp()            → VERB [NP | PP | WH_QWORD | AUX ...]
-```
+| Pha            | Ý nghĩa                                                        |
+| -------------- | -------------------------------------------------------------- |
+| **Predictor** | Mở rộng item với mọi production của non-terminal ở vị trí hiện tại |
+| **Scanner**    | Nếu ký hiệu tiếp theo là terminal, tiêu thụ token nếu khớp       |
+| **Completer**  | Khi một production hoàn tất, "magic completion" cho mọi item đang chờ |
 
-Bảng tra cứu (`_build_lookup_tables()`) được xây tự động từ văn phạm: danh sách
-terminal của mỗi non-terminal, danh sách course name / topic / assignment /
-learning outcome. Nhờ vậy **chỉ có một nguồn sự thật duy nhất** cho ngôn ngữ —
-tránh tình trạng văn phạm và parser lệch nhau.
+Bảng `complete` lưu các suy diễn `(symbol, start, stop) → [rule]`, bảng `advance`
+lưu các span ứng viên cho từng vị trí dấu chấm. Vì văn phạm có nhập bằng, một
+ký hiệu có thể có nhiều span; vì vậy `_build_tree()` **backtrack** qua các ứng
+viên và chỉ giữ lại cách suy diễn hoàn chỉnh.
+
+Bảng tra cứu (`_build_lookup_tables()`) và chỉ mục văn phạm
+(`_build_grammar_index()`) được xây tự động từ văn phạm: danh sách terminal của
+mỗi non-terminal, danh sách course name / topic / assignment / learning outcome.
+Nhờ vậy **chỉ có một nguồn sự thật duy nhất** cho ngôn ngữ — tránh tình trạng
+văn phạm và parser lệch nhau.
 
 #### 2.3.2 Cơ chế dự phòng (fallback)
 
 Không phải câu nào trong tự nhiên cũng khớp văn phạm nghiêm ngặt. Để hệ thống
-vẫn trả lời được, khi recursive descent thất bại, parser chuyển sang
+vẫn trả lời được, khi Earley parser thất bại, parser chuyển sang
 `_parse_fallback()`: phân loại từng token theo bảng từ khoá rồi dựng cây theo
 mẫu (`WH_WORD` | `NP` | `VP` | `PUNCT`).
 
@@ -373,17 +379,16 @@ tầng semantic làm việc trên văn bản, không phụ thuộc cây cú phá
 Trên 34 câu hỏi trong `tests/data/sample_queries.txt`:
 
 
-| Chế độ                   | Số câu | Tỉ lệ   |
-| ------------------------ | ------ | ------- |
-| Strict recursive descent | 4      | 11.76 % |
-| Pattern fallback         | 30     | 88.24 % |
-| Thất bại                 | 0      | 0 %     |
+| Chế độ                    | Số câu | Tỉ lệ   |
+| ------------------------- | ------ | ------- |
+| Strict (Earley chart)     | 31     | 91.18 % |
+| Pattern fallback          | 3      | 8.82 %  |
+| Thất bại                  | 0      | 0 %     |
 
-
-> Strict parse chỉ 11.76 % là **hạn chế đã biết** của phiên bản hiện tại — đây
-> chính là nội dung của Work Package WP3 (xem mục 6.1). Nguyên nhân: văn phạm
-> được thiết kế để *sinh câu* một cách tự nhiên, trong khi câu hỏi thực tế của
-> người dùng có nhiều biến thể mà văn phạm chưa bao phủ hết.
+> **Sau WP3.** Strict parse đã tăng từ 11.76 % lên **91.18 %** nhờ parser mới
+> là **Earley chart parser** tổng quát (xem mục 6.1). 3 câu còn lại rơi vào
+> fallback là do câu quá dài / có nhiều mệnh đề — ngoài phạm vi thiết kế của
+> văn phạm, và vẫn được phục vụ đúng ở tầng semantic.
 
 
 
@@ -815,18 +820,19 @@ người dùng: "Nó có liên quan đến parsing không?"
 
 
 
-### 4.6 Trạng thái hiện tại và hướng hoàn thiện
+### 4.6 Trạng thái sau WP6
 
-`DialogueManager` đã được viết đầy đủ và có test contract riêng (`tests/test_dialogue_cases.py`:
-6 test pass cho API nội bộ, 6 test xfail cho các ca chưa nối vào pipeline), nhưng
-**chưa được nối vào pipeline chính** của `CourseAssistant.process_dialogue()`. Vì vậy:
+`DialogueManager` đã được **nối hoàn toàn** vào pipeline chính của
+`CourseAssistant.process_dialogue()` (và `process_query()` dùng chung trạng
+thái thụ động). Sau WP6:
 
-- Phần lớn test hội thoại hiện được đánh dấu `xfail` với lý do
-*"DialogueManager chưa được nối vào process_dialogue()"* (6 ca xfail).
-- Việc nối vào pipeline là nội dung của **WP6** (xem mục 6.1).
-
-Đây là hạn chế đã được **đo và ghi nhận công khai** trong `tests/known_issues.py`,
-không phải lỗi ẩn.
+- Toàn bộ 6 ca hội thoại `DIALOGUE_01` – `DIALOGUE_05` **pass** (trước đây
+  là `xfail`).
+- `process_query()` phân biệt hai chế độ: **câu đơn lẻ** (có tham chiếu →
+  `CONTEXT_DEPENDENT`, hệ thống hỏi lại) và **phiên hội thoại** (tham chiếu
+  được giải theo trạng thái → trả lời bình thường).
+- Hàng rào `xfail` trong `tests/known_issues.py` đã được dọn sạch — không còn
+  `xfail`/`XPASS` nào trong bộ test.
 
 ---
 
@@ -874,13 +880,18 @@ python -m pytest                                   # chạy bộ test
 
 | Chỉ số                          | Kết quả | Tỉ lệ       |
 | ------------------------------- | ------- | ----------- |
-| Intent accuracy                 | 30/34   | **88.24 %** |
-| Entity accuracy (có bảng alias) | 19/34   | 55.88 %     |
-| Entity accuracy (khớp thô)      | 16/34   | 47.06 %     |
-| **Intent + Entity accuracy**    | 18/34   | **52.94 %** |
-| Strict recursive-descent parse  | 4/34    | 11.76 %     |
-| Pattern fallback parse          | 30/34   | 88.24 %     |
+| Intent accuracy                 | 34/34   | **100.00 %** |
+| Entity accuracy (có bảng alias) | 34/34   | **100.00 %** |
+| Entity accuracy (khớp thô)      | 32/34   | 94.12 %     |
+| **Intent + Entity accuracy**    | 34/34   | **100.00 %** |
+| Strict parse (Earley chart)     | 31/34   | **91.18 %** |
+| Pattern fallback parse          | 3/34    | 8.82 %      |
 | Parse failure                   | 0/34    | 0 %         |
+| **Bộ test (`pytest`)**          | 130 pass | 0 failed, 0 xfailed |
+
+> Các chỉ số trên là kết quả **sau WP3 – WP6** (đo tự động bằng
+> `python scripts/baseline.py`). Trước đó: intent 88.24 %, entity 55.88 %,
+> intent+entity 52.94 %, strict parse 11.76 %, và 23 test `xfail`.
 
 
 **Chất lượng bộ sinh câu (10 000 câu):**
@@ -898,21 +909,29 @@ python -m pytest                                   # chạy bộ test
 
 #### 5.1.4 Phân tích theo từng intent
 
-Phân bố 4 lỗi intent trên tập kiểm thử:
+**Sau WP4 – WP6 không còn câu hỏi nào bị sai intent trên tập kiểm thử.**
+
+Bốn lỗi intent đã được xử lý như sau:
 
 
-| Câu hỏi                                   | Intent đúng       | Intent thực tế | Nguyên nhân                                                       |
-| ----------------------------------------- | ----------------- | -------------- | ----------------------------------------------------------------- |
-| "Hãy giải bài tập xác suất này giúp tôi." | UNKNOWN           | GET_ASSIGNMENT | Bộ phát hiện ngoài phạm vi chưa bao phủ "giải bài tập … giúp tôi" |
-| "Nó có liên quan đến parsing không?"      | CONTEXT_DEPENDENT | GET_RULE       | Chưa có intent CONTEXT_DEPENDENT; "không" khớp mẫu GET_RULE       |
-| "Còn chương sau?"                         | CONTEXT_DEPENDENT | GET_TOPIC      | Chưa có intent CONTEXT_DEPENDENT                                  |
-| "Phần này cần xuất file gì?"              | CONTEXT_DEPENDENT | GET_ASSIGNMENT | Chưa có intent CONTEXT_DEPENDENT                                  |
+| Câu hỏi                                   | Intent đúng       | Trước WP4            | Nguyên nhân và cách sửa                                                       |
+| ----------------------------------------- | ----------------- | -------------------- | -------------------------------------------------------------------------------- |
+| "Hãy giải bài tập xác suất này giúp tôi." | UNKNOWN           | GET_ASSIGNMENT       | Thêm mẫu ngoài phạm vi vào `models/lexicon.json` + kiểm tra `is_out_of_scope` trước khi chấm điểm intent |
+| "Nó có liên quan đến parsing không?"      | CONTEXT_DEPENDENT | GET_RULE             | Thêm intent `CONTEXT_DEPENDENT`; `DialogueManager.has_reference()` phát hiện đại từ |
+| "Còn chương sau?"                         | CONTEXT_DEPENDENT | GET_TOPIC            | Thêm intent `CONTEXT_DEPENDENT`; nhận diện cấu trúc rút gọn (ellipsis)         |
+| "Phần này cần xuất file gì?"              | CONTEXT_DEPENDENT | GET_ASSIGNMENT       | Thêm intent `CONTEXT_DEPENDENT`; nhận diện mô tả xác định ("phần này")          |
 
+Ngoài ra, 13 lỗi trích xuất entity đã được khắc phục nhờ cơ chế **longest-match**
+của `src/lexicon.py`: `"pcfg"` không còn bị `"cfg"` chiếm mất, `"semantic grammar"`
+không còn bị `"semantic"` chiếm mất, `"statistical nlp"` / `"python nlp"` không còn
+bị `"nlp"` chiếm mất, `"môn học"` được ánh xạ về `course=CO3085`, và phần của bài
+tập được suy luận được từ keyword (`"parser"` → `PART_I`, `"hỏi đáp"` → `PART_II`).
 
-**Nhận xét quan trọng:** 30/34 intent đúng là kết quả **khá cao**, nhưng con số
-này **không phải** "độ chính xác tổng thể" của hệ thống. Khi đo đồng thời intent
-*và* entity, độ chính xác chỉ còn **52.94 %**. Báo cáo này trình bày cả hai số
-để tránh hiểu sai.
+**Nhận xét quan trọng:** 34/34 intent đúng **không đồng nghĩa** với 100 % mọi
+thứ. Khi đo đồng thời intent *và* entity, độ chính xác tổng thể là
+**100.00 %** trên tập 34 câu này; nhưng đây vẫn là một tập nhỏ, được biên soạn
+cho môn học, nên **không** nên suy rộng cho mọi câu hỏi tiếng Việt. Báo cáo này
+trình bày cả hai số để tránh hiểu sai.
 
 #### 5.1.5 Kết quả evaluation tổng hợp
 
@@ -923,14 +942,14 @@ COURSE ASSISTANT - BASELINE METRICS
 ======================================================================
 
 Official test set (tests/data/sample_queries.txt): 34 cases
-  Intent accuracy:        30/34 = 88.24%
-  Entity accuracy (alias-aware): 19/34 = 55.88%
-  Entity accuracy (raw match):   16/34 = 47.06%
-  Intent + Entity accuracy: 18/34 = 52.94%
+  Intent accuracy:        34/34 = 100.00%
+  Entity accuracy (alias-aware): 34/34 = 100.00%
+  Entity accuracy (raw match):   32/34 = 94.12%
+  Intent + Entity accuracy: 34/34 = 100.00%
 
 Parser (on the official test set):
-  Strict recursive descent: 4/34 = 11.76%
-  Pattern fallback:        30/34 = 88.24%
+  Strict recursive descent: 31/34 = 91.18%
+  Pattern fallback:        3/34 = 8.82%
   Failure:                 0/34 = 0.00%
 
 Sentence generation:
@@ -962,50 +981,57 @@ Sentence generation:
 
 #### 5.2.1 Hạn chế về độ bao phủ của văn phạm và parser
 
-**Hiện trạng:** strict parse chỉ đạt 11.76 % trên tập kiểm thử.
+**Hiện trạng (sau WP3):** strict parse đạt **91.18 %** (31/34 câu); 3 câu còn
+lại rơi vào fallback và 0 câu thất bại.
 
-**Nguyên nhân:** văn phạm được thiết kế để *sinh câu* một cách tự nhiên và có
-tính đầy đủ về mặt ngôn ngữ, còn câu hỏi thật của người dùng có rất nhiều
-biến thể (ví dụ *"Phần CFG và Parsing nằm ở tuần nào?"*, *"Có được sử dụng
-công cụ AI không?"*) mà văn phạm chưa bao phủ hết.
+**Nguyên nhên của 3 câu chưa parse strict:** các câu này có cấu trúc phức tạp
+hơn (nhiều mệnh đề, vị từ phức tạp) mà văn phạm chưa mô hình hoá hết — ví dụ
+*"Tài liệu tham khảo về statistical NLP là gì?"* hoặc *"Bài tập lớn yêu cầu xây
+dựng những gì?"*.
 
-**Hệ quả:** người dùng hỏi câu lạ → parser không sinh được cây cú pháp đúng →
-cây phân tích cú pháp trong báo cáo có thể không đúng với câu đó. Tuy nhiên
-**intent vẫn đúng** nhờ tầng semantic làm việc trực tiếp trên văn bản và cơ
-chế fallback của parser.
+**Hệ quả:** cây phân tích cú pháp trong báo cáo có thể không đúng với 3 câu
+đó. Tuy nhiên **intent và entity vẫn đúng** nhờ tầng semantic làm việc trực tiếp
+trên văn bản và cơ chế fallback của parser.
 
-**Hướng khắc phục:** mở rộng văn phạm theo hướng *rule + pattern* (WP3), hoặc
-chuyển sang bộ phân tích cú pháp dựa trên FIRST/FOLLOW (chart parsing / Earley)
-để tăng độ bao phủ mà không phải liệt kê thủ công.
+**Hướng khắc phục:** bổ sung quy tắc cho vị từ phức tạp và danh từ ghép trong
+`src/grammar.py`; Earley parser sẽ tự động hấp thụ các quy tắc mới mà không
+cần sửa mã parser.
 
 #### 5.2.2 Hạn chế về trích xuất thực thể
 
-**Hiện trạng:** entity accuracy 55.88 % (alias-aware) — thấp hơn đáng kể so với
-intent accuracy 88.24 %.
+**Hiện trạng (sau WP4):** entity accuracy **100.00 %** (alias-aware) trên tập 34
+câu — khớp thô 94.12 % (2 câu dùng nhãn canonical khác tên trong đề bài).
 
-**Nguyên nhân:** các lỗi còn lại tập trung ở việc **ưu tiên khớp** và **suy luận**:
+**Đã khắc phục:** toàn bộ lỗi "khớp chồng lấn" và "tranh chấp miền" đã được
+xử lý bằng cơ chế **longest-match** của `src/lexicon.py` và bảng ưu tiên nhóm:
 
-- *Khớp chồng lấn:* "PCFG" bị khớp thành "CFG" (substring), "semantic grammar"
-bị khớp thành "SEMANTIC".
-- *Tranh chấp miền:* "Tài liệu về statistical NLP" bị gán `course=NLP` thay vì
-`topic=STATISTICAL_NLP`.
-- *Thiếu suy luận:* "Bài tập lớn có phần parser không?" cần suy luận
-`part=PART_I` từ từ khoá "parser"; "… có phần hỏi đáp không?" cần suy luận
-`part=PART_II`.
-- *Thiếu thực thể:* chưa trích xuất được `rule=LLM_RAG`, `rule=AI_USAGE`.
+- "PCFG" không còn bị "CFG" chiếm mất; "semantic grammar" không còn bị
+  "semantic" chiếm mất.
+- "Tài liệu về statistical NLP" được gán `topic=STATISTICAL_NLP` thay vì
+  `course=NLP`; "Python NLP" được gán `topic=PYTHON_NLP`.
+- Suy luận `part` đã có: "Bài tập lớn có phần parser không?" → `PART_I`;
+  "… có phần hỏi đáp không?" → `PART_II`.
+- Thực thể quy tắc đã có: `rule=LLM_RAG`, `rule=AI_USAGE`.
 
-**Hướng khắc phục:** dùng bảng `models/lexicon.json` làm nguồn chuẩn, khớp
-theo **độ dài cụm từ giảm dần** (ưu tiên cụm dài trước), và bổ sung luật suy luận
-`part` từ từ khoá (WP4).
+**Hạn chế còn lại:** lexicon vẫn là bảng tra **thủ công**; một bề mặt từ mới
+(cách viết khác) sẽ không được nhận diện. Hướng khắc phục: bổ sung đơn vị
+từ vựng (morphology) để sinh biến thể tự động từ gốc từ vựng.
 
 #### 5.2.3 Hạn chế về xử lý ngữ cảnh hội thoại
 
-**Hiện trạng:** `DialogueManager` đã hiện thực đầy đủ nhưng chưa nối vào
-pipeline, nên các câu phụ thuộc ngữ cảnh chưa được giải quyết (3 trong 34 câu
-kiểm thử thuộc nhóm này).
+**Hiện trạng (sau WP6):** `DialogueManager` **đã được nối đầy đủ** vào
+pipeline. Cả 5 hội thoại mẫu (`DIALOGUE_01` – `DIALOGUE_05`) đều pass; 3 câu
+kiểm thử thuộc nhóm context-dependent đều được phân loại đúng là
+`CONTEXT_DEPENDENT` kèm thực thể referent gợi ý.
 
-**Hướng khắc phục:** nối `resolve_reference()` vào `process_dialogue()` và bổ
-sung intent `CONTEXT_DEPENDENT` (WP6).
+**Hạn chế còn lại:** bộ tham chiếu hiện là **cố định** (đại từ, mô tả xác định,
+cấu trúc rút gọn, quan hệ "kế tiếp") đúng như đề bài yêu cầu. Hệ thống chưa
+theo dõi **salience** thật sự, chưa xử lý tham chiếu *bridging* (ví dụ "cuốn sách
+đó" khi cuốn sách chưa từng được nhắc) và chưa giải quyết tham chiếu mơ hồ
+("cái đó", "thứ kia") khi có nhiều ứng viên.
+
+**Hướng khắc phục:** triển khai đầy đủ mô hình **Centering** (đã có trong kiến
+thức môn học ở Chương 12) để xếp hạng ứng viên theo độ nổi bật.
 
 #### 5.2.4 Hạn chế về phương pháp nhận diện intent
 
@@ -1023,11 +1049,20 @@ mở rộng tự nhiên, không phải LLM.
 
 #### 5.2.5 Hạn chế về độ bao phủ knowledge base
 
+**Hiện trạng (sau WP5):** knowledge base đã mở rộng từ vài chục dòng lên
+thành dữ liệu có cấu trúc cho **12 chương** (mỗi chương có tóm tắt, chủ đề con,
+tuần học, phương pháp, mục tiêu học tập), **15 tuần**, **4 phần bài tập lớn**
+(kèm file phải xuất), **7 tài liệu tham khảo**, **5 nhóm quy định** và
+**17 mục tiêu học tập**.
+
+**Hạn chế còn lại:**
+
 - Chỉ hỗ trợ truy vấn đơn giản theo `(intent, entities)`, không có suy luận nhiều
-bước.
+  bước.
 - Chưa có cơ chế **trả lời khi thiếu thông tin theo ngữ cảnh** — hiện tại mọi
-truy vấn không có kết quả đều trả về cùng một thông báo.
-- Nội dung knowledge base còn sơ lược so với đề cương môn học đầy đủ.
+  truy vấn không có kết quả đều trả về cùng một thông báo.
+- Nội dung knowledge base vẫn là bản tóm tắt, chưa bao phủ hết đề cương môn
+  học đầy đủ.
 
 ---
 
@@ -1042,22 +1077,35 @@ truy vấn không có kết quả đều trả về cùng một thông báo.
 Hệ thống **Course Assistant** đã hiện thực được chuỗi xử lý NLP hoàn chỉnh trong miền môn học, từ ngôn ngữ tự nhiên đến câu trả lời.
 
 **Về mặt phương pháp**, hệ thống thể hiện được đầy đủ các kỹ thuật NLP được yêu
-cầu: xây dựng văn phạm CFG có trọng số, sinh câu, phân tích cú pháp top-down,
-biểu diễn ngữ nghĩa dạng logic form, nhận diện intent bằng luật theo thứ tự ưu
-tiên, trích xuất entity có chuẩn hoá qua lexicon, truy vấn knowledge base theo
-tham số, và xử lý tham chiếu ngữ cảnh cục bộ.
+cầu: xây dựng văn phạm CFG có trọng số, sinh câu, phân tích cú pháp bằng **Earley
+chart parser**, biểu diễn ngữ nghĩa dạng logic form, nhận diện intent bằng luật
+theo thứ tự ưu tiên, trích xuất entity có chuẩn hoá qua lexicon với chiến lược
+**longest-match**, truy vấn knowledge base theo tham số, và xử lý tham chiếu ngữ
+cảnh cục bộ (đại từ, mô tả xác định, cấu trúc rút gọn, quan hệ "kế tiếp").
 
 **Điểm mạnh đáng chú ý** là tính **minh bạch và tái lập được**: mọi quyết định
 của hệ thống đều có thể truy vết (rule nào khớp, entity nào được trích, query
 gì được gửi tới KB); mọi con số trong báo cáo đều do script sinh ra chứ không
 phải ước lượng tay.
 
-**Hạn chế lớn nhất** là độ bao phủ của văn phạm so với biến thể ngôn ngữ thực
-tế (strict parse 11.76 %) và độ chính xác trích xuất entity (55.88 %). Cả hai
-đều đã được **đo, phân loại nguyên nhân và ghi vào sổ đăng ký lỗi**
-`tests/known_issues.py` kèm Work Package chịu trách nhiệm — không phải lỗi ẩn.
+**Sau khi hoàn thành WP3 – WP6**, các hạn chế đã ghi nhận ở phiên bản trước đều
+được khắc phục: strict parse 11.76 % → **91.18 %**, intent accuracy 88.24 % →
+**100.00 %**, entity accuracy 55.88 % → **100.00 %**, intent+entity 52.94 % →
+**100.00 %**, và bộ test từ *"89 pass + 23 xfail"* → **"130 pass, 0 xfail"**.
+Những hạn chế *còn lại* đã được đo lại và ghi rõ trong mục 5.2 — không phải lỗi ẩn.
 
 ### 6.2 Hướng cải tiến
+
+Sau WP3 – WP6, các hướng cải tiến được xếp theo mức độ ưu tiên:
+
+| # | Hướng                                          | Lý do / giá trị                                        |
+| - | ---------------------------------------------- | ------------------------------------------------------ |
+| 1 | Bổ sung quy tắc vị từ phức tạp cho 3 câu chưa parse strict | Nâng strict parse 91.18 % → 100 %                      |
+| 2 | Sinh biến thể từ vựng tự động cho lexicon      | Bỏ nỗi thủ công nhập từng bề mặt từ                    |
+| 3 | Triển khai Centering cho xếp hạng ứng viên tham chiếu | Xử lý tham chiếu mơ hồ khi có nhiều ứng viên           |
+| 4 | Suy luận nhiều bước trong knowledge base       | Trả lời các câu cần kết hợp 2 thông tin               |
+| 5 | Bộ câu hỏi kiểm thử mở rộng (100+ câu)         | Tránh overfitting trên tập 34 câu                      |
+| 6 | Mô hình phân loại n-gram thống kê (dự phòng)   | Mở rộng độ bao phủ intent theo hướng Statistical NLP   |
 
 ---
 

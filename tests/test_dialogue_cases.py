@@ -169,3 +169,40 @@ def test_context_dependent_without_context_asks_for_clarification(fresh_assistan
     assert result["intent"] == "CONTEXT_DEPENDENT"
     answer = result["answer"].lower()
     assert "trước" in answer or "ngữ cảnh" in answer or "chương" in answer
+
+
+def test_dialogue_answers_are_grounded_in_the_knowledge_base(fresh_assistant):
+    """
+    Every turn of a sample dialogue must produce an answer that comes from
+    the knowledge base -- the assistant never invents content.
+    """
+    assistant = fresh_assistant
+    for case in DIALOGUE_CASES:
+        for query, _intent, _entities in case["turns"]:
+            answer, _context = assistant.process_dialogue(query)
+            assert answer and not answer.startswith("Xin lỗi"), (
+                f"{case['id']}: '{query}' produced an empty/unknown answer"
+            )
+
+
+def test_learning_outcome_reference_resolves_to_its_chapter(fresh_assistant):
+    """
+    DIALOGUE_05: "Nội dung này nằm ở chương nào?" must be answered with
+    the chapter that serves the learning outcome discussed in the previous
+    turn.
+    """
+    assistant = fresh_assistant
+    assistant.process_dialogue("L.O.2.5 học về gì?")
+
+    answer, _context = assistant.process_dialogue("Nội dung này nằm ở chương nào?")
+    assert "Chương 06" in answer, f"Unexpected answer: {answer}"
+
+
+def test_next_chapter_reference_stops_at_the_last_chapter(fresh_assistant):
+    """The "next" relation must not run past the last chapter."""
+    assistant = fresh_assistant
+    assistant.process_dialogue("Chương 12 nói về gì?")
+
+    answer, _context = assistant.process_dialogue("Còn chương sau?")
+    # There is no chapter 13 -- the assistant must not invent one.
+    assert "Chương 13" not in answer

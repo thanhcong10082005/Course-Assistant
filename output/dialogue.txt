@@ -2,22 +2,65 @@ DIALOGUE EXAMPLES
 ==================================================
 
 User: Tuần 3 học gì?
-Answer: Tuần 03: Học Chương 03 - Grammar and Parsing. Nội dung: CFG, Top-down parsing, Bottom-up parsing.
+Answer: Tuần 03: Học Chương 03 - Grammar and Parsing.
+Nội dung: CFG, Top-down parsing, Bottom-up parsing.
+Hoạt động: Thực hành.
+Mốc: Checkpoint 1: nộp sơ bộ grammar.
 
-User: Tài liệu của phần này ở đâu?
-Answer: Tài liệu tham khảo: 4 cuốn sách. Xem danh sách đầy đủ trong resources.txt
+User: Tài liệu của chương này là gì?
+  [Reference resolved from previous context: {'last_week': 'WEEK_03', 'turn': 1, 'last_intent': 'GET_SCHEDULE'}]
+Answer: Tài liệu tham khảo: 7 mục.
+- Natural Language Processing with Python (Bird, Klein, Loper, 2009) [TEXTBOOK]: Thực hành với Python; phù hợp cho phần semantic và QA
+- Speech and Language Processing (Jurafsky, Martin, 2019) [TEXTBOOK]: Giáo trình chuẩn, tham khảo rộng cho toàn bộ môn học
+- Introduction to NLP (Jacob Eisenstein, 2019) [TEXTBOOK]: Nền tảng về tổ chức hệ thống NLP và các ứng dụng
+- Foundation of Statistical NLP (Manning, Schütze, 2001) [REFERENCE]: Thống kê cho NLP: xác suất, PCFG, POS tagging
+- Speech and Language Processing (2nd ed.) (Jurafsky, Martin, 2007) [REFERENCE]: Phiên bản cũ, nhiều ví dụ về văn phạm ngữ nghĩa
+- Bài giảng và slide của giảng viên (TS. Trần Minh Khoa, 2026) [SLIDES]: Slide trình bày và bài tập về nhà theo tuần
+- Ghi chú bài giảng và ví dụ thực hành (Nhóm học, 2026) [NOTES]: Ghi chú tóm tắt và bài tập mở rộng do nhóm biên soạn
 
 User: Chương 4 nói về gì?
-Answer: Chương 04 - Features and Augmented Grammar: Extends formal grammar with feature systems and augmented grammar. Covers lexicon, parsing with features.
+  [Reference resolved from previous context: {'last_week': 'WEEK_03', 'turn': 2, 'last_intent': 'GET_RESOURCE', 'last_chapter': 'CH03'}]
+Answer: Chương 04 - Features and Augmented Grammar
+Thuộc phần: Syntactic Processing.
+Nội dung: Mở rộng văn phạm hình thức bằng hệ đặc trưng: lexicon, hợp nhất đặc trưng, phân tích cú pháp có đặc trưng, mạng chuyển tiếp tăng cường (ATN) và văn phạm hợp nhất.
+Các chủ đề chính: Feature systems and augmented grammars; Basic feature systems for English; Lexicon; Grammar using feature systems; Parsing with features; Augmented transition networks; Unification grammar.
+Chương này được học vào tuần 4.
+Phương pháp chính: Hợp nhất đặc trưng (unification); Mạng chuyển tiếp tăng cường ATN.
+Phục vụ mục tiêu học tập: LO2.2, LO2.3.
 
 User: Nó có liên quan đến parsing không?
-  [Reference resolved from previous context: {'last_chapter': 'CH04'}]
-Answer: Các quy định: Sinh viên được khuyến khích tham dự đầy đủ các buổi học.; Sinh viên phải tuân thủ nguyên tắc liêm chính học thuật.; Sinh viên phải khai báo việc sử dụng AI trong báo cáo.; LLM/RAG có thể được sử dụng như phần mở rộng, không thay thế yêu cầu NLP cốt lõi.; Hệ thống chỉ chịu trách nhiệm trong phạm vi dữ liệu môn học.
+  [Reference resolved from previous context: {'last_week': 'WEEK_03', 'turn': 3, 'last_intent': 'GET_TOPIC', 'last_chapter': 'CH04'}]
+Answer: Chương 04 - Features and Augmented Grammar
+Thuộc phần: Syntactic Processing.
+Nội dung: Mở rộng văn phạm hình thức bằng hệ đặc trưng: lexicon, hợp nhất đặc trưng, phân tích cú pháp có đặc trưng, mạng chuyển tiếp tăng cường (ATN) và văn phạm hợp nhất.
+Các chủ đề chính: Feature systems and augmented grammars; Basic feature systems for English; Lexicon; Grammar using feature systems; Parsing with features; Augmented transition networks; Unification grammar.
+Chương này được học vào tuần 4.
+Phương pháp chính: Hợp nhất đặc trưng (unification); Mạng chuyển tiếp tăng cường ATN.
+Phục vụ mục tiêu học tập: LO2.2, LO2.3.
+
+User: Còn chương sau?
+  [Reference resolved from previous context: {'last_week': 'WEEK_03', 'turn': 4, 'last_intent': 'GET_TOPIC', 'last_chapter': 'CH04', 'last_topic': 'PARSING'}]
+Answer: Chương 05 - Grammar for Natural Language
+Thuộc phần: Syntactic Processing.
+Nội dung: Tập trung vào các hiện tượng ngữ pháp quan trọng với ngôn ngữ tự nhiên: động từ khuyết thiếu, hiện tượng dịch chuyển, xử lý câu hỏi trong CFG và mệnh đề quan hệ.
+Các chủ đề chính: Auxiliary verbs and verb phrases; Movement phenomena; Handling questions in CFG; Relative clauses.
+Chương này được học vào tuần 6.
+Phương pháp chính: Xây dựng văn phạm cho câu hỏi; Mô hình hóa hiện tượng dịch chuyển.
+Phục vụ mục tiêu học tập: LO2.4.
 
 User: Bài tập lớn có phần parser không?
-Answer: Bài tập lớn 'Intelligent Course Assistant' - Nhóm 3-4 sinh viên.
+Answer: Grammar and Parser: Xây dựng văn phạm (grammar) cho câu hỏi tiếng Việt về môn học và xây dựng bộ phân tích cú pháp (parser) trên văn phạm đó. Hệ thống phải sinh được tập câu hỏi mẫu và phân tích cú pháp được các câu hỏi thực tế.
+File cần xuất: grammar.txt (văn phạm dạng text); samples.txt (tập câu hỏi mẫu sinh từ văn phạm); parse-results.txt (kết quả phân tích cú pháp).
 
 User: Phần này cần xuất file gì?
-  [Reference resolved from previous context: {'last_chapter': 'CH04', 'last_topic': 'PARSING'}]
-Answer: Bài tập lớn 'Intelligent Course Assistant' - Nhóm 3-4 sinh viên.
+  [Reference resolved from previous context: {'last_week': 'WEEK_03', 'turn': 6, 'last_intent': 'GET_ASSIGNMENT', 'last_chapter': 'CH05', 'last_topic': 'PARSING', 'last_part': 'PART_I'}]
+Answer: Grammar and Parser: Xây dựng văn phạm (grammar) cho câu hỏi tiếng Việt về môn học và xây dựng bộ phân tích cú pháp (parser) trên văn phạm đó. Hệ thống phải sinh được tập câu hỏi mẫu và phân tích cú pháp được các câu hỏi thực tế.
+File cần xuất: grammar.txt (văn phạm dạng text); samples.txt (tập câu hỏi mẫu sinh từ văn phạm); parse-results.txt (kết quả phân tích cú pháp).
+
+User: L.O.2.5 học về gì?
+Answer: LO2.5: Kiến thức xác suất để giải quyết nhập nhằng từ ở mức câu.
+Được phục vụ bởi: Chương 06 - Ambiguity Resolution - Statistical Methods.
+
+User: Nội dung này nằm ở chương nào?
+Answer: LO2.5 được phục vụ bởi: Chương 06 - Ambiguity Resolution - Statistical Methods.
 

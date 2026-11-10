@@ -151,7 +151,8 @@ Course_Assistant_Sample/
 │   ├── __init__.py
 │   ├── preprocessing.py     # Tầng 1: normalize, tokenize, POS tag, entity spans
 │   ├── grammar.py           # Tầng 2a: CFG, trọng số, detokenize, bộ sinh câu
-│   ├── parser.py            # Tầng 2b: recursive-descent parser + fallback
+│   ├── parser.py            # Tầng 2b: Earley chart parser + fallback
+│   ├── lexicon.py           # Tra cứu surface form → canonical value (longest-match)
 │   ├── semantic.py          # Tầng 3-4: logical form, intent, entity
 │   ├── knowledge_base.py    # Tầng 5-6: dữ liệu môn học, query engine, câu trả lời
 │   ├── dialogue.py          # Tầng ngữ cảnh: DialogueState, DialogueManager
@@ -167,7 +168,7 @@ Course_Assistant_Sample/
 ├── scripts/
 │   ├── baseline.py          # Đo chỉ số chất lượng
 │   └── generate_outputs.py  # Sinh lại output/ một cách tất định
-├── tests/                   # 89 test pytest
+├── tests/                   # 130 test pytest
 │   ├── conftest.py          # Fixture dùng chung
 │   ├── known_issues.py      # Sổ đăng ký lỗi còn lại (xfail)
 │   └── data/                # Bản sao dữ liệu mẫu chính thức
@@ -250,34 +251,34 @@ S → WH_QUESTION
 
 ### 6.1 Thuật toán
 
-**Recursive-descent parsing (top-down)** với cơ chế backtracking, nằm trong
+**Earley chart parsing** (bottom-up, xử lý nhập bằng tự nhiên), nằm trong
 `src/parser.py`:
 
 ```
 parse(text):
     tokens ← tokenize_input(text)
-    tree   ← _parse_question()
-    if tree ≠ null và đã tiêu thụ hết tokens:
-        return tree                      # phân tích thành công
-    fallback ← _parse_fallback(text)     # dựng cây theo mẫu
+    tree   ← _earley_parse(tokens)        # nhận diện theo văn phạm
+    if tree ≠ null:
+        return tree                       # phân tích thành công
+    fallback ← _parse_fallback(text)      # dựng cây theo mẫu
     if fallback ≠ null: return fallback
-    return null, errors                 # không thuộc văn phạm
+    return null, errors                  # không thuộc văn phạm
 ```
 
-Các hàm đệ quy tương ứng từng non-terminal:
+Các bước chính:
 
+| Hàm                      | Phụ trách                                                                 |
+| ------------------------ | ------------------------------------------------------------------------- |
+| `_earley_parse()`        | Nhận diện Earley: dự đoán (predictor), quét (scanner), hoàn tất (completer) |
+| `_build_tree()`          | Dựng lại cây từ bảng `complete`, có **backtrack** qua các cách suy diễn     |
+| `_build_children()`      | Đệ quy theo vị trí dấu chấm, thử từng ứng viên span                      |
+| `_match_terminals()`     | Ánh xạ một từ bề mặt → tập terminal của văn phạm                          |
+| `_parse_fallback()`      | Dựng cây theo mẫu khi câu nằm ngoài văn phạm                              |
 
-| Hàm                        | Phụ trách                                           |
-| -------------------------- | --------------------------------------------------- |
-| `_parse_question()`        | Chọn nhánh `WH_QUESTION` hoặc `YES_NO_QUESTION`     |
-| `_parse_wh_question()`     | `WH_QWORD` + `NP` + `VP` + dấu câu hỏi              |
-| `_parse_yes_no_question()` | `NP` + `VP` + dấu câu hỏi                           |
-| `_parse_np()`              | Định danh miền, `DET NOMINAL`, `NOMINAL`, `PRONOUN` |
-| `_parse_vp()`              | `VERB` kèm `NP` / `PP` / `WH_QWORD` / `AUX`         |
-
-
-Bảng tra cứu (`_build_lookup_tables()`) được sinh tự động từ văn phạm nên
-parser luôn đồng bộ với grammar.
+Văn phạm là **nhập đơn vị** của Earley: productions, terminal classes và tập
+từ vựng đều được đọc trực tiễp từ `src/grammar.py` (`_build_grammar_index()`),
+nên parser không bao giờ lệch khỏi văn phạm. Bảng tra cứu
+(`_build_lookup_tables()`) cũng được sinh tự động từ văn phạm.
 
 ### 6.2 Cơ chế fallback
 
@@ -291,7 +292,7 @@ tầng semantic làm việc trực tiếp trên văn bản chứ không phụ th
 Kết quả ghi ra `output/parse-results.txt`:
 
 ```
-(WH_QUESTION (WH_WORD chương) (NP (NUM 4)) (VP (VERB nói) (VERB về) (DET gì)))
+(WH_QUESTION (WH_QWORD chương) (NP (CHAPTER_REF (NOUN chương) (CHAPTER_NUM 4))) ...)
 ```
 
 Câu không thuộc văn phạm được xuất `()`.
@@ -299,11 +300,18 @@ Câu không thuộc văn phạm được xuất `()`.
 ### 6.4 Kết quả đo
 
 
-| Chế độ                   | Số câu | Tỉ lệ (34 câu kiểm thử chính thức) |
-| ------------------------ | ------ | ---------------------------------- |
-| Strict recursive descent | 4      | 11.76 %                            |
-| Pattern fallback         | 30     | 88.24 %                            |
-| Thất bại                 | 0      | 0 %                                |
+| Chế độ                    | Số câu | Tỉ lệ (34 câu kiểm thử chính thức) |
+| ------------------------- | ------ | ---------------------------------- |
+| Strict (Earley chart)     | 31     | **91.18 %**                       |
+| Pattern fallback          | 3      | 8.82 %                            |
+| Thất bại                  | 0      | 0 %                               |
+
+> **WP3 đã nâng cấp parser.** Trước WP3, bộ dự đoán đệ quy thủ công chỉ parse
+> strict được 4/34 câu (11.76 %) và 30/34 câu rơi vào fallback. Parser hiện tại
+> là **Earley chart parser** tổng quát, điều khiển bởi văn phạm trong
+> `src/grammar.py`, nên strict parse đạt **91.18 %**; 3 câu còn lại thuộc nhóm
+> ngoài phạm vi thiết kế (câu quá dài / nhiều mệnh đề) và vẫn được phục vụ
+> đúng qua fallback.
 
 
 ---
@@ -355,6 +363,8 @@ Cấu trúc dạng logic: `GET_INTENT(entity₁=value₁, entity₂=value₂, �
 | `GET_RULE`        | Quy định môn học                                                     |
 | `GET_INSTRUCTOR`  | Giảng viên phụ trách                                                 |
 | `GET_LO`          | Mục tiêu học tập (Learning Outcome)                                  |
+| `GET_INSTRUCTOR`  | Giảng viên phụ trách và giờ gặp trực tiếp                             |
+| `CONTEXT_DEPENDENT` | Câu hỏi phụ thuộc lượt trước — cần ngữ cảnh để trả lời            |
 | `UNKNOWN`         | Ngoài phạm vi hệ thống                                               |
 
 
@@ -364,51 +374,53 @@ Cấu trúc dạng logic: `GET_INTENT(entity₁=value₁, entity₂=value₂, �
 
 ### 8.1 Intent — phương pháp dựa trên luật
 
-**Kỹ thuật:** khớp từ khoá + biểu thức chính quy (regex), theo **thứ tự ưu tiên
-từ cụ thể đến chung**, kết hợp chấm điểm từ khoá ở bước cuối.
+**Kỹ thuật:** bảng luật có **trọng số** (`INTENT_RULES` trong `src/semantic.py`),
+mỗi luật là một cặp `(intent, regex, điểm)`. Điểm cao hơn thắng; các điểm cộng
+theo entity được dùng để phá thế hoà.
 
 ```
-Bước 1  Kiểm tra ngoài phạm vi (thời tiết, bóng đá, giá vàng, giải bài toán…)
+Bước 1  Kiểm tra ngoài phạm vi (lexicon.out_of_scope + mẫu "giải bài tập…")
         → nếu khớp: return UNKNOWN
 
-Bước 2  Các intent có mẫu đặc biệt, theo thứ tự ưu tiên:
-        GET_DEADLINE → GET_LO → GET_INSTRUCTOR → GET_RULE
-        → GET_RESOURCE → GET_ASSIGNMENT → GET_SCHEDULE → GET_TOPIC
+Bước 2  Chấm điểm các luật trong INTENT_RULES:
+        score(intent) = Σ điểm của các regex khớp
+        + điểm cộng theo entity đã trích (rule, chapter, part, lo…)
 
-Bước 3  Chấm điểm từ khoá cho từng intent:
-        score = (# từ khoá xuất hiện) + 2 × (# pattern khớp)
-        → trả intent có điểm cao nhất (nếu điểm > 0), ngược lại UNKNOWN
+Bước 3  Nếu câu chứa tham chiếu ngữ cảnh mà không có hội thoại đang mở
+        → intent = CONTEXT_DEPENDENT (xin người dùng làm rõ)
 ```
 
-**Vì sao cần thứ tự ưu tiên?** Nhiều từ khoá xung đột. *"Tài liệu nào liên quan
-đến PCFG?"* chứa cả `tài liệu` (→ GET_RESOURCE) lẫn `pcfg` (→ GET_TOPIC). Đặt
-GET_RESOURCE trước GET_TOPIC giải quyết mâu thuẫn này.
+**Vì sao cần chấm điểm thay vì thứ tự ưu tiên cứng?** Nhiều từ khoá xung đột.
+*"Tài liệu nào liên quan đến PCFG?"* chứa cả `tài liệu` (→ GET_RESOURCE) lẫn
+`pcfg` (→ GET_TOPIC). Chấm điểm cho phép nhiều tín hiệu cùng tồn tại thay vì
+phải cố đặt một thứ tên tuần tự.
 
 ### 8.2 Entity — trích xuất theo luật + lexicon
 
-Entity được trích xuất theo 3 lớp:
+Entity được trích xuất qua **3 lớp**, tất cả đều dựa trên `src/lexicon.py`
+(`models/lexicon.json` là nguồn sự thật duy nhất):
 
 ```
-Lớp 1 — Định danh miền (khớp trực tiếp)
-    course      : "nlp" | "co3085" → NLP | CO3085
-    chapter     : /chương\s*(\d+)/          → CH04
-    week        : /tuần\s*(\d+)/            → WEEK_12
-    topic       : cfg, pcfg, parsing, semantic, … → CFG, PCFG, …
-    assignment  : "btl" | "bài tập lớn"      → BTL01
-    lo          : /lo_(\d)(?:_(\d+))?/     → LO2.5
+Lớp 1 — Lexicon tra cứu theo chiến lược LONGEST-MATCH
+    "semantic grammar"        → topic=SEMANTIC_GRAMMAR   (thắng "semantic")
+    "statistical nlp"         → topic=STATISTICAL_NLP    (thắng "nlp")
+    "pcfg"                    → topic=PCFG               (thắng "cfg")
+    "chương 4"                → chapter=CH04
+    "tuần 3"                  → week=WEEK_03
+    "l.o.2.5"                 → lo=LO2.5
+    "llm/rag"                 → rule=LLM_RAG
+    "hỏi đáp"                 → part=PART_II
 
-Lớp 2 — Lexicon chuẩn hoá (models/lexicon.json)
-    surface form → canonical value
-    "semantic grammar"        → SEMANTIC_GRAMMAR
-    "selectional restriction" → SELECTIONAL_RESTRICTION
-    "llm/rag"                 → LLM_RAG
-    "phần ii"                 → PART_II
-    "sách tham khảo"          → REFERENCE_BOOK
+Lớp 2 — Suy luận theo nhóm ưu tiên
+    assignment_part > part_of_assignment > assignment > learning_outcome
+    > chapter > week > rule > attribute > topic > course > resource
+    (nhóm "part_of_assignment" cho phép "parser" → part=PART_I,
+     "hỏi đáp" → part=PART_II)
 
-Lớp 3 — Suy luận theo intent
-    GET_COURSE_INFO + "tín chỉ"  → attribute=credits
-    GET_COURSE_INFO + "giữa kỳ"  → attribute=midterm_duration
-    GET_ASSIGNMENT + "phần ii"   → part=PART_II
+Lớp 3 — Thuộc tính của câu hỏi
+    "tín chỉ"   → attribute=credits
+    "giữa kỳ"   → attribute=midterm_duration
+    "cuối kỳ"   → attribute=final_duration
 ```
 
 Bảng lexicon được kiểm thử tự động bằng `tests/test_lexicon.py` (11 test),
@@ -421,19 +433,23 @@ biệt hoa thường.
 
 ### 9.1 Cấu trúc knowledge base
 
-Dữ liệu môn học nằm trong `data/course_data.txt`, được nạp vào lớp
-`KnowledgeBase` (`src/knowledge_base.py`) dưới dạng dict có cấu trúc:
-
+Dữ liệu môn học nằm ngay trong `src/knowledge_base.py` (một module Python với
+các hằng dict có cấu trúc), được nạp vào lớp `KnowledgeBase` dưới dạng dict:
 
 | Nhóm          | Nội dung                                                                       |
 | ------------- | ------------------------------------------------------------------------------ |
-| `course`      | Thông tin chung: tên, mã, số tín chỉ, mô tả, mục tiêu, thời lượng giữa/cuối kỳ |
-| `schedule`    | 15 tuần, ánh xạ tuần ↔ chương ↔ nội dung                                       |
-| `chapters`    | 12 chương, nội dung và chủ đề từng chương                                      |
-| `assignment`  | BTL: 4 phần (PART_I…PART_IV), yêu cầu, file phải xuất, checkpoint              |
-| `resources`   | Danh mục sách tham khảo, slide, tài liệu                                       |
-| `regulations` | Quy định dùng AI/LLM, chính sách bản quyền                                     |
-| `faq`         | Câu hỏi thường gặp                                                             |
+| `COURSE_INFO` | Thông tin chung: tên, mã, số tín chỉ, mô tả, mục tiêu, thời lượng giữa/cuối kỳ, giảng viên |
+| `SCHEDULE`    | 15 tuần, ánh xạ tuần ↔ chương ↔ nội dung ↔ hoạt động ↔ mốc nộp                 |
+| `CHAPTERS`    | 12 chương: tóm tắt, chủ đề con, tuần dạy, phương pháp, mục tiêu học tập phục vụ |
+| `ASSIGNMENT`  | BTL: 4 phần (PART_I…PART_IV), yêu cầu, file phải xuất, checkpoint, tiêu chí    |
+| `RESOURCES`   | Danh mục sách tham khảo, slide, tài liệu — kèm chủ đề liên quan                 |
+| `REGULATIONS` | Quy định dùng AI/LLM, chính sách bản quyền, liêm chính học thuật                 |
+| `FAQ`         | Câu hỏi thường gặp                                                             |
+| `TOPIC_TO_CHAPTER` / `LO_TO_CHAPTERS` | Ánh xạ ngược: chủ đề → chương, LO → chương |
+
+Ngoài ra có các hàm trả lời theo ngữ cảnh:
+`ask_for_clarification()` (câu cần ngữ cảnh), `unknown_answer()` (không hiểu),
+`out_of_scope_answer()` (ngoài phạm vi môn học).
 
 
 ### 9.2 Cách truy vấn
@@ -444,15 +460,18 @@ truy vấn riêng:
 ```
 query(intent, entities):
     GET_COURSE_INFO → get_course_info(attribute)
-    GET_TOPIC        → get_chapter_info(chapter) | get_topic_chapter(topic)
+    GET_TOPIC        → get_chapter_info(chapter) | get_topic_detail(topic)
     GET_SCHEDULE     → get_chapter_week(chapter) | get_topic_week(topic)
                        | get_schedule(week)
     GET_ASSIGNMENT   → get_assignment_info(part, list_parts)
+                       | get_assignment_deliverables(part)
     GET_DEADLINE     → get_deadline()
     GET_RESOURCE     → get_resource(topic)
     GET_RULE         → get_regulation(rule)
-    GET_LO           → get_learning_outcome(lo)
-    (mặc định)       → "Xin lỗi, tôi không tìm thấy thông tin này trong dữ liệu môn học."
+    GET_LO           → get_learning_outcome(lo) | get_lo_chapter(lo)
+    GET_INSTRUCTOR   → get_instructor()
+    CONTEXT_DEPENDENT→ ask_for_clarification()
+    UNKNOWN          → out_of_scope_answer() | unknown_answer()
 ```
 
 Đây là truy vấn có tham số theo mẫu (template-based query), không phải truy vấn
@@ -461,14 +480,61 @@ miền dữ liệu hẹp.
 
 ### 9.3 Xử lý trường hợp không tìm thấy thông tin
 
-Khi truy vấn không có kết quả, hệ thống trả về thông báo:
+Hệ thống có **hai** thông báo chuẩn, tùy nguyên nhân:
 
-```
-"Xin lỗi, tôi không tìm thấy thông tin này trong dữ liệu môn học."
-```
+| Tình huống                              | Thông báo trả về                                              |
+| --------------------------------------- | ------------------------------------------------------------- |
+| Ngoài phạm vi môn học (`scope=OUT_OF_SCOPE`) | "Hệ thống chỉ chịu trách nhiệm trong phạm vi dữ liệu môn học…" |
+| Câu hỏi phụ thuộc ngữ cảnh chưa đủ      | "Tôi cần thêm ngữ cảnh để trả lời câu hỏi này…"             |
+| Không xác định được ý định              | "Xin lỗi, tôi không hiểu câu hỏi này…"                       |
 
 Hệ thống **không tự tạo thông tin** khi không có dữ liệu — đây là yêu cầu bắt
 buộc của đề bài (mục 4.1.5).
+
+---
+
+## 9bis. Xử lý ngữ cảnh hội thoại (WP6)
+
+Tầng ngữ cảnh nằm trong `src/dialogue.py`, gồm hai lớp:
+
+- **`DialogueState`** — trạng thái diễn ngôn: số lượt, ý định cuối, và các
+  thực thể đang "nổi bật" (`last_topic`, `last_chapter`, `last_week`,
+  `last_part`, `last_assignment`, `last_lo`) cùng bảng discourse entity.
+- **`DialogueManager`** — bộ giải tham chiếu, chạy **trước** bước phân tích
+  ngữ nghĩa để câu hỏi trở nên tự chứa.
+
+### 9bis.1 Bốn loại tham chiếu được hỗ trợ
+
+| Loại                       | Ví dụ                        | Cách giải                                     |
+| -------------------------- | ---------------------------- | --------------------------------------------- |
+| **Đại từ** (pronoun)       | "Nó có liên quan đến parsing không?" | Thay bằng thực thể nổi bật nhất (ưu tiên chương) |
+| **Mô tả xác định** (definite) | "Tài liệu của **chương này** là gì?" | Thay bằng chương/tuần/phần vừa nói |
+| **Cấu trúc rút gọn** (ellipsis) | "Còn **chương sau**?"      | Quan hệ "kế tiếp" — cần tri thức miền (12 chương, 15 tuần) |
+| **Mô tả xác định + kế tiếp** | "**Phần này** cần xuất file gì?" | Suy ra phần của bài tập đang bàn |
+
+### 9bis.2 Hai chế độ xử lý
+
+```
+process_query(q)   # câu đơn lẻ
+  ├─ có tham chiếu?  → CONTEXT_DEPENDENT (hỏi lại người dùng) + gợi ý referent
+  └─ không            → trả lời bình thường
+
+process_dialogue(q) # trong phiên hội thoại
+  ├─ resolve_reference(q) theo trạng thái → câu tự chứa
+  ├─ phân tích ngữ nghĩa → intent + entity
+  └─ update_context(...) → cập nhật trạng thái cho lượt sau
+```
+
+Ví dụ minh hoạ (`output/dialogue.txt`):
+
+```
+User: Chương 4 nói về gì?
+Assistant: Chương 04 - Features and Augmented Grammar ...
+User: Nó có liên quan đến parsing không?      ← "nó" → CH04
+Assistant: Chương 04 - Features and Augmented Grammar ...
+User: Còn chương sau?                        ← "chương sau" → CH05
+Assistant: Chương 05 - Grammar for Natural Language ...
+```
 
 ---
 
@@ -483,11 +549,11 @@ Nhóm thực hiện theo **Lựa chọn 1: Classical / Statistical NLP**.
 | ----------------------------------------------- | ---------------------------------------- |
 | Văn phạm CFG có trọng số (PCFG-lite)            | `src/grammar.py`                         |
 | Sinh câu bằng mở rộng đệ quy theo trọng số      | `src/grammar.py`                         |
-| Phân tích cú pháp recursive descent (top-down)  | `src/parser.py`                          |
+| Phân tích cú pháp Earley chart (bottom-up)      | `src/parser.py`                          |
 | Tính FIRST/FOLLOW cho văn phạm                  | `src/grammar.py`                         |
 | Biểu diễn ngữ nghĩa dạng logic form             | `src/semantic.py`                        |
-| Nhận diện intent bằng luật + chấm điểm từ khoá  | `src/semantic.py`                        |
-| Trích xuất entity bằng luật + lexicon tra cứu   | `src/semantic.py`, `models/lexicon.json` |
+| Nhận diện intent bằng luật có trọng số          | `src/semantic.py`                        |
+| Trích xuất entity bằng lexicon longest-match     | `src/lexicon.py`, `models/lexicon.json`   |
 | Truy vấn knowledge base theo mẫu có tham số     | `src/knowledge_base.py`                  |
 | Giải quyết tham chiếu ngữ cảnh cục bộ bằng luật | `src/dialogue.py`                        |
 
@@ -527,7 +593,7 @@ Thêm **5 kịch bản hội thoại** (`tests/data/dialogues.txt`) cho ngữ c�
 ### 11.2 Công cụ đánh giá
 
 ```bash
-# Chạy bộ test đầy đủ (89 test)
+# Chạy bộ test đầy đủ (130 test)
 python -m pytest
 
 # Đo các chỉ số
@@ -549,17 +615,22 @@ python scripts/baseline.py --out docs/baseline.txt
 
 | Chỉ số                         | Kết quả             |
 | ------------------------------ | ------------------- |
-| Intent accuracy                | 30/34 — **88.24 %** |
-| Entity accuracy (alias-aware)  | 19/34 — 55.88 %     |
-| Entity accuracy (khớp thô)     | 16/34 — 47.06 %     |
-| **Intent + Entity accuracy**   | 18/34 — **52.94 %** |
-| Strict recursive-descent parse | 4/34 — 11.76 %      |
-| Pattern fallback parse         | 30/34 — 88.24 %     |
+| Intent accuracy                | 34/34 — **100.00 %** |
+| Entity accuracy (alias-aware)  | 34/34 — **100.00 %** |
+| Entity accuracy (khớp thô)     | 32/34 — 94.12 %     |
+| **Intent + Entity accuracy**   | 34/34 — **100.00 %** |
+| Strict parse (Earley chart)    | 31/34 — **91.18 %** |
+| Pattern fallback parse         | 3/34 — 8.82 %       |
 | Parse failure                  | 0/34 — 0 %          |
+| Bộ test                        | **130 passed — 0 failed, 0 xfailed** |
 
 
 **Chất lượng bộ sinh câu (10 000 câu):** 0 câu chứa `_`, 0 câu rò non-terminal,  
 0 câu mở sai, 0 câu thiếu dấu câu.
+
+> Các chỉ số trên được đo lại sau WP3 – WP6. Trước đó (sau WP2) intent
+> accuracy là 88.24 %, entity accuracy 55.88 %, strict parse 11.76 % và bộ test
+> còn 23 mục được đánh dấu `xfail`.
 
 ### 11.4 Quản lý lỗi tồn đọng
 
@@ -575,6 +646,12 @@ ghi rõ nguyên nhân và Work Package chịu trách nhiệm:
 
 Các test này được đánh dấu `xfail` (non-strict) nên quality gate luôn xanh,
 nhưng lỗi vẫn hiện rõ mỗi lần chạy và không thể bị "quên".
+
+> **Trạng thái sau WP3 – WP6:** sổ đăng ký đã được **dọn sạch** — toàn bộ 23
+> mục đã xử lý xong và được chuyển thành regression test thật (không còn
+> `xfail`/`XPASS`). File `tests/known_issues.py` vẫn được giữ lại như một
+> "hàng rào" cho các Work Package tương lai: khi có lỗi mới, chỉ cần thêm
+> entry vào đây là test sẽ tự động được đánh dấu `xfail`.
 
 ---
 

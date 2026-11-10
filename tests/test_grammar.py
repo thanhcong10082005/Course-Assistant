@@ -183,7 +183,9 @@ def test_generated_sentences_contain_a_domain_identifier(generated):
         "chương", "tuần", "NLP", "CO3085", "BTL", "L.O.",
         "CFG", "PCFG", "POS", "bài tập lớn", "môn học", "ngôn ngữ tự nhiên",
         "parsing", "semantic", "syntax", "feature", "grammar",
-        "tagging", "disambiguation", "assignment",
+        "tagging", "disambiguation", "assignment", "parser",
+        "reference", "question answering", "selectional restriction",
+        "semantic grammar", "statistical nlp", "python nlp",
     )
     for sentence in generated:
         lowered = sentence.lower()

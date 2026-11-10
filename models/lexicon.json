@@ -1,17 +1,20 @@
 {
   "_meta": {
     "description": "Lexicon for the Course Assistant (domain: NLP course CO3085). Each entry maps a surface form to a canonical entity value and the entity type.",
-    "version": "1.0",
+    "version": "2.0",
     "work_package": "WP0 (structure) / WP4 (consumption)",
-    "normalization": "All surfaces are stored lower-case and NFC-normalised. Matching is done on the normalized text."
+    "normalization": "All surfaces are stored lower-case and NFC-normalised. Matching is done on the normalized text with a longest-match strategy, so 'semantic grammar' wins over 'semantic' and 'statistical nlp' wins over 'nlp'."
   },
 
   "course": {
     "nlp": "NLP",
     "co3085": "CO3085",
-    "xử_lý ngôn ngữ tự nhiên": "NLP",
+    "xử lý ngôn ngữ tự nhiên": "NLP",
     "môn nlp": "CO3085",
-    "môn học": "CO3085"
+    "môn co3085": "CO3085",
+    "môn học": "CO3085",
+    "học phần": "CO3085",
+    "môn": "CO3085"
   },
 
   "chapter": {
@@ -51,10 +54,14 @@
     "cfg": "CFG",
     "pcfg": "PCFG",
     "context free grammar": "CFG",
+    "context-free grammar": "CFG",
     "probabilistic context free grammar": "PCFG",
+    "probabilistic cfg": "PCFG",
     "parsing": "PARSING",
     "parse": "PARSING",
+    "parser": "PARSING",
     "semantic": "SEMANTIC",
+    "semantics": "SEMANTIC",
     "semantic grammar": "SEMANTIC_GRAMMAR",
     "ngữ nghĩa": "SEMANTIC",
     "syntax": "SYNTAX",
@@ -62,6 +69,7 @@
     "pos": "POS",
     "pos tagging": "POS_TAGGING",
     "gán nhãn từ loại": "POS_TAGGING",
+    "part of speech tagging": "POS_TAGGING",
     "feature": "FEATURE",
     "đặc trưng": "FEATURE",
     "grammar": "GRAMMAR",
@@ -80,7 +88,30 @@
     "wsd": "WORD_DISAMBIGUATION",
     "statistical nlp": "STATISTICAL_NLP",
     "thống kê": "STATISTICAL_NLP",
-    "python nlp": "PYTHON_NLP"
+    "python nlp": "PYTHON_NLP",
+    "dependency": "DEPENDENCY",
+    "dependency grammar": "DEPENDENCY",
+    "discourse": "DISCOURSE",
+    "knowledge representation": "KNOWLEDGE_REPRESENTATION",
+    "suy diễn": "REASONING",
+    "reasoning": "REASONING",
+    "logical form": "LOGICAL_FORM",
+    "thematic role": "THEMATIC_ROLE",
+    "thematic roles": "THEMATIC_ROLE",
+    "word sense": "WORD_SENSE",
+    "ambiguity": "AMBIGUITY",
+    "nhập nhằng": "AMBIGUITY",
+    "best first": "BEST_FIRST",
+    "best-first parsing": "BEST_FIRST",
+    "top down": "TOP_DOWN",
+    "top-down": "TOP_DOWN",
+    "bottom up": "BOTTOM_UP",
+    "bottom-up": "BOTTOM_UP",
+    "unification": "UNIFICATION",
+    "lexicon": "LEXICON",
+    "từ vựng": "LEXICON",
+    "atn": "ATN",
+    "augmented transition network": "ATN"
   },
 
   "assignment": {
@@ -89,7 +120,8 @@
     "btl 1": "BTL01",
     "bài tập lớn 1": "BTL01",
     "assignment": "BTL01",
-    "đồ án": "BTL01"
+    "đồ án": "BTL01",
+    "bài tập": "BTL01"
   },
 
   "assignment_part": {
@@ -111,6 +143,23 @@
     "part iv": "PART_IV"
   },
 
+  "part_of_assignment": {
+    "hỏi đáp": "PART_II",
+    "q&a": "PART_II",
+    "qa": "PART_II",
+    "parser": "PART_I",
+    "grammar": "PART_I",
+    "văn phạm": "PART_I",
+    "trình bày": "PART_I",
+    "presentation": "PART_I",
+    "slide": "PART_I",
+    "phần trình bày": "PART_I",
+    "source code": "PART_III",
+    "mã nguồn": "PART_III",
+    "code": "PART_III",
+    "mã nguồn mở": "PART_III"
+  },
+
   "rule": {
     "llm": "LLM_RAG",
     "llm/rag": "LLM_RAG",
@@ -124,29 +173,35 @@
     "chatgpt": "AI_USAGE",
     "chính sách": "POLICY",
     "bản quyền": "COPYRIGHT",
-    "chính sách bản quyền": "POLICY"
+    "chính sách bản quyền": "POLICY",
+    "liêm chính học thuật": "ACADEMIC_INTEGRITY",
+    "học thuật": "ACADEMIC_INTEGRITY",
+    "copy": "COPYRIGHT"
   },
 
   "attribute": {
     "tín chỉ": "credits",
     "mấy tín chỉ": "credits",
     "bao nhiêu tín chỉ": "credits",
+    "ects": "ects",
     "mục tiêu": "learning_outcomes",
     "mục tiêu học tập": "learning_outcomes",
     "mô tả": "description",
     "giới thiệu": "description",
-    "phần": "parts",
     "cấu trúc": "parts",
     "giữa kỳ": "midterm_duration",
     "midterm": "midterm_duration",
     "cuối kỳ": "final_duration",
     "final": "final_duration",
+    "phút": "duration",
     "hạn nộp": "deadline",
     "deadline": "deadline",
     "thời hạn": "deadline",
     "ngày": "deadline",
     "lịch học": "schedule",
-    "thứ": "schedule"
+    "thứ": "schedule",
+    "phương pháp": "methods",
+    "phương tiện": "resources"
   },
 
   "resource": {
@@ -154,12 +209,13 @@
     "slide": "SLIDES",
     "slides": "SLIDES",
     "slide bài giảng": "SLIDES",
+    "bài giảng": "SLIDES",
     "sách tham khảo": "REFERENCE_BOOK",
     "tham khảo": "REFERENCE_BOOK",
     "reference book": "REFERENCE_BOOK",
-    "bài giảng": "SLIDES",
     "ghi chú": "NOTES",
-    "notes": "NOTES"
+    "notes": "NOTES",
+    "giáo trình": "TEXTBOOK"
   },
 
   "learning_outcome": {
@@ -182,20 +238,6 @@
     "l.o.4.2": "LO4.2"
   },
 
-  "part_of_assignment": {
-    "hỏi đáp": "PART_II",
-    "q&a": "PART_II",
-    "qa": "PART_II",
-    "parser": "PART_I",
-    "trình bày": "PART_I",
-    "presentation": "PART_I",
-    "slide": "PART_I",
-    "phần trình bày": "PART_I",
-    "source code": "PART_III",
-    "mã nguồn": "PART_III",
-    "code": "PART_III"
-  },
-
   "instructor": {
     "giảng viên": "TS. Trần Minh Khoa",
     "gv": "TS. Trần Minh Khoa",
@@ -209,11 +251,13 @@
     "nó": "last_topic",
     "phần này": "last_topic",
     "cái này": "last_topic",
+    "nội dung này": "last_topic",
     "chương này": "last_chapter",
     "tuần này": "last_week",
     "bài này": "last_assignment",
-    "nội dung này": "last_topic",
-    "đề này": "last_assignment"
+    "đề này": "last_assignment",
+    "chương sau": "next_chapter",
+    "tuần sau": "next_week"
   },
 
   "out_of_scope": [
@@ -225,6 +269,8 @@
     "dịch sang tiếng anh",
     "thời tiết hôm nay",
     "dự báo thời tiết",
+    "có mưa không",
+    "nắng",
     "nấu món gì",
     "kể một câu chuyện",
     "bóng đá",
@@ -239,6 +285,13 @@
     "rút số",
     "xổ số",
     "vay tiền",
-    "lãi suất"
+    "lãi suất",
+    "tổng thống",
+    "thủ tướng",
+    "chủ tịch nước",
+    "bóng đá",
+    "thể thao",
+    "giải phương trình",
+    "tính tích phân"
   ]
 }

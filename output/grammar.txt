@@ -2,13 +2,13 @@
 # Domain: Vietnamese questions about the NLP course (CO3085)
 # Format: <non-terminal> -> <symbol> ...   [# comment]
 
-# Non-terminals (28): ADJ, ADV, ASSIGNMENT_NAME, AUX, CHAPTER_NUM, CHAPTER_REF, COURSE_NAME, DET, LO_ID, NOMINAL, NOUN, NP, NUM, PP, PREP, PRONOUN, PUNCT, QUESTION, S, TOPIC_NAME, VERB, VP, WEEK_NUM, WEEK_REF, WH_PHRASE, WH_QUESTION, WH_QWORD, YES_NO_QUESTION
+# Non-terminals (36): ADJ, ADV, ASSIGNMENT_NAME, ATTR_NOUN, AUX, CHAPTER_NUM, CHAPTER_REF, COURSE_MOD, COURSE_NAME, COURSE_REF, DET, LO_ID, MODS, NOMINAL, NOUN, NP, NUM, PART_NUM, PART_REF, PP, PREP, PRONOUN, PUNCT, QUANT, QUESTION, S, TECH_NAME, TOPIC_NAME, VERB, VP, WEEK_NUM, WEEK_REF, WH_PHRASE, WH_QUESTION, WH_QWORD, YES_NO_QUESTION
 
-# Terminals (119): !, 1, 10, 11, 12, 13, 14, 15, 2, 3, 30, 4, 5, 6, 60, 7, 8, 9, 90, ?, ai, assignment, bao, bao_gồm, bao_nhiêu, biết, btl, bài, bài_tập_lớn, cfg, cho, chính_sách, chương, co3085, cuối_kỳ, các, có, cần, của, deadline, disambiguation, feature, file, giữa_kỳ, grammar, gì, học, học_về, hỏi, hỏi_đáp, khi_nào, không, l.o.1.1, l.o.1.2, l.o.1.3, l.o.1.4, l.o.1.5, l.o.2.1, l.o.2.2, l.o.2.3, l.o.2.4, l.o.2.5, l.o.3.1, l.o.3.2, l.o.3.3, l.o.3.4, l.o.3.5, l.o.4.1, l.o.4.2, liên_quan, là, lịch_học, muốn, mình, môn_học, mấy, nhiêu, những, nlp, nào, này, nên, nó, nói, nói_về, nội_dung, output, parsing, pcfg, phải, phần, phần_này, pos, quy_định, semantic, syntax, sử_dụng, tagging, thông_tin, thế_nào, thời_hạn, tra, trình_bày, tuần, tài_liệu, tìm, tín_chỉ, tôi, tớ, về, với, xem, xuất, xử_lý_ngôn_ngữ_tự_nhiên, yêu_cầu, đó, được, ở, ở_đâu
+# Terminals (182): !, 1, 10, 11, 12, 13, 14, 15, 2, 3, 30, 4, 5, 6, 60, 7, 8, 9, 90, ?, ai, anaphora, assignment, atn, bao, bao_giờ, bao_gồm, bao_nhiêu, best_first, biết, bottom_up, btl, bài, bài_giảng, bài_tập_lớn, báo_cáo, bị, centering, cfg, cho, chính_sách, chương, co3085, cuối_kỳ, các, còn, có, cần, của, deadline, dependency, disambiguation, discourse, dùng, feature, file, final, ghi_chú, giới_thiệu, giữa_kỳ, grammar, gì, gồm, hãy, hạn_nộp, học, học_kỳ, học_phần, học_về, hỏi, hỏi_đáp, i, ii, iii, iv, khi_nào, không, kiểm_tra, kéo_dài, l.o.1.1, l.o.1.2, l.o.1.3, l.o.1.4, l.o.1.5, l.o.2.1, l.o.2.2, l.o.2.3, l.o.2.4, l.o.2.5, l.o.3.1, l.o.3.2, l.o.3.3, l.o.3.4, l.o.3.5, l.o.4.1, l.o.4.2, lexicon, liên_quan, llm_rag, là, làm_quen, lịch_học, midterm, muốn, mình, môn, môn_học, mấy, mới, nhiêu, nhóm, những, nlp, nào, này, nên, nó, nói, nói_về, nằm, nội_dung, output, parser, parsing, pcfg, phút, phương_pháp, phải, phần, phần_hẹn, phần_này, pos, python_nlp, quan_trọng, question_answering, quy_định, reference, rồi, sau, selectional_restriction, semantic, semantic_grammar, statistical_nlp, syntax, sẽ, sử_dụng, tagging, tham_khảo, thành_viên, thông_tin, thế_nào, thời_hạn, tiêu_chí, top_down, tra, trong, trình_bày, tuần, tài_liệu, tìm, tín_chỉ, tôi, tớ, unification, vào, vậy, về, với, wsd, xem, xuất, xây_dựng, xử_lý_ngôn_ngữ_tự_nhiên, yêu_cầu, đó, được, đến, đề_bài, định_nghĩa, đồ_án, ở, ở_đâu
 
 # --- ADJ ---
-ADJ -> gì    # từ hỏi
-ADJ -> nào    # từ hỏi
+ADJ -> mới    # tính từ
+ADJ -> quan_trọng    # tính từ
 
 # --- ADV ---
 ADV -> bao    # trạng ngữ
@@ -17,17 +17,32 @@ ADV -> không    # trạng ngữ
 ADV -> có    # trạng ngữ
 ADV -> được    # trạng ngữ
 ADV -> gì    # trạng ngữ
+ADV -> còn    # trạng ngữ liên kết
+ADV -> rồi    # trạng ngữ liên kết
+ADV -> vậy    # trạng ngữ liên kết
+ADV -> hãy    # trạng ngữ liên kết
+ADV -> sau    # trạng ngữ liên kết
 
 # --- ASSIGNMENT_NAME ---
 ASSIGNMENT_NAME -> btl    # tên bài tập
 ASSIGNMENT_NAME -> bài_tập_lớn    # tên bài tập
 ASSIGNMENT_NAME -> assignment    # tên bài tập
+ASSIGNMENT_NAME -> đồ_án    # tên bài tập
+
+# --- ATTR_NOUN ---
+ATTR_NOUN -> tín_chỉ    # thuộc tính môn học
+ATTR_NOUN -> phút    # thuộc tính môn học
+ATTR_NOUN -> midterm    # thuộc tính môn học
+ATTR_NOUN -> final    # thuộc tính môn học
 
 # --- AUX ---
 AUX -> cần    # trợ động từ
 AUX -> muốn    # trợ động từ
 AUX -> phải    # trợ động từ
 AUX -> nên    # trợ động từ
+AUX -> được    # trợ động từ
+AUX -> sẽ    # trợ động từ
+AUX -> bị    # trợ động từ
 
 # --- CHAPTER_NUM ---
 CHAPTER_NUM -> 1    # số chương
@@ -48,10 +63,20 @@ CHAPTER_REF -> chương    # chương
 CHAPTER_REF -> chương CHAPTER_NUM    # chương + số
 CHAPTER_REF -> chương WH_QWORD    # chương nào
 
+# --- COURSE_MOD ---
+COURSE_MOD -> môn    # chỉ danh môn học
+COURSE_MOD -> môn_học    # chỉ danh môn học
+COURSE_MOD -> học_phần    # chỉ danh môn học
+
 # --- COURSE_NAME ---
 COURSE_NAME -> nlp    # mã / tên môn
 COURSE_NAME -> co3085    # mã / tên môn
 COURSE_NAME -> xử_lý_ngôn_ngữ_tự_nhiên    # mã / tên môn
+
+# --- COURSE_REF ---
+COURSE_REF -> COURSE_NAME    # tên môn
+COURSE_REF -> COURSE_MOD COURSE_NAME    # 'môn' + tên môn
+COURSE_REF -> COURSE_MOD    # 'môn học'
 
 # --- DET ---
 DET -> các    # từ chỉ định
@@ -82,11 +107,19 @@ LO_ID -> l.o.3.5    # mã mục tiêu học tập
 LO_ID -> l.o.4.1    # mã mục tiêu học tập
 LO_ID -> l.o.4.2    # mã mục tiêu học tập
 
+# --- MODS ---
+MODS -> PP    # một PP hậu tố
+MODS -> PP MODS    # nhiều PP hậu tố
+
 # --- NOMINAL ---
 NOMINAL -> NOUN    # danh từ
 NOMINAL -> NOUN NOUN    # danh từ ghép
+NOMINAL -> NOUN TOPIC_NAME    # danh từ + chủ đề ('phần parser')
 NOMINAL -> ADJ NOUN    # danh từ + tính từ
 NOMINAL -> NOUN ADJ    # danh từ + tính từ
+NOMINAL -> NOUN WH_QWORD    # danh từ + từ hỏi
+NOMINAL -> NOUN DET    # danh từ + từ chỉ định ('chương này')
+NOMINAL -> NOUN ADV    # danh từ + trạng ngữ ('chương sau')
 
 # --- NOUN ---
 NOUN -> tín_chỉ    # danh từ miền
@@ -110,18 +143,42 @@ NOUN -> cuối_kỳ    # danh từ miền
 NOUN -> chính_sách    # danh từ miền
 NOUN -> hỏi_đáp    # danh từ miền
 NOUN -> lịch_học    # danh từ miền
+NOUN -> phương_pháp    # danh từ miền
+NOUN -> tham_khảo    # danh từ miền
+NOUN -> đề_bài    # danh từ miền
+NOUN -> sử_dụng    # danh từ miền
+NOUN -> xây_dựng    # danh từ miền
+NOUN -> phần_hẹn    # danh từ miền
+NOUN -> làm_quen    # danh từ miền
+NOUN -> học_kỳ    # danh từ miền
+NOUN -> hạn_nộp    # danh từ miền
+NOUN -> bài_giảng    # danh từ miền
+NOUN -> ghi_chú    # danh từ miền
+NOUN -> kiểm_tra    # danh từ miền
+NOUN -> tiêu_chí    # danh từ miền
+NOUN -> thành_viên    # danh từ miền
+NOUN -> nhóm    # danh từ miền
 
 # --- NP ---
-NP -> COURSE_NAME    # tên môn học
+NP -> COURSE_REF    # tên môn học kèm chỉ danh
 NP -> CHAPTER_REF    # chương + (số | nào)
 NP -> WEEK_REF    # tuần + (số | nào)
 NP -> TOPIC_NAME    # chủ đề
 NP -> ASSIGNMENT_NAME    # tên bài tập lớn
+NP -> TECH_NAME    # công nghệ (LLM/RAG, AI)
 NP -> LO_ID    # mã mục tiêu học tập
+NP -> ATTR_NOUN    # thuộc tính (tín chỉ, phút, midterm...)
+NP -> PART_REF    # phần của bài tập lớn
 NP -> DET NOMINAL    # danh từ có từ chỉ định
+NP -> DET WH_QWORD    # từ chỉ định + từ hỏi
 NP -> NOMINAL    # danh từ đơn
+NP -> NOMINAL NOMINAL    # danh từ ghép ('tài liệu tham khảo')
+NP -> NOMINAL WH_QWORD    # danh từ + từ hỏi ('sử dụng ai')
 NP -> PRONOUN    # đại từ
 NP -> WH_QWORD    # từ hỏi đóng vai trò danh từ
+NP -> QUANT ATTR_NOUN    # lượng từ + thuộc tính
+NP -> NOMINAL PP    # danh từ + PP (hậu tố)
+NP -> COURSE_REF PP    # tên môn + PP (hậu tố)
 
 # --- NUM ---
 NUM -> 1    # số
@@ -143,6 +200,15 @@ NUM -> 30    # số
 NUM -> 60    # số
 NUM -> 90    # số
 
+# --- PART_NUM ---
+PART_NUM -> i    # số phần (La Mã)
+PART_NUM -> ii    # số phần (La Mã)
+PART_NUM -> iii    # số phần (La Mã)
+PART_NUM -> iv    # số phần (La Mã)
+
+# --- PART_REF ---
+PART_REF -> NOUN PART_NUM    # 'phần' + số La Mã
+
 # --- PP ---
 PP -> PREP NP    # PREP NP
 PP -> PREP NOUN    # PREP NOUN
@@ -153,6 +219,9 @@ PREP -> về    # giới từ
 PREP -> của    # giới từ
 PREP -> với    # giới từ
 PREP -> cho    # giới từ
+PREP -> vào    # giới từ
+PREP -> đến    # giới từ
+PREP -> trong    # giới từ
 
 # --- PRONOUN ---
 PRONOUN -> tôi    # đại từ / tham chiếu
@@ -165,6 +234,10 @@ PRONOUN -> phần_này    # đại từ / tham chiếu
 PUNCT -> ?    # dấu câu hỏi
 PUNCT -> !    # dấu chấm than
 
+# --- QUANT ---
+QUANT -> bao_nhiêu    # lượng từ
+QUANT -> mấy    # lượng từ
+
 # --- QUESTION ---
 QUESTION -> WH_QUESTION    # alias tổng quát
 
@@ -172,17 +245,39 @@ QUESTION -> WH_QUESTION    # alias tổng quát
 S -> WH_QUESTION    # câu hỏi từ hạ từ
 S -> YES_NO_QUESTION    # câu hỏi có/không
 
+# --- TECH_NAME ---
+TECH_NAME -> llm_rag    # công nghệ được phép dùng
+TECH_NAME -> ai    # công nghệ được phép dùng
+
 # --- TOPIC_NAME ---
 TOPIC_NAME -> cfg    # chủ đề NLP
 TOPIC_NAME -> pcfg    # chủ đề NLP
 TOPIC_NAME -> parsing    # chủ đề NLP
 TOPIC_NAME -> semantic    # chủ đề NLP
+TOPIC_NAME -> semantic_grammar    # chủ đề NLP
 TOPIC_NAME -> syntax    # chủ đề NLP
 TOPIC_NAME -> pos    # chủ đề NLP
 TOPIC_NAME -> feature    # chủ đề NLP
 TOPIC_NAME -> grammar    # chủ đề NLP
 TOPIC_NAME -> tagging    # chủ đề NLP
 TOPIC_NAME -> disambiguation    # chủ đề NLP
+TOPIC_NAME -> reference    # chủ đề NLP
+TOPIC_NAME -> question_answering    # chủ đề NLP
+TOPIC_NAME -> selectional_restriction    # chủ đề NLP
+TOPIC_NAME -> statistical_nlp    # chủ đề NLP
+TOPIC_NAME -> python_nlp    # chủ đề NLP
+TOPIC_NAME -> dependency    # chủ đề NLP
+TOPIC_NAME -> discourse    # chủ đề NLP
+TOPIC_NAME -> anaphora    # chủ đề NLP
+TOPIC_NAME -> centering    # chủ đề NLP
+TOPIC_NAME -> wsd    # chủ đề NLP
+TOPIC_NAME -> atn    # chủ đề NLP
+TOPIC_NAME -> unification    # chủ đề NLP
+TOPIC_NAME -> lexicon    # chủ đề NLP
+TOPIC_NAME -> top_down    # chủ đề NLP
+TOPIC_NAME -> bottom_up    # chủ đề NLP
+TOPIC_NAME -> best_first    # chủ đề NLP
+TOPIC_NAME -> parser    # chủ đề NLP
 
 # --- VERB ---
 VERB -> học    # động từ chính
@@ -202,15 +297,41 @@ VERB -> bao_gồm    # gồm
 VERB -> trình_bày    # trình bày
 VERB -> học_về    # học về
 VERB -> nói_về    # nói về
+VERB -> gồm    # gồm
+VERB -> dùng    # dùng
+VERB -> xây_dựng    # xây dựng
+VERB -> nằm    # nằm ở
+VERB -> báo_cáo    # báo cáo
+VERB -> kéo_dài    # kéo dài
+VERB -> giới_thiệu    # giới thiệu
+VERB -> định_nghĩa    # định nghĩa
 
 # --- VP ---
 VP -> VERB    # V
 VP -> VERB NP    # V NP
 VP -> VERB PP    # V PP
+VP -> VERB NP PP    # V NP PP
+VP -> VERB ADV    # V ADV
+VP -> VERB NP ADV    # V NP ADV
+VP -> VERB PP ADV    # V PP ADV
+VP -> VERB VERB    # V V (nhóm động từ)
+VP -> VERB VERB NP    # V V NP
+VP -> VERB VERB PP    # V V PP
+VP -> VERB VERB PP ADV    # V V PP ADV
+VP -> VERB VERB NP ADV    # V V NP ADV
 VP -> VERB WH_QWORD    # V + từ hỏi
 VP -> VERB WH_QWORD NP    # V + từ hỏi + NP
+VP -> VERB QUANT NP    # V + lượng từ + NP
+VP -> AUX VERB    # trợ động từ + V
 VP -> AUX VERB NP    # trợ động từ + V + NP
+VP -> AUX VERB PP    # trợ động từ + V + PP
 VP -> AUX VERB NP PP    # trợ động từ + V + NP + PP
+VP -> AUX VERB NP ADV    # trợ động từ + V + NP + ADV
+VP -> AUX VERB PP ADV    # trợ động từ + V + PP + ADV
+VP -> AUX VERB WH_QWORD    # trợ động từ + V + từ hỏi
+VP -> VERB AUX VERB NP ADV    # V + trợ động từ + V + NP + ADV ('có được dùng LLM không')
+VP -> VERB AUX VERB NP    # V + trợ động từ + V + NP ('có được dùng LLM')
+VP -> QUANT NP    # lượng từ + NP
 
 # --- WEEK_NUM ---
 WEEK_NUM -> 1    # số tuần
@@ -239,7 +360,12 @@ WH_PHRASE -> WH_QWORD    # cụm từ hỏi
 
 # --- WH_QUESTION ---
 WH_QUESTION -> WH_QWORD NP VP PUNCT    # từ hỏi + NP + VP + ?
+WH_QUESTION -> WH_QWORD NP MODS VP PUNCT    # từ hỏi + NP + PP + VP + ?
 WH_QUESTION -> NP VP PUNCT    # NP + VP + ? (từ hỏi nằm trong VP)
+WH_QUESTION -> NP MODS VP PUNCT    # NP + PP + VP + ?
+WH_QUESTION -> VP PUNCT    # VP + ? (câu hỏi không có chủ ngữ rõ ràng)
+WH_QUESTION -> NP PUNCT    # NP + ? (câu hỏi rút gọn)
+WH_QUESTION -> WH_QWORD NP PUNCT    # từ hỏi + NP + ?
 
 # --- WH_QWORD ---
 WH_QWORD -> gì    # từ hỏi nội dung
@@ -249,6 +375,12 @@ WH_QWORD -> ở_đâu    # địa điểm
 WH_QWORD -> khi_nào    # thời điểm
 WH_QWORD -> thế_nào    # cách thức
 WH_QWORD -> ai    # chủ thể người
+WH_QWORD -> bao_giờ    # thời điểm (viết tắt)
 
 # --- YES_NO_QUESTION ---
 YES_NO_QUESTION -> NP VP PUNCT    # NP + VP + ?
+YES_NO_QUESTION -> NP MODS VP PUNCT    # NP + PP + VP + ?
+YES_NO_QUESTION -> VP PUNCT    # VP + ?
+YES_NO_QUESTION -> ADV NP PUNCT    # ADV + NP + ? (câu hỏi rút gọn 'Còn ...?')
+YES_NO_QUESTION -> ADV NP VP PUNCT    # ADV + NP + VP + ?
+YES_NO_QUESTION -> NP PUNCT    # NP + ?

@@ -23,6 +23,11 @@ from typing import Dict, List, Tuple
 # Multi-word entities
 # ---------------------------------------------------------------------------
 # (normalized surface form, entity kind)
+#
+# The surface forms use underscores; the matcher accepts spaces as well, so
+# "bài tập lớn" and "bài_tập_lớn" are recognised alike.  The table doubles as
+# the **tokenizer's protected vocabulary**: the parser (WP3) needs the very
+# same underscore forms as the terminals declared in ``src/grammar.py``.
 MULTIWORD_ENTITIES: List[Tuple[str, str]] = [
     ("bài_tập_lớn", "ASSIGNMENT_NAME"),
     ("tín_chỉ", "ATTRIBUTE"),
@@ -32,6 +37,8 @@ MULTIWORD_ENTITIES: List[Tuple[str, str]] = [
     ("hạn_nộp", "DEADLINE"),
     ("lịch_học", "SCHEDULE"),
     ("tài_liệu", "RESOURCE"),
+    ("bài_giảng", "RESOURCE"),
+    ("ghi_chú", "NOTES"),
     ("tham_khảo", "RESOURCE_MOD"),
     ("quy_định", "RULE"),
     ("chính_sách", "POLICY"),
@@ -39,9 +46,56 @@ MULTIWORD_ENTITIES: List[Tuple[str, str]] = [
     ("nội_dung", "CONTENT"),
     ("học_kỳ", "TERM"),
     ("môn_học", "COURSE_MOD"),
+    ("học_phần", "COURSE_MOD"),
     ("đề_bài", "ASSIGNMENT_MOD"),
     ("phần_hẹn", "MEETING"),
     ("làm_quen", "ASSIGNMENT_MOD"),
+    ("xử_lý_ngôn_ngữ_tự_nhiên", "COURSE_NAME"),
+    ("sử_dụng", "VERB"),
+    ("xây_dựng", "VERB"),
+    ("yêu_cầu", "VERB"),
+    ("liên_quan", "VERB"),
+    ("nói_về", "VERB"),
+    ("học_về", "VERB"),
+    ("bao_gồm", "VERB"),
+    ("trình_bày", "VERB"),
+    ("báo_cáo", "VERB"),
+    ("kéo_dài", "VERB"),
+    ("giới_thiệu", "VERB"),
+    ("định_nghĩa", "VERB"),
+    ("thế_nào", "ADV"),
+    ("như_thế_nào", "ADV"),
+    ("kế_tiếp", "ADV"),
+    ("bao_nhiêu", "QUANT"),
+    ("bao_giờ", "WH_QWORD"),
+    ("khi_nào", "WH_QWORD"),
+    ("ở_đâu", "WH_QWORD"),
+    ("phương_pháp", "NOUN"),
+    ("thư_viện", "NOUN"),
+    ("đồ_án", "ASSIGNMENT_NAME"),
+    ("kiểm_tra", "NOUN"),
+    ("tiêu_chí", "NOUN"),
+    ("thành_viên", "NOUN"),
+    ("quan_trọng", "ADJ"),
+    ("semantic_grammar", "TOPIC_NAME"),
+    ("statistical_nlp", "TOPIC_NAME"),
+    ("python_nlp", "TOPIC_NAME"),
+    ("question_answering", "TOPIC_NAME"),
+    ("selectional_restriction", "TOPIC_NAME"),
+    ("top_down", "TOPIC_NAME"),
+    ("bottom_up", "TOPIC_NAME"),
+    ("best_first", "TOPIC_NAME"),
+    ("llm_rag", "RULE"),
+    ("tp_hcm", "LOCATION"),
+]
+
+# Surface forms that are written with punctuation in running text but must be
+# normalised before tokenization ("LLM/RAG" -> "llm rag").
+SURFACE_NORMALIZATION: List[Tuple[str, str]] = [
+    ("llm/rag", "llm rag"),
+    ("q&a", "qa"),
+    ("tp.hcm", "tp hcm"),
+    ("tp hcm", "tp hcm"),
 ]
 
 # Pre-compiled matcher for the multi-word entities.
@@ -111,6 +165,10 @@ class Preprocessor:
 
         text = unicodedata.normalize("NFC", text)
         text = text.lower()
+
+        # Rewrite the punctuation-bearing surfaces ("LLM/RAG" -> "llm rag").
+        for surface, canonical in SURFACE_NORMALIZATION:
+            text = text.replace(surface, canonical)
 
         # Unify common tone-placement variants (oà / oà ...).
         for wrong, right in self.vietnamese_mappings.items():
@@ -324,6 +382,19 @@ VIETNAMESE_POS_TAGS = {
     "anh": "PRON", "chị": "PRON", "em": "PRON",
     "ai": "PRON", "đó": "DET", "này": "DET",
     "kia": "DET", "nọ": "DET",
+    "còn": "ADV", "rồi": "ADV", "vậy": "ADV", "hãy": "ADV",
+    "sau": "ADV", "phải": "AUX", "nên": "AUX", "sẽ": "AUX",
+    "bị": "AUX", "dùng": "VERB", "xây": "VERB", "dựng": "VERB",
+    "nằm": "VERB", "kéo": "VERB", "dài": "VERB", "giới": "VERB",
+    "thiệu": "VERB", "định_nghĩa": "VERB", "báo": "VERB", "cáo": "NOUN",
+    "phương": "NOUN", "pháp": "NOUN", "thư": "NOUN", "viện": "NOUN",
+    "phút": "NOUN", "midterm": "NOUN", "final": "NOUN",
+    "kiểm_tra": "NOUN", "tiêu": "NOUN", "chí": "NOUN",
+    "thành": "NOUN", "viên": "NOUN", "nhóm": "NOUN",
+    "mới": "ADJ", "quan_trọng": "ADJ", "quan_trọng": "ADJ",
+    "gồm": "VERB", "còn": "ADV", "rồi": "ADV", "vậy": "ADV",
+    "nội": "NOUN", "dung": "NOUN", "phần": "NOUN",
+    "chính": "NOUN", "sách": "NOUN", "đồ": "NOUN", "án": "NOUN",
 
     # --- Multi-word components ---
     "giữa": "NOUN", "kỳ": "NOUN", "cuối": "NOUN",
@@ -331,12 +402,18 @@ VIETNAMESE_POS_TAGS = {
     "sách": "NOUN", "phần": "NOUN", "nội": "NOUN",
     "dung": "NOUN", "lịch": "NOUN", "học_kỳ": "NOUN",
     "môn_học": "NOUN", "giữa_kỳ": "NOUN", "cuối_kỳ": "NOUN",
+    "học_phần": "NOUN", "bài_giảng": "RESOURCE",
+    "ghi_chú": "NOTES", "làm_quen": "ASSIGNMENT_MOD",
+    "đề_bài": "ASSIGNMENT_MOD", "phần_hẹn": "MEETING",
+    "hỏi_đáp": "QA", "sử_dụng": "VERB", "xây_dựng": "VERB",
 
     # --- Verbs ---
     "có": "VERB", "triển": "VERB", "khai": "VERB",
     "báo": "VERB", "dùng": "VERB", "phép": "ADJ",
     "phân": "VERB", "giải": "VERB", "giúp": "VERB",
     "học_về": "VERB", "nói_về": "VERB", "trình_bày": "VERB",
+    "kéo_dài": "VERB", "giới_thiệu": "VERB", "báo_cáo": "VERB",
+    "bao_gồm": "VERB", "liên_quan": "VERB",
 
     # --- Adpositions / adverbs ---
     "sau": "ADP", "trước": "ADP", "kế": "ADP",
@@ -344,6 +421,7 @@ VIETNAMESE_POS_TAGS = {
     "thế_nào": "ADV", "như_thế_nào": "ADV",
     "hôm": "NOUN", "nay": "PRON", "bây": "ADV",
     "giờ": "NOUN", "chính": "ADV", "sao": "PRON",
+    "vào": "PREP", "đến": "PREP", "trong": "PREP",
 
     # --- Numbers ---
     "1": "NUM", "2": "NUM", "3": "NUM", "4": "NUM",
@@ -351,6 +429,7 @@ VIETNAMESE_POS_TAGS = {
     "9": "NUM", "10": "NUM", "11": "NUM", "12": "NUM",
     "13": "NUM", "14": "NUM", "15": "NUM", "16": "NUM",
     "30": "NUM", "60": "NUM", "90": "NUM", "99": "NUM",
+    "i": "NUM", "ii": "NUM", "iii": "NUM", "iv": "NUM",
 
     # --- Topics ---
     "cfg": "NOUN", "pcfg": "NOUN", "pos": "NOUN",
@@ -358,6 +437,15 @@ VIETNAMESE_POS_TAGS = {
     "grammar": "NOUN", "feature": "NOUN", "anaphora": "NOUN",
     "centering": "NOUN", "reference": "NOUN", "wsd": "NOUN",
     "tagging": "NOUN", "disambiguation": "NOUN",
+    "dependency": "NOUN", "discourse": "NOUN",
+    "parser": "NOUN", "atn": "NOUN", "unification": "NOUN",
+    "lexicon": "NOUN", "top_down": "NOUN", "bottom_up": "NOUN",
+    "best_first": "NOUN", "semantic_grammar": "TOPIC_NAME",
+    "statistical_nlp": "TOPIC_NAME", "python_nlp": "TOPIC_NAME",
+    "question_answering": "TOPIC_NAME",
+    "selectional_restriction": "TOPIC_NAME",
+    "llm": "NOUN", "rag": "NOUN", "llm_rag": "RULE",
+    "ai": "NOUN",
 
     # --- Assignment parts ---
     "part": "NOUN", "i": "NUM", "ii": "NUM", "iii": "NUM", "iv": "NUM",

@@ -11,7 +11,7 @@ The script reports three families of metrics:
 1. **Official test set** (``tests/data/sample_queries.txt``, 34 queries)
    -- intent accuracy, entity accuracy and the combined accuracy.
 2. **Parser quality** -- how many sentences are handled by the strict
-   recursive-descent parser versus the pattern-based fallback.
+   Earley chart parser versus the pattern-based fallback.
 3. **Sentence generation** -- how many sentences the grammar produces and
    how many of them look like a well-formed Vietnamese question.
 """
@@ -200,7 +200,7 @@ def build_report() -> str:
     lines.append("Parser (on the official test set):")
     total_p = par["strict"] + par["fallback"] + par["failure"]
     lines.append(
-        f"  Strict recursive descent: {par['strict']}/{total_p} = "
+        f"  Strict Earley chart parse: {par['strict']}/{total_p} = "
         f"{par['strict'] / total_p * 100:.2f}%"
     )
     lines.append(

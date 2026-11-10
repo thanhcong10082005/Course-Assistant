@@ -1,8 +1,8 @@
 Query: Môn NLP có bao nhiêu tín chỉ?
-Answer: Môn Xử lý Ngôn ngữ Tự nhiên (CO3085) có 3 tín chỉ.
+Answer: Môn Xử lý Ngôn ngữ Tự nhiên (CO3085) có 3 tín chỉ, tương đương 6 ECTS.
 
 Query: CO3085 có mấy tín chỉ?
-Answer: Môn Xử lý Ngôn ngữ Tự nhiên (CO3085) có 3 tín chỉ.
+Answer: Môn Xử lý Ngôn ngữ Tự nhiên (CO3085) có 3 tín chỉ, tương đương 6 ECTS.
 
 Query: Môn học gồm những phần nào?
 Answer: Môn học gồm 3 phần chính: Xử lý cú pháp; Diễn dịch ngữ nghĩa; Ngữ cảnh và tri thức thế giới.
@@ -17,55 +17,82 @@ Query: Final kéo dài bao lâu?
 Answer: Final có thời lượng 90 phút.
 
 Query: Mô tả môn NLP?
-Answer: Môn học cung cấp các khái niệm, lý thuyết và kỹ thuật nền tảng của xử lý ngôn ngữ tự nhiên.
+Answer: Môn học cung cấp các khái niệm, lý thuyết và kỹ thuật nền tảng của xử lý ngôn ngữ tự nhiên. Nội dung đi từ mức biểu diễn văn bản, phân tích cú pháp với văn phạm, giải quyết nhập nhằng bằng xác suất, đến diễn dịch ngữ nghĩa, biểu diễn tri thức và xử lý ngữ cảnh hội thoại. Môn học kết thúc bằng một bài tập lớn theo nhóm trong đó sinh viên xây dựng một hệ thống hỏi đáp tự nhiên cho chính môn học.
 
 Query: Tuần 1 học gì?
-Answer: Tuần 01: Học Chương 01 - Introduction to Natural Language Processing. Nội dung: Introduction to NLP, NLU applications.
+Answer: Tuần 01: Học Chương 01 - Introduction to Natural Language Processing.
+Nội dung: Introduction to NLP, NLU applications, Mức phân tích ngôn ngữ.
+Hoạt động: Lý thuyết.
 
 Query: Tuần 2 học những gì?
-Answer: Tuần 02: Học Chương 02 - Linguistic Background - English Syntax. Nội dung: English syntax, Noun phrases, Verb phrases.
+Answer: Tuần 02: Học Chương 02 - Linguistic Background - English Syntax.
+Nội dung: English syntax, Noun phrases, Verb phrases.
+Hoạt động: Lý thuyết + thực hành.
 
 Query: Tuần 3 học gì?
-Answer: Tuần 03: Học Chương 03 - Grammar and Parsing. Nội dung: CFG, Top-down parsing, Bottom-up parsing.
+Answer: Tuần 03: Học Chương 03 - Grammar and Parsing.
+Nội dung: CFG, Top-down parsing, Bottom-up parsing.
+Hoạt động: Thực hành.
+Mốc: Checkpoint 1: nộp sơ bộ grammar.
 
 Query: Tuần 5 học vào lịch nào?
-Answer: Tuần 05: Học Chương 04 - Features and Augmented Grammar. Nội dung: Augmented transition networks, Unification.
+Answer: Tuần 05: Học Chương 04 - Features and Augmented Grammar.
+Nội dung: Augmented transition networks, Unification.
+Hoạt động: Thực hành.
 
 Query: Chương 4 học vào tuần nào?
-Answer: Chương 04 (Features and Augmented Grammar) được học vào Week 04.
+Answer: Chương 04 (Features and Augmented Grammar) được học vào Tuần 04.
 
 Query: Chương 1 nói về gì?
-Answer: Chương 01 - Introduction to Natural Language Processing: NLP studies computational methods for processing natural language. Introduces applications, levels of language analysis, representation and understanding.
+Answer: Chương 01 - Introduction to Natural Language Processing
+Thuộc phần: Introduction.
+Nội dung: NLP nghiên cứu các phương pháp tính toán để xử lý ngôn ngữ tự nhiên. Chương giới thiệu các ứng dụng, các mức phân tích ngôn ngữ, cách biểu diễn và cách đánh giá một hệ thống hiểu ngôn ngữ tự nhiên.
+Các chủ đề chính: The study of natural language; Applications of NLU; Evaluating NLU systems; Different levels of language analysis; Representation and understanding.
+Chương này được học vào tuần 1.
+Phương pháp chính: Khảo sát tài liệu; Phân tích ví dụ thực tế.
+Phục vụ mục tiêu học tập: LO1.1, LO1.2, LO1.3.
 
 Query: Chương 3 có nội dung gì?
-Answer: Chương 03 - Grammar and Parsing: Introduces context-free grammar, sentence structure and parsing methods. PCFG and dependency grammar.
+Answer: Chương 03 - Grammar and Parsing
+Thuộc phần: Syntactic Processing.
+Nội dung: Giới thiệu văn phạm phi ngữ cảnh (CFG), cấu trúc câu và các phương pháp phân tích cú pháp: top-down, bottom-up (chart), PCFG và văn phạm phụ thuộc.
+Các chủ đề chính: Context-Free Grammars; Top-down parser; Bottom-up chart parser; Probabilistic CFG; Dependency Grammar; Stanford Dependencies.
+Chương này được học vào tuần 3.
+Phương pháp chính: Phân tích cú pháp từ trên xuống; Phân tích cú pháp từ dưới lên (chart parser).
+Phục vụ mục tiêu học tập: LO2.2, LO2.4.
 
 Query: Chương nào học về CFG?
-Answer: Chương 03: Grammar and Parsing trình bày về CFG.
+Answer: Chủ đề CFG thuộc Chương 03 - Grammar and Parsing.
+Nội dung liên quan: Context-Free Grammars; Top-down parser; Bottom-up chart parser; Probabilistic CFG; Dependency Grammar; Stanford Dependencies.
 
 Query: CFG nằm ở chương nào?
-Answer: Chương 03: Grammar and Parsing trình bày về CFG.
+Answer: Chủ đề CFG thuộc Chương 03 - Grammar and Parsing.
+Nội dung liên quan: Context-Free Grammars; Top-down parser; Bottom-up chart parser; Probabilistic CFG; Dependency Grammar; Stanford Dependencies.
 
 Query: PCFG được học ở đâu?
-Answer: Chương 03: Grammar and Parsing trình bày về CFG.
+Answer: Chủ đề PCFG thuộc Chương 03 - Grammar and Parsing.
+Nội dung liên quan: Context-Free Grammars; Top-down parser; Bottom-up chart parser; Probabilistic CFG; Dependency Grammar; Stanford Dependencies.
 
 Query: Chương nào nói về semantic?
-Answer: Chương 07: Semantics and Logical Form trình bày về SEMANTIC.
+Answer: Chủ đề SEMANTIC thuộc Chương 07 - Semantics and Logical Form.
+Nội dung liên quan: Semantics and logical form; Word senses and ambiguity; Basic logical form language; Encoding ambiguity in logical form; Thematic roles; Speech acts and embedded sentences.
 
 Query: Chương nào dạy về parsing?
-Answer: Chương 03: Grammar and Parsing trình bày về PARSING.
+Answer: Chủ đề PARSING thuộc Chương 03 - Grammar and Parsing.
+Nội dung liên quan: Context-Free Grammars; Top-down parser; Bottom-up chart parser; Probabilistic CFG; Dependency Grammar; Stanford Dependencies.
 
 Query: Bài tập lớn yêu cầu gì?
-Answer: Bài tập lớn 'Intelligent Course Assistant' - Nhóm 3-4 sinh viên.
+Answer: Bài tập lớn 'Intelligent Course Assistant' - Nhóm 3-4 sinh viên. Mục tiêu: Xây dựng hệ thống xử lý câu hỏi tự nhiên trong miền thông tin của một môn học. Hệ thống phải trả lời được các câu hỏi về lịch học, nội dung chương, bài tập, tài liệu, quy định và mục tiêu học tập của môn học.
 
 Query: BTL gồm những phần nào?
-Answer: Bài tập lớn 'Intelligent Course Assistant' gồm các phần: Grammar and Parser; Semantic Interpretation and QA; Local Discourse Context; Evaluation.
+Answer: Bài tập lớn 'Intelligent Course Assistant' - Nhóm 3-4 sinh viên. Mục tiêu: Xây dựng hệ thống xử lý câu hỏi tự nhiên trong miền thông tin của một môn học. Hệ thống phải trả lời được các câu hỏi về lịch học, nội dung chương, bài tập, tài liệu, quy định và mục tiêu học tập của môn học.
 
 Query: Phần I của BTL là gì?
-Answer: Grammar and Parser: Xây dựng grammar và parser
+Answer: Grammar and Parser: Xây dựng văn phạm (grammar) cho câu hỏi tiếng Việt về môn học và xây dựng bộ phân tích cú pháp (parser) trên văn phạm đó. Hệ thống phải sinh được tập câu hỏi mẫu và phân tích cú pháp được các câu hỏi thực tế.
+File cần xuất: grammar.txt (văn phạm dạng text); samples.txt (tập câu hỏi mẫu sinh từ văn phạm); parse-results.txt (kết quả phân tích cú pháp).
 
 Query: Bài tập lớn cần xuất file gì?
-Answer: Bài tập lớn 'Intelligent Course Assistant' - Nhóm 3-4 sinh viên.
+Answer: Bài tập lớn 'Intelligent Course Assistant' - Nhóm 3-4 sinh viên. Mục tiêu: Xây dựng hệ thống xử lý câu hỏi tự nhiên trong miền thông tin của một môn học. Hệ thống phải trả lời được các câu hỏi về lịch học, nội dung chương, bài tập, tài liệu, quy định và mục tiêu học tập của môn học.
 
 Query: Deadline BTL là khi nào?
 Answer: Thời hạn BTL:
@@ -86,26 +113,50 @@ Answer: Thời hạn BTL:
 - final: Tuần 15 - Nộp BTL và Demo
 
 Query: Tài liệu về CFG ở đâu?
-Answer: Tài liệu tham khảo: 4 cuốn sách. Xem danh sách đầy đủ trong resources.txt
+Answer: Tài liệu về CFG:
+- Foundation of Statistical NLP (Manning, Schütze, 2001) - Thống kê cho NLP: xác suất, PCFG, POS tagging
 
 Query: Có tài liệu nào về NLP không?
-Answer: Tài liệu tham khảo: 4 cuốn sách. Xem danh sách đầy đủ trong resources.txt
+Answer: Tài liệu tham khảo: 7 mục.
+- Natural Language Processing with Python (Bird, Klein, Loper, 2009) [TEXTBOOK]: Thực hành với Python; phù hợp cho phần semantic và QA
+- Speech and Language Processing (Jurafsky, Martin, 2019) [TEXTBOOK]: Giáo trình chuẩn, tham khảo rộng cho toàn bộ môn học
+- Introduction to NLP (Jacob Eisenstein, 2019) [TEXTBOOK]: Nền tảng về tổ chức hệ thống NLP và các ứng dụng
+- Foundation of Statistical NLP (Manning, Schütze, 2001) [REFERENCE]: Thống kê cho NLP: xác suất, PCFG, POS tagging
+- Speech and Language Processing (2nd ed.) (Jurafsky, Martin, 2007) [REFERENCE]: Phiên bản cũ, nhiều ví dụ về văn phạm ngữ nghĩa
+- Bài giảng và slide của giảng viên (TS. Trần Minh Khoa, 2026) [SLIDES]: Slide trình bày và bài tập về nhà theo tuần
+- Ghi chú bài giảng và ví dụ thực hành (Nhóm học, 2026) [NOTES]: Ghi chú tóm tắt và bài tập mở rộng do nhóm biên soạn
 
 Query: Sách tham khảo của môn học là gì?
-Answer: Tài liệu tham khảo: 4 cuốn sách. Xem danh sách đầy đủ trong resources.txt
+Answer: Tài liệu tham khảo: 7 mục.
+- Natural Language Processing with Python (Bird, Klein, Loper, 2009) [TEXTBOOK]: Thực hành với Python; phù hợp cho phần semantic và QA
+- Speech and Language Processing (Jurafsky, Martin, 2019) [TEXTBOOK]: Giáo trình chuẩn, tham khảo rộng cho toàn bộ môn học
+- Introduction to NLP (Jacob Eisenstein, 2019) [TEXTBOOK]: Nền tảng về tổ chức hệ thống NLP và các ứng dụng
+- Foundation of Statistical NLP (Manning, Schütze, 2001) [REFERENCE]: Thống kê cho NLP: xác suất, PCFG, POS tagging
+- Speech and Language Processing (2nd ed.) (Jurafsky, Martin, 2007) [REFERENCE]: Phiên bản cũ, nhiều ví dụ về văn phạm ngữ nghĩa
+- Bài giảng và slide của giảng viên (TS. Trần Minh Khoa, 2026) [SLIDES]: Slide trình bày và bài tập về nhà theo tuần
+- Ghi chú bài giảng và ví dụ thực hành (Nhóm học, 2026) [NOTES]: Ghi chú tóm tắt và bài tập mở rộng do nhóm biên soạn
 
 Query: Có được sử dụng LLM không?
-Answer: Các quy định: Sinh viên được khuyến khích tham dự đầy đủ các buổi học.; Sinh viên phải tuân thủ nguyên tắc liêm chính học thuật.; Sinh viên phải khai báo việc sử dụng AI trong báo cáo.; LLM/RAG có thể được sử dụng như phần mở rộng, không thay thế yêu cầu NLP cốt lõi.; Hệ thống chỉ chịu trách nhiệm trong phạm vi dữ liệu môn học.
+Answer: LLM/RAG có thể được sử dụng như một phần mở rộng, nhưng không được thay thế yêu cầu NLP cốt lõi của bài tập lớn. Phần lõi (grammar, parser, semantic, QA) phải do sinh viên tự xây dựng và giải thích được.
 
 Query: Quy định về sử dụng AI là gì?
-Answer: Các quy định: Sinh viên được khuyến khích tham dự đầy đủ các buổi học.; Sinh viên phải tuân thủ nguyên tắc liêm chính học thuật.; Sinh viên phải khai báo việc sử dụng AI trong báo cáo.; LLM/RAG có thể được sử dụng như phần mở rộng, không thay thế yêu cầu NLP cốt lõi.; Hệ thống chỉ chịu trách nhiệm trong phạm vi dữ liệu môn học.
+Answer: Sinh viên được phép dùng công cụ AI hỗ trợ (LLM, RAG) nhưng phải khai báo rõ ràng trong báo cáo: mục đích sử dụng, phạm vi áp dụng và phần nào do AI sinh ra. Việc không khai báo được xem là vi phạm liêm chính học thuật.
 
 Query: Được phép dùng thư viện nào?
-Answer: Các quy định: Sinh viên được khuyến khích tham dự đầy đủ các buổi học.; Sinh viên phải tuân thủ nguyên tắc liêm chính học thuật.; Sinh viên phải khai báo việc sử dụng AI trong báo cáo.; LLM/RAG có thể được sử dụng như phần mở rộng, không thay thế yêu cầu NLP cốt lõi.; Hệ thống chỉ chịu trách nhiệm trong phạm vi dữ liệu môn học.
+Answer: Các quy định của môn học:
+- attendance: Sinh viên được khuyến khích tham dự đầy đủ các buổi học.
+- academic_integrity: Sinh viên phải tuân thủ nguyên tắc liêm chính học thuật: không sao chép bài làm của nhau, phải trích dẫn nguồn khi sử dụng tài liệu của người khác và chịu trách nhiệm về toàn bộ nội dung nộp.
+- ai_usage: Sinh viên được phép dùng công cụ AI hỗ trợ (LLM, RAG) nhưng phải khai báo rõ ràng trong báo cáo: mục đích sử dụng, phạm vi áp dụng và phần nào do AI sinh ra. Việc không khai báo được xem là vi phạm liêm chính học thuật.
+- llm_rag: LLM/RAG có thể được sử dụng như một phần mở rộng, nhưng không được thay thế yêu cầu NLP cốt lõi của bài tập lớn. Phần lõi (grammar, parser, semantic, QA) phải do sinh viên tự xây dựng và giải thích được.
+- copyright: Không sử dụng tài liệu có bản quyền không được phép; khi trích dẫn tài liệu tham khảo phải ghi rõ tác giả, năm xuất bản và nguồn.
+- policy: Mọi hoạt động trong môn học tuân thủ quy định chung của trường về đạo đức học thuật, bảo mật thông tin và trách nhiệm bảo mật dữ liệu.
+- out_of_scope: Hệ thống chỉ chịu trách nhiệm trong phạm vi dữ liệu môn học. Các yêu cầu ngoài phạm vi (giải bài tập khác, dịch thuật, tin tức, thời tiết...) sẽ bị từ chối.
 
 Query: L.O.2.5 là gì?
 Answer: LO2.5: Kiến thức xác suất để giải quyết nhập nhằng từ ở mức câu.
+Được phục vụ bởi: Chương 06 - Ambiguity Resolution - Statistical Methods.
 
 Query: L.O.4.2 liên quan đến nội dung gì?
 Answer: LO4.2: Ngữ cảnh diễn ngôn cục bộ và sự tham chiếu.
+Được phục vụ bởi: Chương 12 - Discourse Context and Reference.
 
