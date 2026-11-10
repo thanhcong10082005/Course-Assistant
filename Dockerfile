@@ -25,6 +25,14 @@ COPY scripts/ ./scripts/
 # would silently drop the 34 official cases if this directory were missing.
 COPY tests/data/ ./tests/data/
 
+# The rest of the submission package.  Without these the image would not be a
+# faithful copy of what is handed in: scripts/check_submission.py checks for
+# README.md, pytest.ini and docs/, and the grader may look at them too.
+COPY README.md ./
+COPY pytest.ini ./
+COPY Dockerfile ./
+COPY docs/ ./docs/
+
 RUN mkdir -p output
 
 ENV PYTHONPATH=/app
