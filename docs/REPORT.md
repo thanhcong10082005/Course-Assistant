@@ -53,14 +53,21 @@ Các nội dung kỹ thuật được kỳ vọng:
 ### 1.3 Phạm vi Knowledge Base
 
 
-| Nhóm thông tin          | Nội dung                                         | Nguồn trong `data/` |
-| ----------------------- | ------------------------------------------------ | ------------------- |
-| Thông tin chung môn học | Tên, mã, số tín chỉ, mô tả, mục tiêu             | `course_data.txt`   |
-| Đề cương                | 12 chương, nội dung và chủ đề từng chương        | `course_data.txt`   |
-| Lịch học                | 15 tuần, ánh xạ tuần ↔ chương                    | `course_data.txt`   |
-| Bài tập lớn             | 4 phần (PART_I…PART_IV), yêu cầu, file phải xuất | `course_data.txt`   |
-| Quy định                | Quy định dùng AI/LLM, chính sách bản quyền       | `course_data.txt`   |
-| Tài liệu tham khảo      | Danh mục sách, slide, tài liệu                   | `course_data.txt`   |
+| Nhóm thông tin          | Nội dung                                         | Nguồn trong `src/knowledge_base.py` |
+| ----------------------- | ------------------------------------------------ | ---------------------------------- |
+| Thông tin chung môn học | Tên, mã, số tín chỉ, mô tả, mục tiêu             | `COURSE_INFO`                      |
+| Đề cương                | 12 chương, nội dung và chủ đề từng chương        | `CHAPTERS`                         |
+| Lịch học                | 15 tuần, ánh xạ tuần ↔ chương                    | `SCHEDULE`                         |
+| Bài tập lớn             | 4 phần (PART_I…PART_IV), yêu cầu, file phải xuất | `ASSIGNMENT`                       |
+| Quy định                | 7 nhóm quy định (dùng AI/LLM, bản quyền, …)      | `REGULATIONS`                      |
+| Tài liệu tham khảo      | 7 mục sách, slide, ghi chú                       | `RESOURCES`                        |
+| Câu hỏi thường gặp      | 7 câu hỏi mẫu                                   | `FAQ`                              |
+
+> **Nguồn dữ liệu:** toàn bộ tri thức môn học do nhóm biên soạn tay dựa trên đề
+> cương môn CO3085 và tài liệu giảng viên cung cấp. File `data/course_data.txt`
+> là bản tóm tắt dạng văn bản của cùng bộ dữ liệu đó (để đối chiếu nhanh);
+> mã nguồn không đọc file này khi chạy. Không sử dụng dữ liệu từ nguồn bên ngoài
+> nào khác.
 
 
 
@@ -79,6 +86,7 @@ Các nội dung kỹ thuật được kỳ vọng:
 | `GET_RULE`        | Quy định môn học                    | "Có được dùng LLM không?"          |
 | `GET_INSTRUCTOR`  | Giảng viên phụ trách                | "Ai dạy môn NLP?"                  |
 | `GET_LO`          | Mục tiêu học tập (Learning Outcome) | "L.O.4.2 là gì?"                   |
+| `CONTEXT_DEPENDENT` | Câu hỏi phụ thuộc ngữ cảnh lượt trước | "Nó có liên quan đến parsing không?" |
 | `UNKNOWN`         | Ngoài phạm vi hệ thống              | "Hôm nay thời tiết thế nào?"       |
 
 
@@ -120,7 +128,7 @@ vì phải xử lý hậu kỳ bằng bộ lọc.
 #### 2.1.2 Văn phạm được cài đặt
 
 Văn phạm nằm trong `src/grammar.py` (lớp `CFG`), được sinh ra file
-`output/grammar.txt` (254 dòng, 28 non-terminal, 119 terminal). Cấu trúc cốt lõi:
+`output/grammar.txt` (386 dòng, 36 non-terminal, 182 terminal). Cấu trúc cốt lõi:
 
 ```
 # Cấp câu
@@ -135,8 +143,9 @@ YES_NO_QUESTION→ NP VP PUNCT
 WH_QWORD       → "gì" | "nào" | "bao_nhiêu" | "ở_đâu" | "khi_nào" | "thế_nào" | "ai"
 
 # Danh ngữ chủ thể
-NP             → COURSE_NAME | CHAPTER_REF | WEEK_REF | TOPIC_NAME
-               | ASSIGNMENT_NAME | LO_ID | DET NOMINAL | NOMINAL | PRONOUN
+NP             → COURSE_REF | CHAPTER_REF | WEEK_REF | TOPIC_NAME
+               | ASSIGNMENT_NAME | TECH_NAME | LO_ID | ATTR_NOUN | PART_REF
+               | DET NOMINAL | NOMINAL | PRONOUN | QUANT ATTR_NOUN | …
 
 # Định danh chương / tuần (head noun luôn đi kèm)
 CHAPTER_REF    → "chương" | "chương" CHAPTER_NUM | "chương" WH_QWORD
@@ -157,17 +166,22 @@ AUX            → "cần" | "muốn" | "phải" | "nên"
 PREP           → "ở" | "về" | "của" | "với" | "cho"
 
 # Định danh miền
+COURSE_REF     → COURSE_MOD COURSE_NAME | COURSE_NAME
 COURSE_NAME    → "nlp" | "co3085" | "xử_lý_ngôn_ngữ_tự_nhiên"
 CHAPTER_NUM    → "1" | "2" | … | "12"
 WEEK_NUM       → "1" | "2" | … | "15"
-TOPIC_NAME     → "cfg" | "pcfg" | "parsing" | "semantic" | "syntax" | "pos"
-               | "feature" | "grammar" | "tagging" | "disambiguation"
-ASSIGNMENT_NAME→ "btl" | "bài_tập_lớn" | "assignment"
+TOPIC_NAME     → "cfg" | "pcfg" | "parsing" | "semantic" | "semantic_grammar"
+               | "syntax" | "pos" | "feature" | "grammar" | "tagging"
+               | "disambiguation" | …
+ASSIGNMENT_NAME→ "btl" | "bài_tập_lớn" | "assignment" | "đồ_án"
 LO_ID          → "l.o.1.1" | "l.o.1.2" | … | "l.o.4.2"
 
 # Dấu câu
 PUNCT          → "?" | "!"
 ```
+
+> Trên đây là phần **rút gọn** cho dễ đọc; toàn bộ văn phạm (36 non-terminal,
+> 182 terminal, 307 production) nằm trong `output/grammar.txt`.
 
 
 
@@ -185,7 +199,8 @@ class GrammarRule:
 ```
 
 Trọng số biến văn phạm ngữ pháp thành **PCFG nhẹ**: động từ `học` (3.0) được
-sinh ra nhiều hơn `tra` (0.3), `chương` (4.0) nhiều hơn `quy` (0.8). Nhờ vậy
+sinh ra nhiều hơn `tra` (0.3), và luật `CHAPTER_REF → "chương" CHAPTER_NUM`
+(4.0) nhiều hơn luật `CHAPTER_REF → "chương"` đứng trần (1.0). Nhờ vậy
 câu sinh ra nghe tự nhiên thay vì ngẫu nhiên.
 
 Mỗi luật đều có `comment` tiếng Việt, nên `output/grammar.txt` **tự giải thích
@@ -386,9 +401,11 @@ Trên 34 câu hỏi trong `tests/data/sample_queries.txt`:
 | Thất bại                  | 0      | 0 %     |
 
 > **Hiện trạng.** Strict parse đã tăng từ 11.76 % lên **91.18 %** nhờ parser mới
-> là **Earley chart parser** tổng quát (xem mục 6.1). 3 câu còn lại rơi vào
-> fallback là do câu quá dài / có nhiều mệnh đề — ngoài phạm vi thiết kế của
-> văn phạm, và vẫn được phục vụ đúng ở tầng semantic.
+> là **Earley chart parser** tổng quát (xem mục 2.3.1). 3 câu còn lại rơi vào
+> fallback (`Q026`, `Q027`, `Q028`) là các câu **cố ý nằm ngoài phạm vi** của
+> đề bài — "Hôm nay ở TP.HCM có mưa không?", "Ai là tổng thống của Pháp?" và
+> "Hãy giải bài tập xác suất này giúp tôi." Trên 31 câu in-scope, strict parse
+> đạt **100 %**, và cả 3 câu này vẫn được phục vụ đúng ở tầng semantic.
 
 
 
@@ -397,7 +414,9 @@ Trên 34 câu hỏi trong `tests/data/sample_queries.txt`:
 Kết quả được ghi ra `output/parse-results.txt` theo dạng cây lồng:
 
 ```
-(WH_QUESTION (WH_WORD chương) (NP (COURSE_NAME nlp)) (VP (VERB có) (ADJ bao) (ADJ nhiêu) (NP (NOUN tín))))
+(WH_QUESTION (NP (COURSE_REF (COURSE_MOD (môn)) (COURSE_NAME (nlp))))
+             (VP (VERB (có)) (NP (QUANT (bao_nhiêu)) (ATTR_NOUN (tín_chỉ))))
+             (PUNCT (?)))
 ```
 
 Câu không thuộc văn phạm được xuất `()` theo yêu cầu đề bài.
@@ -443,12 +462,12 @@ Ví dụ thực tế từ hệ thống:
 
 | Câu hỏi                         | Dạng logic                                       |
 | ------------------------------- | ------------------------------------------------ |
-| "Môn NLP có bao nhiêu tín chỉ?" | `GET_COURSE_INFO(course=NLP, attribute=credits)` |
+| "Môn NLP có bao nhiêu tín chỉ?" | `GET_COURSE_INFO(course=CO3085, attribute=credits)` |
 | "Tuần 3 học gì?"                | `GET_SCHEDULE(week=WEEK_03)`                     |
 | "Chương 4 nói về gì?"           | `GET_TOPIC(chapter=CH04)`                        |
 | "Chương nào học về CFG?"        | `GET_TOPIC(topic=CFG)`                           |
-| "Deadline BTL là khi nào?"      | `GET_DEADLINE(assignment=BTL01)`                 |
-| "Có được dùng LLM không?"       | `GET_RULE()`                                     |
+| "Deadline BTL là khi nào?"      | `GET_DEADLINE(attribute=deadline, assignment=BTL01)` |
+| "Có được dùng LLM không?"       | `GET_RULE(rule=LLM_RAG)`                         |
 | "L.O.4.2 là gì?"                | `GET_LO(lo=LO4.2)`                               |
 
 
@@ -456,47 +475,51 @@ Ví dụ thực tế từ hệ thống:
 
 #### 3.1.2 Nhận diện Intent — phương pháp dựa trên luật
 
-**Phương pháp:** khớp từ khoá + biểu thức chính quy (regex), theo thứ tự ưu
-tiên từ cụ thể đến chung.
+**Phương pháp:** khớp từ khoá + biểu thức chính quy (regex) **có trọng số** —
+mỗi luật là một cặp `(intent, regex, điểm)`; điểm cao hơn thắng.
 
 *Pseudocode:*
 
 ```
-function extract_intent(text, tokens):
-    normalized ← lowercase(text); bảo vệ pattern "l.o.X.Y" → "lo_X_Y"
+function extract_intent(text, tokens, entities):
+    normalized ← normalize_text(text)
 
     # Bước 1: phát hiện ngoài phạm vi trước tiên
-    for pattern in OUT_OF_SCOPE_PATTERNS:          # thời tiết, bóng đá, giá vàng, …
+    if lexicon.is_out_of_scope(normalized):          # thời tiết, bóng đá, giá vàng, …
+        return UNKNOWN
+    if re.search(r"giải (bài tập|đề|bài)(?! lớn)", normalized):
+        return UNKNOWN
+    if re.search(r"(làm hộ|viết code cho tôi|dịch (văn bản|sang))", normalized):
+        return UNKNOWN
+
+    # Bước 2: chấm điểm các luật trong INTENT_RULES
+    scores ← {}
+    for (intent, pattern, score) in INTENT_RULES:
         if re.search(pattern, normalized):
-            return UNKNOWN
+            scores[intent] ← scores[intent] + score
 
-    # Bước 2: các intent có mẫu đặc biệt, kiểm tra theo thứ tự ưu tiên
-    if re.search(r"(deadline|thời hạn|hạn nộp|nộp|khi nào nộp)", normalized):
-        return GET_DEADLINE
-    if re.search(r"lo_\d", normalized) or "learning outcome" in normalized:
-        return GET_LO
-    if re.search(r"(ai dạy|giảng viên|thầy|cô giáo)", normalized):
-        return GET_INSTRUCTOR
-    if re.search(r"\b(quy định|được phép dùng|sử dụng llm|dùng ai|chính sách)\b", normalized):
-        return GET_RULE
-    if re.search(r"(tài liệu|sách|giáo trình|tham khảo|resource)", normalized):
-        return GET_RESOURCE
-    if re.search(r"(bài tập lớn|btl|assignment)", normalized):
-        return GET_ASSIGNMENT
-    if re.search(r"tuần\s*\d+", normalized):              return GET_SCHEDULE
-    if re.search(r"(chương|ch).*tuần nào", normalized):  return GET_SCHEDULE
-    if re.search(r"(chương nào|chương \d+|nói về|nội dung gì)", normalized):
-        return GET_TOPIC
+    # Bước 3: điểm cộng theo entity đã trích, dùng để phá thế hoà
+    if entities.rule:              scores[GET_RULE]       += 40
+    if entities.resource
+       and not entities.chapter:   scores[GET_RESOURCE]   += 30
+    if entities.lo:                scores[GET_LO]         += 60
+    if entities.chapter
+       and not entities.resource:   scores[GET_TOPIC]      += 25
+    if entities.assignment
+       or entities.part:            scores[GET_ASSIGNMENT] += 25
 
-    # Bước 3: chấm điểm theo từ khoá / pattern cho từng intent
-    for intent, config in INTENT_PATTERNS:
-        score(intent) ← số từ khoá xuất hiện + 2 × số pattern khớp
+    # Bước 4: nếu câu chứa tham chiếu ngữ cảnh mà không có hội thoại đang mở
+    if has_reference(text) and not has_active_session():
+        return CONTEXT_DEPENDENT
+
     return intent có điểm cao nhất, nếu điểm > 0; ngược lại UNKNOWN
 ```
 
-**Vì sao cần thứ tự ưu tiên?** Nhiều từ khoá xung đột. Ví dụ *"Tài liệu nào liên
-quan đến PCFG?"* chứa cả `tài liệu` (→ GET_RESOURCE) lẫn `pcfg` (→ GET_TOPIC).
-Đặt GET_RESOURCE trước GET_TOPIC giải quyết mâu thuẫn này.
+**Vì sao cần chấm điểm thay vì thứ tự ưu tiên cứng?** Nhiều từ khoá xung đột.
+Ví dụ *"Tài liệu nào liên quan đến PCFG?"* chứa cả `tài liệu` (→ GET_RESOURCE) lẫn
+`pcfg` (→ GET_TOPIC). Chấm điểm cho phép nhiều tín hiệu cùng tồn tại; các điểm cộng
+theo entity ở Bước 3 mới là thứ phá thế hoà, thay vì phải cố đặt một thứ tự
+tuần tự cố định.
 
 #### 3.1.3 Nhận diện Entity
 
@@ -507,31 +530,28 @@ function extract_entities(text, intent):
     normalized ← normalize_text(text)
     entities ← {}
 
-    # Định danh miền
-    if "nlp" in tokens or "co3085" in tokens:
-        entities["course"] ← "CO3085" nếu có co3085, ngược lại "NLP"
+    # Định danh miền — tra bằng LEXICON, chiến lược LONGEST-MATCH
+    # (nguồn sự thật duy nhất: models/lexicon.json)
+    matches ← lexicon.lookup(
+        normalized,
+        priority_groups = ["assignment_part", "part_of_assignment", "assignment",
+                           "learning_outcome", "chapter", "week", "rule",
+                           "attribute", "topic", "course", "resource",
+                           "instructor"],
+    )
+    for match in matches:                 # giữ match đầu tiên (dài/ưu tiên cao nhất)
+        entities[match.entity_type] ← match.canonical
 
+    # Mã mục tiêu học tập: lexicon chỉ biết mã có thật, cần quét riêng
+    if re.search(r"\blo_(\d)(?:_(\d+))?", normalized):
+        entities["lo"] ← "LO" + phần chính + "." + phần phụ (mặc định ".1")
+
+    # Số chương / tuần nằm ngoài phạm vi vẫn tạo ra entity có dạng hợp lệ
+    # ("Chương 99 nói về gì?") để KB trả lời "không tìm thấy" thay vì đoán.
     if re.search(r"chương\s*(\d+)", normalized):
         entities["chapter"] ← "CH" + số.zfill(2)
-
     if re.search(r"tuần\s*(\d+)", normalized):
         entities["week"] ← "WEEK_" + số.zfill(2)
-
-    for keyword, topic in TOPIC_KEYWORDS:            # cfg, pcfg, parsing, semantic, …
-        if keyword in normalized:
-            entities["topic"] ← topic; break
-
-    if "btl" in tokens or "bài tập lớn" in normalized:
-        entities["assignment"] ← "BTL01"
-
-    if intent = GET_ASSIGNMENT:
-        if re.search(r"phần\s*(i{1,3}|iv|v|\d+)", normalized):
-            entities["part"] ← "PART_" + số La Mã viết hoa
-        if "phần nào" in normalized or "những phần" in normalized:
-            entities["list_parts"] ← true
-
-    if re.search(r"lo_(\d)(?:_(\d+))?", normalized):
-        entities["lo"] ← "LO" + phần chính + "." + phần phụ (mặc định ".1")
 
     # Thuộc tính theo intent
     if intent = GET_COURSE_INFO:
@@ -544,6 +564,12 @@ function extract_entities(text, intent):
 
     return entities
 ```
+
+> **Vì sao dùng lexicon thay vì so khớp từ khoá?** Vì bề mặt tiếng Việt có
+> thể chứa bề mặt khác: `"semantic grammar"` phải thắng `"semantic"`,
+> `"statistical nlp"` phải thắng `"nlp"`. Chiến lược **longest-match** giải quyết
+> trọn vẹn lớp bug "chuỗi con cướp entity" thay vì phải viết thứ tự ưu tiên
+> thủ công cho từng cặp bề mặt.
 
 
 
@@ -571,6 +597,12 @@ Bảng này ghi rõ nguồn gốc và được kiểm thử tự động bằng 
 (11 test) — bao gồm kiểm tra mọi surface form đều ở dạng chữ thường để tra cứu
 không phân biệt hoa thường.
 
+Tổng cộng `models/lexicon.json` chứa **207 bề mặt từ** trong **12 nhóm entity**
+(`course` · `chapter` · `week` · `topic` · `assignment` · `assignment_part` ·
+`part_of_assignment` · `rule` · `attribute` · `resource` · `learning_outcome` ·
+`instructor`), cộng thêm **10 bề mặt tham chiếu ngữ cảnh** và **50 mẫu ngoài
+phạm vi**.
+
 ### 3.2 Đặc tả pipeline và kiến trúc hệ thống
 
 
@@ -590,7 +622,7 @@ Input (câu hỏi tiếng Việt)
   │
   ▼
 [2] PARSING
-      recursive descent theo văn phạm CFG → cây cú pháp
+      Earley chart parser theo văn phạm CFG → cây cú pháp
       (fallback: dựng cây theo mẫu nếu không khớp văn phạm)
   │
   ▼
@@ -599,8 +631,8 @@ Input (câu hỏi tiếng Việt)
   │
   ▼
 [4] INTENT / ENTITY
-      intent  : khớp luật theo thứ tự ưu tiên + chấm điểm từ khoá
-      entity  : nhận diện & chuẩn hoá qua lexicon
+      intent  : khớp luật có trọng số + điểm cộng theo entity
+      entity  : nhận diện & chuẩn hoá qua lexicon (longest-match)
   │
   ▼
 [5] QUERY
@@ -635,8 +667,8 @@ Input (câu hỏi tiếng Việt)
 ┌──────────────────────────────────▼───────────────────────────────────┐
 │  TẦNG 2 — PARSING                │  src/grammar.py + src/parser.py   │
 │  ┌────────────────────────────────────────────────────────────────┐  │
-│  │   CFG Grammar ──► Recursive Descent Parser ──► Parse Tree    │  │
-│  │   (28 non-terminal, 119 terminal)      (fallback: pattern)     │  │
+│  │   CFG Grammar ──► Earley Chart Parser ──► Parse Tree          │  │
+│  │   (36 non-terminal, 182 terminal)      (fallback: pattern)     │  │
 │  └────────────────────────────────────────────────────────────────┘  │
 └──────────────────────────────────┬───────────────────────────────────┘
                                    │
@@ -854,13 +886,17 @@ Tập kiểm thử lấy từ dữ liệu mẫu chính thức của bài tập
 
 | Nhóm                       | Số câu | Mô tả                                                                        |
 | -------------------------- | ------ | ---------------------------------------------------------------------------- |
-| Câu hỏi hợp lệ trong miền  | 29     | Hỏi thông tin chung, chương, tuần, chủ đề, bài tập, quy định, tài liệu, L.O. |
-| Câu hỏi ngoài phạm vi      | 2      | Không liên quan tới môn học                                                  |
+| Câu hỏi hợp lệ trong miền  | 28     | Hỏi thông tin chung, chương, tuần, chủ đề, bài tập, quy định, tài liệu, L.O. |
+| Câu hỏi ngoài phạm vi      | 3      | Không liên quan tới môn học                                                  |
 | Câu hỏi phụ thuộc ngữ cảnh | 3      | Cần thông tin từ lượt trước                                                  |
 
 
 Bộ test còn có thêm **5 kịch bản hội thoại** (`tests/data/dialogues.txt`) mô tả
 các mẫu tham chiếu ngữ cảnh cục bộ.
+
+Ngoài 34 câu chính thức, hệ thống còn được đánh giá trên **tổng cộng 57 câu**
+(34 chính thức + 15 câu biến thể do nhóm tự viết + 8 câu hội thoại nhiều lượt) —
+xem mục 5.1.4.
 
 #### 5.1.2 Cơ sở đo lường
 
@@ -948,7 +984,7 @@ Official test set (tests/data/sample_queries.txt): 34 cases
   Intent + Entity accuracy: 34/34 = 100.00%
 
 Parser (on the official test set):
-  Strict recursive descent: 31/34 = 91.18%
+  Strict Earley chart parse: 31/34 = 91.18%
   Pattern fallback:        3/34 = 8.82%
   Failure:                 0/34 = 0.00%
 
@@ -1020,15 +1056,15 @@ so sánh thô, không phải của hệ thống.
 > không phải độ phủ trên tiếng Việt nói chung. Báo cáo này nêu rõ điều này ở
 > cả Mục 5 và Mục 6 để tránh hiểu sai.
 
-#### 5.1.6 Ví dụ hệ thống trả lời đúng
+#### 5.1.7 Ví dụ hệ thống trả lời đúng
 
 
 | Câu hỏi                         | Dạng logic                                       | Câu trả lời                                                                                         |
 | ------------------------------- | ------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
-| "Môn NLP có bao nhiêu tín chỉ?" | `GET_COURSE_INFO(course=NLP, attribute=credits)` | "Môn Xử lý Ngôn ngữ Tự nhiên (CO3085) có 3 tín chỉ."                                                |
-| "Tuần 3 học gì?"                | `GET_SCHEDULE(week=WEEK_03)`                     | "Tuần 03: Học Chương 03 — Grammar and Parsing. Nội dung: CFG, Top-down parsing, Bottom-up parsing." |
-| "Chương nào học về CFG?"        | `GET_TOPIC(topic=CFG)`                           | "Chương 03: Grammar and Parsing trình bày về CFG."                                                  |
-| "L.O.4.2 là gì?"                | `GET_LO(lo=LO4.2)`                               | "LO4.2: Ngữ cảnh diễn ngôn cục bộ và sự tham chiếu."                                                |
+| "Môn NLP có bao nhiêu tín chỉ?" | `GET_COURSE_INFO(course=CO3085, attribute=credits)` | "Môn Xử lý Ngôn ngữ Tự nhiên (CO3085) có 3 tín chỉ, tương đương 6 ECTS." |
+| "Tuần 3 học gì?"                | `GET_SCHEDULE(week=WEEK_03)`                     | "Tuần 03: Học Chương 03 - Grammar and Parsing." |
+| "Chương nào học về CFG?"        | `GET_TOPIC(topic=CFG)`                           | "Chủ đề CFG thuộc Chương 03 - Grammar and Parsing." |
+| "L.O.4.2 là gì?"                | `GET_LO(lo=LO4.2)`                               | "LO4.2: Ngữ cảnh diễn ngôn cục bộ và sự tham chiếu." |
 
 
 
@@ -1042,14 +1078,15 @@ so sánh thô, không phải của hệ thống.
 **Hiện trạng:** strict parse đạt **91.18 %** (31/34 câu); 3 câu còn
 lại rơi vào fallback và 0 câu thất bại.
 
-**Nguyên nhên của 3 câu chưa parse strict:** các câu này có cấu trúc phức tạp
-hơn (nhiều mệnh đề, vị từ phức tạp) mà văn phạm chưa mô hình hoá hết — ví dụ
-*"Tài liệu tham khảo về statistical NLP là gì?"* hoặc *"Bài tập lớn yêu cầu xây
-dựng những gì?"*.
+**Nguyên nhân của 3 câu chưa parse strict:** cả ba đều **cố ý nằm ngoài phạm
+vi** của đề bài — *"Hôm nay ở TP.HCM có mưa không?"* (`Q026`), *"Ai là tổng
+thống của Pháp?"* (`Q027`) và *"Hãy giải bài tập xác suất này giúp tôi."*
+(`Q028`). Chúng không thuộc miền câu hỏi môn học nên văn phạm không mô hình hoá.
 
 **Hệ quả:** cây phân tích cú pháp trong báo cáo có thể không đúng với 3 câu
 đó. Tuy nhiên **intent và entity vẫn đúng** nhờ tầng semantic làm việc trực tiếp
-trên văn bản và cơ chế fallback của parser.
+trên văn bản và cơ chế fallback của parser. Trên **31 câu in-scope**, strict
+parse đạt **100 %**.
 
 **Hướng khắc phục:** bổ sung quy tắc cho vị từ phức tạp và danh từ ghép trong
 `src/grammar.py`; Earley parser sẽ tự động hấp thụ các quy tắc mới mà không
@@ -1097,7 +1134,9 @@ Phương pháp dựa trên luật có ưu điểm là **minh bạch, không cầ
 luyện, giải thích được** (đây là điểm giảng viên đánh giá cao), nhưng:
 
 - Chỉ bao phủ được các mẫu câu đã định nghĩa.
-- Mâu thuẫn từ khoá phải giải quyết thủ công bằng thứ tự ưu tiên.
+- Mâu thuẫn từ khoá được xử lý bằng **chấm điểm có trọng số** và điểm cộng
+  theo entity — hiệu quả hơn thứ tự ưu tiên cứng, nhưng vẫn phải chọn trọng số
+  bằng tay.
 - Không mở rộng tự động khi gặp cách diễn đạt mới.
 
 **Hướng khắc phục (phương án dự phòng):** bổ sung một mô hình phân loại đa lớp
@@ -1110,7 +1149,7 @@ mở rộng tự nhiên, không phải LLM.
 **Hiện trạng:** knowledge base đã mở rộng từ vài chục dòng lên
 thành dữ liệu có cấu trúc cho **12 chương** (mỗi chương có tóm tắt, chủ đề con,
 tuần học, phương pháp, mục tiêu học tập), **15 tuần**, **4 phần bài tập lớn**
-(kèm file phải xuất), **7 tài liệu tham khảo**, **5 nhóm quy định** và
+(kèm file phải xuất), **7 tài liệu tham khảo**, **7 nhóm quy định** và
 **17 mục tiêu học tập**.
 
 **Hạn chế còn lại:**
@@ -1137,7 +1176,7 @@ Hệ thống **Course Assistant** đã hiện thực được chuỗi xử lý N
 **Về mặt phương pháp**, hệ thống thể hiện được đầy đủ các kỹ thuật NLP được yêu
 cầu: xây dựng văn phạm CFG có trọng số, sinh câu, phân tích cú pháp bằng **Earley
 chart parser**, biểu diễn ngữ nghĩa dạng logic form, nhận diện intent bằng luật
-theo thứ tự ưu tiên, trích xuất entity có chuẩn hoá qua lexicon với chiến lược
+có trọng số, trích xuất entity có chuẩn hoá qua lexicon với chiến lược
 **longest-match**, truy vấn knowledge base theo tham số, và xử lý tham chiếu ngữ
 cảnh cục bộ (đại từ, mô tả xác định, cấu trúc rút gọn, quan hệ "kế tiếp").
 
@@ -1159,7 +1198,7 @@ Các hướng cải tiến được xếp theo mức độ ưu tiên:
 
 | # | Hướng                                          | Lý do / giá trị                                        |
 | - | ---------------------------------------------- | ------------------------------------------------------ |
-| 1 | Bổ sung quy tắc vị từ phức tạp cho 3 câu chưa parse strict | Nâng strict parse 91.18 % → 100 %                      |
+| 1 | Bổ sung quy tắc văn phạm cho câu hỏi ngoài phạm vi thiết kế | Mở rộng strict parse ra ngoài 31 câu in-scope   |
 | 2 | Sinh biến thể từ vựng tự động cho lexicon      | Bỏ nỗi thủ công nhập từng bề mặt từ                    |
 | 3 | Triển khai Centering cho xếp hạng ứng viên tham chiếu | Xử lý tham chiếu mơ hồ khi có nhiều ứng viên           |
 | 4 | Suy luận nhiều bước trong knowledge base       | Trả lời các câu cần kết hợp 2 thông tin               |

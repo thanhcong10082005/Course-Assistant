@@ -224,14 +224,25 @@ def check_lexicon(results: List[Tuple[bool, str]]) -> None:
 
         with open(path, "r", encoding="utf-8") as fh:
             data = json.load(fh)
-        count = sum(
-            len(value) for value in data.values()
-            if isinstance(value, dict)
-        )
+
+        # Count exactly what the runtime sees.  ``src.lexicon.Lexicon`` exposes
+        # the *entity* groups only: the "_meta" header, the "out_of_scope"
+        # list and the "context_reference" group are handled separately and
+        # are not entity surfaces.  Importing the module here would create a
+        # __pycache__ directory and make the last two checks fail, so the
+        # same rule is applied directly to the JSON.
+        excluded = {"_meta", "out_of_scope", "context_reference"}
+        groups = {
+            name: value
+            for name, value in data.items()
+            if name not in excluded and isinstance(value, dict)
+        }
+        count = sum(len(value) for value in groups.values())
         _check(
             results,
             count >= 100,
-            f"lexicon {count} bề mặt từ trong models/lexicon.json",
+            f"lexicon {count} bề mặt từ trong {len(groups)} nhóm entity "
+            f"(models/lexicon.json)",
         )
     except Exception as exc:  # pragma: no cover - defensive
         _check(results, False, f"lexicon không đọc được: {exc}")

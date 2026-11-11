@@ -18,7 +18,7 @@ Current status
 All previously registered issues have been **resolved**.  The corresponding
 entries have been removed from :data:`KNOWN_ISSUES`, so the affected tests
 are now permanent regression guards and the whole suite is green
-(``133 passed``).
+(``158 passed``).
 """
 
 from typing import Dict, List
