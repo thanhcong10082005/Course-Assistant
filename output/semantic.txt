@@ -1,7 +1,10 @@
+SEMANTIC REPRESENTATION
+======================================================================
+
 Query: Môn NLP có bao nhiêu tín chỉ?
 Intent: GET_COURSE_INFO
-Entities: {'course': 'NLP', 'attribute': 'credits'}
-Logical Form: GET_COURSE_INFO(course=NLP, attribute=credits)
+Entities: {'course': 'CO3085', 'attribute': 'credits'}
+Logical Form: GET_COURSE_INFO(course=CO3085, attribute=credits)
 
 Query: CO3085 có mấy tín chỉ?
 Intent: GET_COURSE_INFO
@@ -10,8 +13,8 @@ Logical Form: GET_COURSE_INFO(course=CO3085, attribute=credits)
 
 Query: Môn học gồm những phần nào?
 Intent: GET_COURSE_INFO
-Entities: {'attribute': 'parts'}
-Logical Form: GET_COURSE_INFO(attribute=parts)
+Entities: {'course': 'CO3085', 'attribute': 'parts'}
+Logical Form: GET_COURSE_INFO(course=CO3085, attribute=parts)
 
 Query: NLP có những phần chính nào?
 Intent: GET_COURSE_INFO
@@ -30,8 +33,8 @@ Logical Form: GET_COURSE_INFO(attribute=final_duration)
 
 Query: Mô tả môn NLP?
 Intent: GET_COURSE_INFO
-Entities: {'course': 'NLP', 'attribute': 'description'}
-Logical Form: GET_COURSE_INFO(course=NLP, attribute=description)
+Entities: {'attribute': 'description', 'course': 'CO3085'}
+Logical Form: GET_COURSE_INFO(attribute=description, course=CO3085)
 
 Query: Tuần 1 học gì?
 Intent: GET_SCHEDULE
@@ -80,8 +83,8 @@ Logical Form: GET_TOPIC(topic=CFG)
 
 Query: PCFG được học ở đâu?
 Intent: GET_TOPIC
-Entities: {'topic': 'CFG'}
-Logical Form: GET_TOPIC(topic=CFG)
+Entities: {'topic': 'PCFG'}
+Logical Form: GET_TOPIC(topic=PCFG)
 
 Query: Chương nào nói về semantic?
 Intent: GET_TOPIC
@@ -100,13 +103,13 @@ Logical Form: GET_ASSIGNMENT(assignment=BTL01)
 
 Query: BTL gồm những phần nào?
 Intent: GET_ASSIGNMENT
-Entities: {'assignment': 'BTL01', 'list_parts': True}
-Logical Form: GET_ASSIGNMENT(assignment=BTL01, list_parts=True)
+Entities: {'assignment': 'BTL01', 'attribute': 'parts'}
+Logical Form: GET_ASSIGNMENT(assignment=BTL01, attribute=parts)
 
 Query: Phần I của BTL là gì?
 Intent: GET_ASSIGNMENT
-Entities: {'assignment': 'BTL01', 'part': 'PART_I'}
-Logical Form: GET_ASSIGNMENT(assignment=BTL01, part=PART_I)
+Entities: {'part': 'PART_I', 'assignment': 'BTL01'}
+Logical Form: GET_ASSIGNMENT(part=PART_I, assignment=BTL01)
 
 Query: Bài tập lớn cần xuất file gì?
 Intent: GET_ASSIGNMENT
@@ -115,13 +118,13 @@ Logical Form: GET_ASSIGNMENT(assignment=BTL01)
 
 Query: Deadline BTL là khi nào?
 Intent: GET_DEADLINE
-Entities: {'assignment': 'BTL01'}
-Logical Form: GET_DEADLINE(assignment=BTL01)
+Entities: {'attribute': 'deadline', 'assignment': 'BTL01'}
+Logical Form: GET_DEADLINE(attribute=deadline, assignment=BTL01)
 
 Query: Thời hạn nộp bài tập lớn là bao giờ?
 Intent: GET_DEADLINE
-Entities: {'assignment': 'BTL01'}
-Logical Form: GET_DEADLINE(assignment=BTL01)
+Entities: {'attribute': 'deadline', 'assignment': 'BTL01'}
+Logical Form: GET_DEADLINE(attribute=deadline, assignment=BTL01)
 
 Query: Khi nào cần nộp checkpoint 1?
 Intent: GET_DEADLINE
@@ -130,28 +133,28 @@ Logical Form: GET_DEADLINE()
 
 Query: Tài liệu về CFG ở đâu?
 Intent: GET_RESOURCE
-Entities: {'topic': 'CFG'}
-Logical Form: GET_RESOURCE(topic=CFG)
+Entities: {'resource': 'DOCUMENT', 'topic': 'CFG'}
+Logical Form: GET_RESOURCE(resource=DOCUMENT, topic=CFG)
 
 Query: Có tài liệu nào về NLP không?
 Intent: GET_RESOURCE
-Entities: {'course': 'NLP'}
-Logical Form: GET_RESOURCE(course=NLP)
+Entities: {'resource': 'DOCUMENT', 'course': 'NLP'}
+Logical Form: GET_RESOURCE(resource=DOCUMENT, course=NLP)
 
 Query: Sách tham khảo của môn học là gì?
 Intent: GET_RESOURCE
-Entities: {}
-Logical Form: GET_RESOURCE()
+Entities: {'resource': 'REFERENCE_BOOK', 'course': 'CO3085'}
+Logical Form: GET_RESOURCE(resource=REFERENCE_BOOK, course=CO3085)
 
 Query: Có được sử dụng LLM không?
 Intent: GET_RULE
-Entities: {}
-Logical Form: GET_RULE()
+Entities: {'rule': 'LLM_RAG'}
+Logical Form: GET_RULE(rule=LLM_RAG)
 
 Query: Quy định về sử dụng AI là gì?
 Intent: GET_RULE
-Entities: {}
-Logical Form: GET_RULE()
+Entities: {'rule': 'AI_USAGE'}
+Logical Form: GET_RULE(rule=AI_USAGE)
 
 Query: Được phép dùng thư viện nào?
 Intent: GET_RULE

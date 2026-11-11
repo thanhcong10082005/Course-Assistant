@@ -1,0 +1,23 @@
+======================================================================
+COURSE ASSISTANT - BASELINE METRICS
+======================================================================
+
+Official test set (tests/data/sample_queries.txt): 34 cases
+  Intent accuracy:        34/34 = 100.00%
+  Entity accuracy (alias-aware): 34/34 = 100.00%
+  Entity accuracy (raw match):   32/34 = 94.12%
+  Intent + Entity accuracy: 34/34 = 100.00%
+
+Parser (on the official test set):
+  Strict Earley chart parse: 31/34 = 91.18%
+  Pattern fallback:        3/34 = 8.82%
+  Failure:                 0/34 = 0.00%
+
+Sentence generation:
+  Sentences generated:      10000
+  Containing '_':            0
+  Containing 'WH_PHRASE':    0
+  Bad leading token:         0
+  Missing end punctuation:   0
+
+======================================================================

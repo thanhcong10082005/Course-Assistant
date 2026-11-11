@@ -1,11 +1,14 @@
+LOGICAL FORM / KNOWLEDGE BASE QUERY
+======================================================================
+
 Query: Môn NLP có bao nhiêu tín chỉ?
-Intent Query: GET_COURSE_INFO(course=NLP, attribute=credits)
+Intent Query: GET_COURSE_INFO(course=CO3085, attribute=credits)
 
 Query: CO3085 có mấy tín chỉ?
 Intent Query: GET_COURSE_INFO(course=CO3085, attribute=credits)
 
 Query: Môn học gồm những phần nào?
-Intent Query: GET_COURSE_INFO(attribute=parts)
+Intent Query: GET_COURSE_INFO(course=CO3085, attribute=parts)
 
 Query: NLP có những phần chính nào?
 Intent Query: GET_COURSE_INFO(course=NLP, attribute=parts)
@@ -17,7 +20,7 @@ Query: Final kéo dài bao lâu?
 Intent Query: GET_COURSE_INFO(attribute=final_duration)
 
 Query: Mô tả môn NLP?
-Intent Query: GET_COURSE_INFO(course=NLP, attribute=description)
+Intent Query: GET_COURSE_INFO(attribute=description, course=CO3085)
 
 Query: Tuần 1 học gì?
 Intent Query: GET_SCHEDULE(week=WEEK_01)
@@ -47,7 +50,7 @@ Query: CFG nằm ở chương nào?
 Intent Query: GET_TOPIC(topic=CFG)
 
 Query: PCFG được học ở đâu?
-Intent Query: GET_TOPIC(topic=CFG)
+Intent Query: GET_TOPIC(topic=PCFG)
 
 Query: Chương nào nói về semantic?
 Intent Query: GET_TOPIC(topic=SEMANTIC)
@@ -59,37 +62,37 @@ Query: Bài tập lớn yêu cầu gì?
 Intent Query: GET_ASSIGNMENT(assignment=BTL01)
 
 Query: BTL gồm những phần nào?
-Intent Query: GET_ASSIGNMENT(assignment=BTL01, list_parts=True)
+Intent Query: GET_ASSIGNMENT(assignment=BTL01, attribute=parts)
 
 Query: Phần I của BTL là gì?
-Intent Query: GET_ASSIGNMENT(assignment=BTL01, part=PART_I)
+Intent Query: GET_ASSIGNMENT(part=PART_I, assignment=BTL01)
 
 Query: Bài tập lớn cần xuất file gì?
 Intent Query: GET_ASSIGNMENT(assignment=BTL01)
 
 Query: Deadline BTL là khi nào?
-Intent Query: GET_DEADLINE(assignment=BTL01)
+Intent Query: GET_DEADLINE(attribute=deadline, assignment=BTL01)
 
 Query: Thời hạn nộp bài tập lớn là bao giờ?
-Intent Query: GET_DEADLINE(assignment=BTL01)
+Intent Query: GET_DEADLINE(attribute=deadline, assignment=BTL01)
 
 Query: Khi nào cần nộp checkpoint 1?
 Intent Query: GET_DEADLINE()
 
 Query: Tài liệu về CFG ở đâu?
-Intent Query: GET_RESOURCE(topic=CFG)
+Intent Query: GET_RESOURCE(resource=DOCUMENT, topic=CFG)
 
 Query: Có tài liệu nào về NLP không?
-Intent Query: GET_RESOURCE(course=NLP)
+Intent Query: GET_RESOURCE(resource=DOCUMENT, course=NLP)
 
 Query: Sách tham khảo của môn học là gì?
-Intent Query: GET_RESOURCE()
+Intent Query: GET_RESOURCE(resource=REFERENCE_BOOK, course=CO3085)
 
 Query: Có được sử dụng LLM không?
-Intent Query: GET_RULE()
+Intent Query: GET_RULE(rule=LLM_RAG)
 
 Query: Quy định về sử dụng AI là gì?
-Intent Query: GET_RULE()
+Intent Query: GET_RULE(rule=AI_USAGE)
 
 Query: Được phép dùng thư viện nào?
 Intent Query: GET_RULE()

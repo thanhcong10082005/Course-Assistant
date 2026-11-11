@@ -1,37 +1,74 @@
-======================================================================
-COURSE ASSISTANT EVALUATION REPORT
-======================================================================
+=========================================================================
+COURSE ASSISTANT - EVALUATION REPORT
+=========================================================================
 
-Test Set Statistics:
-  Total test cases: 20
-  In-scope tests: 17
-  Out-of-scope tests: 3
+1. SỐ LƯỢNG CÂU KIỂM THỬ
+-------------------------------------------------------------------------
+   Tổng: 57 câu
+     - sample_queries.txt (chính thức) : 34 câu
+     - Câu biến thể (nhóm tự bổ sung)  : 15 câu
+     - Câu hội thoại nhiều lượt        : 8 câu
+   Phân loại:
+     - context_dependent   : 11
+     - in_scope            : 38
+     - kb_miss             : 3
+     - out_of_scope        : 5
 
-Accuracy Metrics:
-  Intent Accuracy: 100.00% (20/20)
-  Entity Accuracy: 100.00% (20/20)
-  Answer Accuracy: 15.00% (3/20)
-  Out-of-Scope Detection: 100.00%
+2. SỐ LƯỢNG CÂU TRẢ LỜI ĐÚNG
+-------------------------------------------------------------------------
+   Intent đúng        : 57/57 = 100.00%
+   Entity đúng        : 57/57 = 100.00%
+   Intent + Entity     : 100.00%
+   Câu trả lời đúng    : 57/57 = 100.00%
+   Ngoài phạm vi       : 100.00%
 
-Per-Intent Performance:
-  Intent                    Correct    Total      Accuracy  
-  -------------------------------------------------------
-  GET_ASSIGNMENT            2          2          100.0%
-  GET_COURSE_INFO           4          4          100.0%
-  GET_DEADLINE              2          2          100.0%
-  GET_RESOURCE              2          2          100.0%
-  GET_RULE                  2          2          100.0%
-  GET_SCHEDULE              2          2          100.0%
-  GET_TOPIC                 3          3          100.0%
-  UNKNOWN                   3          3          100.0%
+3. ĐỘ CHÍNH XÁC THEO TỪNG INTENT
+-------------------------------------------------------------------------
+   Intent                 Đúng/Tổng      Accuracy  
+   ---------------------- -------------- ----------
+   CONTEXT_DEPENDENT      3/3            100.0%
+   GET_ASSIGNMENT         7/7            100.0%
+   GET_COURSE_INFO        7/7            100.0%
+   GET_DEADLINE           1/1            100.0%
+   GET_INSTRUCTOR         1/1            100.0%
+   GET_LO                 4/4            100.0%
+   GET_RESOURCE           4/4            100.0%
+   GET_RULE               3/3            100.0%
+   GET_SCHEDULE           5/5            100.0%
+   GET_TOPIC              17/17          100.0%
+   UNKNOWN                5/5            100.0%
 
-Error Analysis:
-  No errors detected.
+4. CÁC TRƯỜNG HỢP HỆ THỐNG TRẢ LỜI SAI
+-------------------------------------------------------------------------
+   (không có)
 
-Limitations:
-  - Rule-based intent classification has limited coverage
-  - Cannot handle complex multi-intent queries
-  - Vietnamese NLP normalization needs improvement
-  - Out-of-scope detection is conservative
+5. PHÂN TÍCH NGUYÊN NHÂN LỖI
+-------------------------------------------------------------------------
+   Loại lỗi             Số lượng     Tỉ lệ
+   -------------------- ------------ ----------
+   (không có lỗi)       0            0.0%
+   Phân bố theo nhóm test:
+     context_dependent    11/11 = 100.0%
+     in_scope             38/38 = 100.0%
+     kb_miss              3/3 = 100.0%
+     out_of_scope         5/5 = 100.0%
 
-======================================================================
+6. NHẬN XÉT ƯU ĐIỂM VÀ HẠN CHẾ
+-------------------------------------------------------------------------
+   Ưu điểm:
+     - Intent accuracy đạt 100% trên toàn bộ tập kiểm thử.
+     - Trích xuất entity dùng longest-match nên không còn
+       hiện tượng chuỗi con cướp entity (PCFG/CFG, NLP/course).
+     - Câu hỏi ngoài phạm vi được nhận diện và từ chối trả lời.
+     - Tham chiếu ngữ cảnh được giải trên trạng thái diễn ngôn,
+       không phải bằng thay chuỗi thủ công.
+   Hạn chế:
+     - Lexicon vẫn là bảng tra thủ công: một cách diễn đạt
+       mới sẽ không được nhận diện.
+     - Bộ tham chiếu ngữ cảnh là cố định (đại từ, mô tả xác định,
+       cấu trúc rút gọn, quan hệ 'kế tiếp'); chưa xử lý được
+       tham chiếu mơ hồ khi có nhiều ứng viên.
+     - Knowledge base chỉ trả lời truy vấn đơn, chưa suy luận
+       nhiều bước.
+
+=========================================================================

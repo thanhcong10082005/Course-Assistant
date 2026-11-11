@@ -1,20 +1,14 @@
-# Course Assistant - NLP Assignment
-# Requirements for Python 3.8+
+# Course Assistant - NLP Assignment (CO3085)
+# Python 3.9+
+#
+# Runtime dependencies: NONE.
+# Toàn bộ mã nguồn trong src/ chỉ dùng thư viện chuẩn của Python
+# (json, re, random, dataclasses, pathlib, argparse, unicodedata...).
+# Điều này giúp bài làm chạy được trong bất kỳ môi trường chấm nào.
+#
+# Cố ý KHÔNG khai báo nltk / spacy / transformers / torch / pandas / numpy:
+# hệ thống là rule-based thuần Python, không dùng thư viện nào cho NLP.
+# Thêm chúng chỉ làm `pip install` nặng và tăng rủi ro lỗi môi trường.
 
-# Core dependencies
-# NLTK for basic NLP tasks
-nltk>=3.6
-
-# Data processing
-pandas>=1.3.0
-numpy>=1.19.0
-
-# Optional: For more advanced NLP (not required for basic implementation)
-# transformers>=4.0.0  # For LLM/RAG extension
-# torch>=1.7.0
-
-# Utilities
-regex>=2020.11.13
-
-# Testing
+# --- Testing (chỉ cần khi chạy bộ test) ---
 pytest>=6.0.0
