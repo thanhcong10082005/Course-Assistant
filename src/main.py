@@ -33,7 +33,7 @@ import sys
 from typing import List, Tuple, Dict, Optional
 
 from .preprocessing import Preprocessor
-from .grammar import CFG, generate_template_sentences
+from .grammar import CFG
 from .parser import Parser
 from .semantic import SemanticAnalyzer, SemanticRepresentation, IntentType
 from .knowledge_base import KnowledgeBase
@@ -575,16 +575,11 @@ def write_grammar(output_dir: str) -> None:
 
 
 def write_samples(output_dir: str) -> None:
-    """Artefact 2/9 -- the template questions and the generated sentences."""
-    template_sentences = generate_template_sentences()
-    grammar_sentences = CFG().generate_all_sentences(max_sentences=10000)
+    """Artefact 2/9 -- at most 10,000 CFG sentences, one per line."""
+    grammar_sentences = CFG().generate_all_sentences(max_sentences=10000, seed=42)
 
-    with open(os.path.join(output_dir, 'samples.txt'), 'w', encoding='utf-8') as fh:
-        fh.write("# Template-based sentences (with intent labels)\n")
-        for sent, intent in template_sentences:
-            fh.write(f"{sent}\t(intent={intent})\n")
-
-        fh.write("\n# Grammar-generated sentences (raw, no intent labels)\n")
+    with open(os.path.join(output_dir, 'samples.txt'), 'w',
+              encoding='utf-8', newline='\n') as fh:
         for sent in grammar_sentences:
             fh.write(f"{sent}\n")
 

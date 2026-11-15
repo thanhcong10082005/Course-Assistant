@@ -230,113 +230,63 @@ NP -> WEEK_REF       # tuần + (số | nào)
 
 ### 2.2 Giải thuật sinh câu
 
-
-
 #### 2.2.1 Thuật toán
 
-Sinh câu là **mở rộng đệ quy theo trọng số** (weighted recursive expansion):
+Bộ sinh mở rộng đệ quy các luật CFG theo trọng số. Các luật NP/VP rộng được giữ cho parser; riêng khi sinh câu, `_generation_rules` chọn tập luật hỏi có ràng buộc trong cùng CFG. Ví dụ, chủ ngữ là `chương CHAPTER_NUM` hoặc `tuần WEEK_NUM`, đi với vị ngữ như `học những gì` hoặc `có nội_dung về TOPIC_NAME không`. Cách này hạn chế việc ghép ngẫu nhiên các cụm không phù hợp.
 
-```
-generate_parts(symbol):
-    rules ← productions của symbol
-    rule  ← chọn ngẫu nhiên theo trọng số (rng.choices)
-    parts ← []
-    for sym in rule.rhs:
-        if sym là terminal:  parts.append(sym)
-        else:                parts.extend(generate_parts(sym))
-    return parts
-```
+```text
+generate_parts(symbol, depth, rng):
+    rules <- tập luật sinh của symbol nếu có, ngược lại dùng luật CFG
+    nếu không có rules: trả [symbol]
+    nếu depth <= 0: báo lỗi hết độ sâu
+    rule <- chọn theo trọng số bằng rng.choices
+    parts <- []
+    với mỗi sym trong rule.rhs:
+        nếu sym là terminal: thêm sym vào parts
+        ngược lại: nối generate_parts(sym, depth - 1, rng)
+    trả parts
 
-Sau khi có chuỗi terminal, ba bước kiểm tra và làm đẹp được áp dụng:
-
-```
-generate_all_sentences(max_sentences, seed):
-    rng ← Random(seed)                     # cố định để tái lập kết quả
-    repeat:
-        parts ← generate_parts("S")
-        if vi phạm ràng buộc cấu trúc:  bỏ qua
-        if không kết thúc bằng "?"/"!":  bỏ qua
-        sentence ← detokenize(parts)
-        if không tự nhiên:              bỏ qua
-        thêm vào tập kết quả
-    until đủ max_sentences câu
-    return tập câu đã sắp xếp
+generate_all_sentences(N, max_length=15, seed=42):
+    rng <- Random(seed); sentences <- tập rỗng
+    thử tối đa N * 60 lần hoặc dừng khi đủ N câu:
+        parts <- generate_parts(S, 20, rng)
+        nếu vi phạm ràng buộc cấu trúc: bỏ qua
+        nếu không có đúng một dấu câu ở cuối: bỏ qua
+        sentence <- detokenize(parts)
+        nếu len(sentence.split()) > max_length: bỏ qua
+        nếu không qua bộ lọc hình thức _is_natural: bỏ qua
+        thêm sentence vào sentences
+    trả danh sách sentences đã sắp xếp
 ```
 
-
+Độ sâu 20, độ dài 15 đơn vị tách bằng khoảng trắng và seed 42 là các tham số triển khai được nhóm lựa chọn; đề bài không bắt buộc các giá trị này. Giới hạn số lần thử tránh lặp vô hạn. Khi yêu cầu quá nhiều câu hoặc độ dài quá chặt, hàm có thể trả ít hơn N câu. Giới hạn độ sâu được kiểm tra để tránh lộ tên non-terminal vào đầu ra.
 
 #### 2.2.2 Hàm `detokenize()`
 
-Các terminal nội bộ dùng dấu gạch dưới để làm định danh
-(`bài_tập_lớn`, `tín_chỉ`, `xử_lý_ngôn_ngữ_tự_nhiên`). Hàm `detokenize()`
-chuyển chúng về dạng văn xuôi:
+Terminal nội bộ như `bài_tập_lớn`, `tín_chỉ`, `xử_lý_ngôn_ngữ_tự_nhiên` được chuyển về cụm có khoảng trắng. Hàm còn khôi phục cách viết NLP/CO3085/CFG/PCFG và mã L.O., bỏ khoảng trắng trước dấu câu, viết hoa chữ đầu câu. Các cụm `top_down`, `bottom_up`, `best_first` dùng khoảng trắng ở đầu ra để tokenizer hiện có nhận lại đúng cụm.
 
-```python
-TOKEN_GLUE = {
-    "bài_tập_lớn": "bài tập lớn",
-    "tín_chỉ": "tín chỉ",
-    "giữa_kỳ": "giữa kỳ",
-    "xử_lý_ngôn_ngữ_tự_nhiên": "xử lý ngôn ngữ tự nhiên",
-    ...
-}
+Độ dài được kiểm tra **sau** detokenize theo số đơn vị tách bằng khoảng trắng. Đây không phải số từ ngôn ngữ học tiếng Việt.
+
+#### 2.2.3 Ràng buộc và kết quả kiểm tra
+
+Các điều kiện lọc gồm từ đứng đầu, các lớp từ không được đứng liên tiếp, số phải đi sau “chương” hoặc “tuần”, phạm vi chương 1–12 và tuần 1–15, không lặp chủ thể, có định danh miền và dấu câu cuối. Câu chứa non-terminal chưa mở rộng hoặc dấu câu giữa câu bị loại. Tập hợp được dùng để bỏ câu trùng.
+
+Với seed 42 và giới hạn 15 đơn vị tách bằng khoảng trắng, bộ sinh tạo được 10.000 câu phân biệt, không có dấu gạch dưới hoặc non-terminal bị lộ, dài tối đa 14 đơn vị. Toàn bộ 10.000 câu được parser hiện có phân tích strict và cây giữ đủ dãy chữ/số của đầu vào.
+
+Ví dụ câu sinh:
+
+```text
+Chương 5 nói về gì?
+Chương 4 có phần về tagging không?
+Tuần 15 có nói về PCFG không?
 ```
 
-Ngoài ra hàm còn: viết hoa chuẩn cho các proper noun (`NLP`, `CO3085`, `PCFG`,
-`CFG`, `POS`, `BTL`), khôi phục dạng `L.O.2.5`, bỏ khoảng trắng trước dấu câu,
-và viết hoa chữ đầu câu.
+`output/samples.txt` chỉ chứa tối đa 10.000 câu sinh từ CFG, mỗi dòng một câu, không có tiêu đề, dòng trống hoặc nhãn intent. Hai cách chạy `python scripts/generate_outputs.py` và `python -m src.main --mode generate` dùng chung hàm ghi câu để bảo đảm cùng định dạng. Đề bài giới hạn tối đa 10.000 câu, không yêu cầu phải sinh đủ số lượng này. Trong lần chạy với seed 42, file có đúng 10.000 câu phân biệt. Các kiểm tra cấu trúc và phân tích lại không xác nhận mọi câu đều tự nhiên hoặc mọi chủ đề thực sự thuộc chương/tuần được nhắc trong câu hỏi.
 
-#### 2.2.3 Bộ ràng buộc sinh câu
+#### 2.2.4 Tính tái lập
 
-Để câu sinh ra luôn có nghĩa, hàm `_violates_constraints()` kiểm tra 8 luật trên
-chuỗi terminal:
+`random.Random(seed)` sử dụng RNG cục bộ. Cùng tham số và seed cho cùng danh sách câu đã sắp xếp, không thay đổi RNG toàn cục. Trọng số điều khiển lựa chọn luật, không phải trọng số được học từ dữ liệu hoặc điểm đúng ngữ nghĩa của câu.
 
-
-| #   | Ràng buộc                                       | Ví dụ bị loại                       |
-| --- | ----------------------------------------------- | ----------------------------------- |
-| 1   | Không mở câu bằng động từ / lượng từ yếu        | `Tra với chương 4?`, `Mấy bài học?` |
-| 2   | Không có hai từ chỉ định / hai từ hỏi liền nhau | `Gì nào học?`                       |
-| 3   | Số trần không được đứng, phải có head noun      | `10 nói nào?`                       |
-| 4   | Số chương ∈ [1,12], số tuần ∈ [1,15]            | `Chương 13 học gì?`                 |
-| 5   | Không lặp lại chủ thể                           | `Chương này … chương 10?`           |
-| 6   | Từ hỏi không được mở câu                        | `Gì chương 6 sử dụng?`              |
-| 7   | Bắt buộc có ≥ 1 định danh miền                  | `Môn có bao nhiêu?`                 |
-| 8   | Bắt buộc kết thúc bằng `?` hoặc `!`             | `Chương 4 học gì`                   |
-
-
-
-
-#### 2.2.4 Kết quả
-
-`output/samples.txt` chứa **10 000 câu** do bộ sinh tạo ra (tối đa theo yêu cầu
-đề bài), cộng phần template thủ công có nhãn intent. Kết quả so sánh trước và
-sau khi tái thiết kế văn phạm:
-
-
-| Chỉ số                             | Trước | Sau   |
-| ---------------------------------- | ----- | ----- |
-| Câu chứa dấu `_` (chưa detokenize) | 6 278 | **0** |
-| Câu rò non-terminal (`WH_PHRASE`)  | 3 239 | **0** |
-| Câu mở bằng động từ                | 727   | **0** |
-| Câu thiếu dấu câu kết thúc         | —     | **0** |
-
-
-Ví dụ câu sinh ra (trích từ `output/samples.txt`):
-
-```
-Chương 4 yêu cầu gì?
-BTL muốn nói assignment?
-L.O.2.3 học gì?
-AI được phép dùng trong bài tập lớn không?
-Tuần 15 học những gì?
-```
-
-
-
-#### 2.2.5 Tính tất định
-
-Bộ sinh dùng `seed=42` cố định. Chạy lại hai lần cho ra **danh sách câu giống
-hệt nhau** (byte-identical), đảm bảo `output/samples.txt` tái lập được — điều
-kiện cần để video demo và báo cáo luôn khớp với code.
 
 ### 2.3 Bộ phân tích cú pháp
 
@@ -457,6 +407,8 @@ class SemanticRepresentation:
         return f"{self.intent.value}({entity_str})"
 ```
 
+Trong `analyze()`, `attributes` và `query_type` giữ giá trị mặc định; thuộc tính được hỏi nằm trong `entities["attribute"]`. Chuỗi dạng logic mô tả truy vấn, không được thực thi như mã hay SQL.
+
 Ví dụ thực tế từ hệ thống:
 
 
@@ -493,7 +445,7 @@ function extract_intent(text, tokens, entities):
         return UNKNOWN
 
     # Bước 2: chấm điểm các luật trong INTENT_RULES
-    scores ← {}
+    scores ← bảng điểm mặc định bằng 0
     for (intent, pattern, score) in INTENT_RULES:
         if re.search(pattern, normalized):
             scores[intent] ← scores[intent] + score
@@ -508,16 +460,30 @@ function extract_intent(text, tokens, entities):
     if entities.assignment
        or entities.part:            scores[GET_ASSIGNMENT] += 25
 
-    # Bước 4: nếu câu chứa tham chiếu ngữ cảnh mà không có hội thoại đang mở
-    if has_reference(text) and not has_active_session():
-        return CONTEXT_DEPENDENT
-
     return intent có điểm cao nhất, nếu điểm > 0; ngược lại UNKNOWN
 ```
 
+Việc phát hiện tham chiếu thuộc tầng điều phối và DialogueManager, không nằm trong `extract_intent()`. Trong `analyze()`, entity từ context được bổ sung mà không ghi đè entity đã trích; intent được chấm lại nếu có context. Khi `context_dependent=True`, intent được chuyển thành `CONTEXT_DEPENDENT`.
+
+Mã giả kết hợp các bước trong `analyze()`:
+
+```text
+analyze(text, tokens, context):
+    entities <- extract_entities(text)
+    intent <- extract_intent(text, tokens, entities)
+    resolved <- các trường context, trừ các khóa điều khiển:
+                inferred_entities, context_dependent, unresolved_reference
+    bổ sung resolved vào entities, không ghi đè khóa đã có
+    nếu resolved khác rỗng: chấm lại intent theo entities
+    nếu context_dependent = true: intent <- CONTEXT_DEPENDENT
+    bổ sung inferred_entities, không ghi đè khóa đã có
+    trả SemanticRepresentation(intent, entities, raw_query=text)
+```
+
+
 **Vì sao cần chấm điểm thay vì thứ tự ưu tiên cứng?** Nhiều từ khoá xung đột.
 Ví dụ *"Tài liệu nào liên quan đến PCFG?"* chứa cả `tài liệu` (→ GET_RESOURCE) lẫn
-`pcfg` (→ GET_TOPIC). Chấm điểm cho phép nhiều tín hiệu cùng tồn tại; các điểm cộng
+`liên quan đến` (→ GET_TOPIC). Chấm điểm cho phép nhiều tín hiệu cùng tồn tại; các điểm cộng
 theo entity ở Bước 3 mới là thứ phá thế hoà, thay vì phải cố đặt một thứ tự
 tuần tự cố định.
 
@@ -533,14 +499,15 @@ function extract_entities(text, intent):
     # Định danh miền — tra bằng LEXICON, chiến lược LONGEST-MATCH
     # (nguồn sự thật duy nhất: models/lexicon.json)
     matches ← lexicon.lookup(
-        normalized,
+        text,
         priority_groups = ["assignment_part", "part_of_assignment", "assignment",
                            "learning_outcome", "chapter", "week", "rule",
                            "attribute", "topic", "course", "resource",
                            "instructor"],
     )
-    for match in matches:                 # giữ match đầu tiên (dài/ưu tiên cao nhất)
-        entities[match.entity_type] ← match.canonical
+    for match in matches:                 # lookup đã loại các cụm chồng lấn
+        if match.entity_type chưa có trong entities:
+            entities[match.entity_type] ← match.canonical
 
     # Mã mục tiêu học tập: lexicon chỉ biết mã có thật, cần quét riêng
     if re.search(r"\blo_(\d)(?:_(\d+))?", normalized):
@@ -553,23 +520,21 @@ function extract_entities(text, intent):
     if re.search(r"tuần\s*(\d+)", normalized):
         entities["week"] ← "WEEK_" + số.zfill(2)
 
-    # Thuộc tính theo intent
-    if intent = GET_COURSE_INFO:
-        if có "tín"/"credit":            entities["attribute"] ← "credits"
-        elif có "midterm"/"giữa kỳ":    entities["attribute"] ← "midterm_duration"
-        elif có "final"/"cuối kỳ":       entities["attribute"] ← "final_duration"
-        elif có "phần"/"gồm những":     entities["attribute"] ← "parts"
-        elif có "mô tả"/"giới thiệu":    entities["attribute"] ← "description"
-        elif có "mục tiêu":              entities["attribute"] ← "learning_outcomes"
+    # Scope và thuộc tính được bổ sung độc lập với intent
+    if lexicon.is_out_of_scope(text): entities["scope"] ← "OUT_OF_SCOPE"
+    attribute ← _extract_attribute(text)
+    if attribute tồn tại: entities["attribute"] ← attribute
 
     return entities
 ```
 
-> **Vì sao dùng lexicon thay vì so khớp từ khoá?** Vì bề mặt tiếng Việt có
+Khi có các cụm chồng lấn, `lookup()` ưu tiên cụm dài hơn, sau đó xét thứ tự nhóm và vị trí. Các kết quả được trả theo vị trí xuất hiện trong câu; nếu nhiều kết quả có cùng khóa entity, bộ trích xuất giữ kết quả đầu tiên. Cấu trúc hiện tại chỉ giữ một giá trị cho mỗi khóa.
+
+> **Vì sao ưu tiên cụm dài khi tra lexicon?** Vì bề mặt tiếng Việt có
 > thể chứa bề mặt khác: `"semantic grammar"` phải thắng `"semantic"`,
-> `"statistical nlp"` phải thắng `"nlp"`. Chiến lược **longest-match** giải quyết
-> trọn vẹn lớp bug "chuỗi con cướp entity" thay vì phải viết thứ tự ưu tiên
-> thủ công cho từng cặp bề mặt.
+> `"statistical nlp"` phải thắng `"nlp"`. Chiến lược **longest-match** hạn chế lỗi khớp chồng lấn
+> mà không phải viết ngoại lệ thủ công cho từng cặp bề mặt. Cơ chế này xử lý
+> bề mặt từ vựng, không tự xác nhận quan hệ ngữ nghĩa giữa các entity.
 
 
 
@@ -581,7 +546,7 @@ cứu **surface form → canonical value** cho từng nhóm thực thể:
 
 | Nhóm               | Ví dụ surface form        | Canonical value            |
 | ------------------ | ------------------------- | -------------------------- |
-| `course`           | `xử lý ngôn ngữ tự nhiên` | `CO3085`                   |
+| `course`           | `co3085`                  | `CO3085`                   |
 | `chapter`          | `chương 4`                | `CH04`                     |
 | `week`             | `tuần 12`                 | `WEEK_12`                  |
 | `topic`            | `semantic grammar`        | `SEMANTIC_GRAMMAR`         |
@@ -609,6 +574,8 @@ phạm vi**.
 
 #### 3.2.1 Đặc tả pipeline
 
+Pipeline dưới đây mô tả thứ tự xử lý của `process_query()`. Cây cú pháp được lưu riêng để trình bày kết quả Phần I; semantic hiện sử dụng văn bản và ngữ cảnh, không lấy cây làm đầu vào. Khi có tham chiếu, DialogueManager bổ sung entity/cờ ngữ cảnh trước bước nhận diện intent/entity. Hai bước intent/entity và tạo biểu diễn ngữ nghĩa cùng nằm trong `SemanticAnalyzer.analyze()`.
+
 ```
 Input (câu hỏi tiếng Việt)
   │
@@ -626,13 +593,14 @@ Input (câu hỏi tiếng Việt)
       (fallback: dựng cây theo mẫu nếu không khớp văn phạm)
   │
   ▼
-[3] SEMANTIC REPRESENTATION
-      cây cú pháp / văn bản → dạng logic  GET_INTENT(...)
-  │
-  ▼
-[4] INTENT / ENTITY
+[3] INTENT / ENTITY
       intent  : khớp luật có trọng số + điểm cộng theo entity
       entity  : nhận diện & chuẩn hoá qua lexicon (longest-match)
+      context : bổ sung thực thể từ ngữ cảnh khi có tham chiếu
+  │
+  ▼
+[4] SEMANTIC REPRESENTATION
+      intent + entity → dạng logic  GET_INTENT(...)
   │
   ▼
 [5] QUERY
@@ -645,7 +613,7 @@ Input (câu hỏi tiếng Việt)
   ▼
 [7] ANSWER
       sinh câu trả lời tiếng Việt
-      nếu không có thông tin → thông báo lỗi, KHÔNG bịa thông tin
+      thiếu dữ liệu → thông báo phù hợp; cần ngữ cảnh → hỏi lại
 ```
 
 
@@ -668,12 +636,19 @@ Input (câu hỏi tiếng Việt)
 │  TẦNG 2 — PARSING                │  src/grammar.py + src/parser.py   │
 │  ┌────────────────────────────────────────────────────────────────┐  │
 │  │   CFG Grammar ──► Earley Chart Parser ──► Parse Tree          │  │
-│  │   (36 non-terminal, 182 terminal)      (fallback: pattern)     │  │
+│  │   (40 non-terminal, 183 terminal)      (fallback: pattern)     │  │
 │  └────────────────────────────────────────────────────────────────┘  │
 └──────────────────────────────────┬───────────────────────────────────┘
                                    │
 ┌──────────────────────────────────▼───────────────────────────────────┐
-│  TẦNG 3 — SEMANTIC               │  src/semantic.py                  │
+│  TẦNG 3 — NGỮ CẢNH HỘI THOẠI     │  src/dialogue.py                 │
+│  ┌────────────────────────────────────────────────────────────────┐  │
+│  │  Dialogue State ◄──► Reference Resolution ──► Rewrite Query  │  │
+│  └────────────────────────────────────────────────────────────────┘  │
+└──────────────────────────────────┬───────────────────────────────────┘
+                                   │
+┌──────────────────────────────────▼───────────────────────────────────┐
+│  TẦNG 4 — SEMANTIC               │  src/semantic.py                  │
 │  ┌────────────────────────┬────────────────────────┬──────────────┐  │
 │  │ Semantic Representation│  Intent Classification │   Entity     │  │
 │  │  GET_X(entity=value)   │  (rule + ưu tiên)      │  Extraction  │  │
@@ -684,7 +659,7 @@ Input (câu hỏi tiếng Việt)
 └──────────────────────────────────┬───────────────────────────────────┘
                                    │
 ┌──────────────────────────────────▼───────────────────────────────────┐
-│  TẦNG 4 — QUERY & KNOWLEDGE BASE │  src/knowledge_base.py            │
+│  TẦNG 5 — QUERY & KNOWLEDGE BASE │  src/knowledge_base.py            │
 │  ┌────────────────────────────────────────────────────────────────┐  │
 │  │  Query Engine ──► Course │ Schedule │ Topics │ Assignment │   │  │
 │  │                      │ Regulations │ Resources │ FAQ │ LO       │  │
@@ -692,17 +667,10 @@ Input (câu hỏi tiếng Việt)
 └──────────────────────────────────┬───────────────────────────────────┘
                                    │
 ┌──────────────────────────────────▼───────────────────────────────────┐
-│  TẦNG 5 — ANSWER GENERATION                                        │
+│  TẦNG 6 — ANSWER GENERATION                                        │
 │  ┌────────────┬─────────────────┬──────────────────┐                 │
 │  │  Retrieve  │  Template Answer │  Fallback Message│                │
 │  └────────────┴─────────────────┴──────────────────┘                 │
-└──────────────────────────────────┬───────────────────────────────────┘
-                                   │
-┌──────────────────────────────────▼───────────────────────────────────┐
-│  TẦNG 6 — NGỮ CẢNH HỘI THOẠI     │  src/dialogue.py                 │
-│  ┌────────────────────────────────────────────────────────────────┐  │
-│  │  Dialogue State ◄──► Reference Resolution ──► Rewrite Query  │  │
-│  └────────────────────────────────────────────────────────────────┘  │
 └──────────────────────────────────┬───────────────────────────────────┘
                                    │
                               ┌────▼────┐
@@ -712,22 +680,27 @@ Input (câu hỏi tiếng Việt)
 
 
 
+Các mũi tên trong sơ đồ thể hiện thứ tự điều phối; kết quả cây được lưu riêng, không được truyền vào bộ phân tích ngữ nghĩa. Khối ngữ cảnh được dùng khi câu có tham chiếu. Quy mô văn phạm sau cập nhật là 40 non-terminal, 183 terminal và 350 luật.
+
+Trong luồng `process_dialogue()`, chương trình phân giải tham chiếu trước tiền xử lý và semantic, sau đó trả lời và cập nhật trạng thái; luồng này không gọi parser ở mỗi lượt. Knowledge Base hiện lấy dữ liệu từ các cấu trúc Python trong `src/knowledge_base.py`. `_answer_for()` chọn thông báo cần làm rõ, phản hồi `UNKNOWN` hoặc truy vấn KB theo intent/entity.
+
 #### 3.2.3 Cấu trúc mã nguồn
 
 ```
 src/
 ├── preprocessing.py   # Normalize, Tokenize, POS tag, multi-word entity spans
-├── grammar.py         # CFG + WeightedRule + detokenize + bộ sinh câu
-├── parser.py          # Recursive-descent parser + fallback pattern parser
+├── grammar.py         # CFG + GrammarRule + detokenize + bộ sinh câu
+├── parser.py          # Earley chart parser + fallback pattern parser
+├── lexicon.py         # Khớp cụm từ, loại chồng lấn và ánh xạ entity
 ├── semantic.py        # IntentType, SemanticRepresentation, Intent/Entity
 ├── knowledge_base.py  # Dữ liệu môn học + query engine + sinh câu trả lời
 ├── dialogue.py        # DialogueState, DialogueManager, reference resolution
 └── main.py            # CourseAssistant — điều phối pipeline + CLI
 ```
 
-Đặc điểm thiết kế đáng chú ý: `grammar.py` **là nguồn sự thật duy nhất cho
-ngôn ngữ**. `parser.py` đọc productions, terminal classes và tập FIRST/FOLLOW
-từ đó, thay vì hard-code một bản sao. Nhờ vậy khi văn phạm thay đổi, parser
+Đặc điểm thiết kế đáng chú ý: CFG trong `grammar.py` là nguồn văn phạm dùng chung cho bộ sinh câu và parser. `parser.py` xây chỉ mục productions và bảng đối sánh terminal từ CFG,
+thay vì dùng một bản văn phạm riêng. Các API FIRST/FOLLOW có trong CFG,
+nhưng Earley parser không dùng chúng như một parser LL(1). Nhờ vậy khi văn phạm thay đổi, parser
 tự động đồng bộ.
 
 ---

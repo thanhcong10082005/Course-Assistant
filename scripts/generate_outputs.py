@@ -1,5 +1,5 @@
 """
-Regenerate every artefact in ``output/``.
+Regenerate ``output/grammar.txt`` and ``output/samples.txt``.
 
 Usage::
 
@@ -11,13 +11,13 @@ which is what makes the demo video and the report reproducible.
 
 import sys
 from pathlib import Path
-from typing import List, Tuple
 
 ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from src.grammar import CFG, generate_template_sentences  # noqa: E402
+from src.grammar import CFG  # noqa: E402
+from src.main import write_samples  # noqa: E402
 
 OUTPUT_DIR = ROOT / "output"
 
@@ -36,31 +36,10 @@ def generate_grammar_file() -> None:
 
 
 def generate_samples_file() -> None:
-    """
-    output/samples.txt -- the generated corpus.
-
-    Two sections:
-      1. the curated template-based questions with their intent label
-      2. the sentences produced by the weighted grammar generator
-    """
-    lines: List[str] = []
-    lines.append("# ===== GENERATED SAMPLE SENTENCES =====")
-    lines.append("# Section 1: template-based questions (with their intent label)")
-    lines.append("")
-
-    for sentence, intent in generate_template_sentences():
-        lines.append(f"{sentence}\t(intent={intent})")
-
-    lines.append("")
-    lines.append("# Section 2: sentences produced by the weighted CFG generator")
-    lines.append("# (deterministic: seed=42)")
-    lines.append("")
-
-    grammar = CFG()
-    for sentence in grammar.generate_all_sentences(max_sentences=10000, seed=42):
-        lines.append(sentence)
-
-    write(OUTPUT_DIR / "samples.txt", "\n".join(lines) + "\n")
+    """Use the same sentence-only writer as the main program."""
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    write_samples(str(OUTPUT_DIR))
+    print("  wrote output/samples.txt (one CFG sentence per line)")
 
 
 def main() -> None:

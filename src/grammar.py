@@ -94,9 +94,10 @@ TOKEN_GLUE: Dict[str, str] = {
     "python_nlp": "python nlp",
     "question_answering": "question answering",
     "selectional_restriction": "selectional restriction",
-    "top_down": "top-down",
-    "bottom_up": "bottom-up",
-    "best_first": "best-first",
+    # Space-separated surfaces round-trip through the existing tokenizer.
+    "top_down": "top down",
+    "bottom_up": "bottom up",
+    "best_first": "best first",
     "llm_rag": "LLM/RAG",
     "tp.hcm": "TP.HCM",
     "tp_hcm": "TP.HCM",
@@ -225,7 +226,9 @@ class CFG:
         self._terminal_classes: Optional[Dict[str, str]] = None
         self._first_sets: Optional[Dict[str, Set[str]]] = None
         self._follow_sets: Optional[Dict[str, Set[str]]] = None
+        self._generation_rules: Dict[str, List[GrammarRule]] = {}
         self._build_grammar()
+        self._build_generation_rules()
 
     # ------------------------------------------------------------------
     # Rule registration
@@ -586,6 +589,77 @@ class CFG:
         self._add_rule("PUNCT", ["?"], weight=10.0, comment="dấu câu hỏi")
         self._add_rule("PUNCT", ["!"], weight=0.3, comment="dấu chấm than")
 
+    def _build_generation_rules(self) -> None:
+        """Register a typed subset of the same CFG for sentence generation.
+
+        The broad NP/VP rules remain available to the parser. Sampling those
+        independently cannot enforce verb arguments or subject agreement, so
+        generation uses the productions registered here for question nodes.
+        These are ordinary CFG rules too: the parser sees every one of them.
+        A question about a topic in a chapter/week does not assert that the
+        topic is actually taught there; factual validation belongs to the KB.
+        """
+        def add(lhs: str, rhs: str, comment: str, weight: float = 1.0) -> None:
+            self._add_rule(lhs, rhs.split(), weight=weight,
+                           comment="sinh có ràng buộc: " + comment)
+            self._generation_rules.setdefault(lhs, []).append(self.rules[lhs][-1])
+
+        for head, number in (("chương", "CHAPTER_NUM"), ("tuần", "WEEK_NUM")):
+            add("GEN_SUBJECT", f"{head} {number}", "chủ ngữ kèm số hợp lệ")
+            add("GEN_LOCATION", f"trong {head} {number}", "phạm vi nội dung")
+
+        add("WH_QUESTION", "GEN_SUBJECT GEN_WH_PRED ?", "chủ ngữ + câu hỏi nội dung", 5.0)
+        add("YES_NO_QUESTION", "GEN_SUBJECT GEN_YN_PRED ?", "chủ ngữ + có ... không", 5.0)
+
+        for rhs in (
+            "học gì", "học những gì", "nói_về gì", "có nội_dung gì",
+            "có những nội_dung nào", "có những phương_pháp gì",
+            "học những gì về TOPIC_NAME",
+            "trình_bày nội_dung gì về TOPIC_NAME",
+            "giới_thiệu nội_dung gì về TOPIC_NAME",
+            "có những nội_dung nào về TOPIC_NAME",
+            "có những phần nào về TOPIC_NAME",
+            "có những tài_liệu nào về TOPIC_NAME",
+            "có những bài_giảng nào về TOPIC_NAME",
+            "nói_về TOPIC_NAME như_thế_nào",
+            "trình_bày TOPIC_NAME như_thế_nào",
+            "giới_thiệu TOPIC_NAME như_thế_nào",
+        ):
+            add("GEN_WH_PRED", rhs, "vị ngữ hỏi nội dung / tài liệu")
+
+        for rhs in (
+            "có học_về TOPIC_NAME không",
+            "có nói_về TOPIC_NAME không",
+            "có giới_thiệu TOPIC_NAME không",
+            "có trình_bày TOPIC_NAME không",
+            "có nội_dung về TOPIC_NAME không",
+            "có phần về TOPIC_NAME không",
+            "có tài_liệu về TOPIC_NAME không",
+            "có bài_giảng về TOPIC_NAME không",
+        ):
+            add("GEN_YN_PRED", rhs, "vị ngữ nghi vấn có / không")
+
+        for rhs in (
+            "nội_dung về TOPIC_NAME GEN_LOCATION là gì ?",
+            "nội_dung về TOPIC_NAME GEN_LOCATION gồm những gì ?",
+            "nội_dung về TOPIC_NAME GEN_LOCATION được trình_bày như_thế_nào ?",
+            "tài_liệu về TOPIC_NAME GEN_LOCATION là gì ?",
+            "tài_liệu về TOPIC_NAME GEN_LOCATION gồm những gì ?",
+            "bài_giảng về TOPIC_NAME GEN_LOCATION gồm những nội_dung nào ?",
+        ):
+            add("WH_QUESTION", rhs, "danh ngữ chủ đề có phạm vi", 1.0)
+
+        for rhs in (
+            "môn COURSE_NAME có bao_nhiêu tín_chỉ ?",
+            "môn COURSE_NAME gồm những phần nào ?",
+            "chương nào nói_về TOPIC_NAME ?",
+            "tài_liệu về TOPIC_NAME ở_đâu ?",
+            "bài_tập_lớn gồm những phần nào ?",
+            "hạn_nộp bài_tập_lớn là khi_nào ?",
+            "quy_định về sử_dụng llm_rag trong môn COURSE_NAME là gì ?",
+        ):
+            add("WH_QUESTION", rhs, "câu hỏi độc lập trong miền môn học", 0.5)
+
     # ------------------------------------------------------------------
     # Accessors
     # ------------------------------------------------------------------
@@ -764,11 +838,11 @@ class CFG:
 
         rng = rng or self.rng
 
-        rules = self.get_rules(symbol)
+        rules = self._generation_rules.get(symbol, self.get_rules(symbol))
         if not rules:
             return [symbol]
         if max_depth <= 0:
-            return [symbol]
+            raise ValueError("Generation depth exhausted before reaching terminals")
 
         rule = self._weighted_choice(rules, rng)
 
@@ -852,6 +926,12 @@ class CFG:
         if parts[-1] not in {"?", "!"}:
             return True
 
+        # Never leak an unfinished derivation or internal punctuation.
+        if any(self.is_nonterminal(part) for part in parts):
+            return True
+        if any(part in {"?", "!"} for part in parts[:-1]):
+            return True
+
         return False
 
     def _is_natural(self, sentence: str) -> bool:
@@ -874,6 +954,8 @@ class CFG:
     def detokenize(self, sentence: str) -> str:
         """Turn an underscore-joined derivation into readable Vietnamese."""
         result = sentence
+
+        result = result.replace("như_thế_nào", "như thế nào")
 
         # The longest surface forms must be replaced first, otherwise
         # "bài_tập" would eat the beginning of "bài_tập_lớn".
@@ -910,6 +992,8 @@ class CFG:
         generated ``output/samples.txt`` reproducible for the demo video.
         """
         rng = random.Random(seed)
+        if max_sentences < 0 or max_length < 1:
+            raise ValueError("max_sentences must be non-negative; max_length must be positive")
         sentences: Set[str] = set()
         attempts = 0
         max_attempts = max_sentences * 60
@@ -923,10 +1007,12 @@ class CFG:
                 continue
             if parts.count("?") + parts.count("!") != 1:
                 continue
-            if len(parts) > max_length + 4:
+            if len(parts) > max_length + 1:
                 continue
 
             sentence = self.detokenize(" ".join(parts))
+            if len(sentence.split()) > max_length:
+                continue
             if not self._is_natural(sentence):
                 continue
 
@@ -943,6 +1029,8 @@ class CFG:
         lines.append("# ===== COURSE ASSISTANT - CONTEXT-FREE GRAMMAR =====")
         lines.append("# Domain: Vietnamese questions about the NLP course (CO3085)")
         lines.append("# Format: <non-terminal> -> <symbol> ...   [# comment]")
+        lines.append("# Generation uses the typed question subset marked 'sinh có ràng buộc'.")
+        lines.append("# The parser reads all productions, including that generation subset.")
         lines.append("")
         lines.append(f"# Non-terminals ({len(self.nonterminals)}): "
                      + ", ".join(sorted(self.nonterminals)))
@@ -985,7 +1073,7 @@ COURSE_QUESTION_TEMPLATES = [
     ("Tuần {week} học gì?", "GET_SCHEDULE"),
     ("Hôm nay học gì?", "GET_SCHEDULE"),
     ("Chương {chapter} học vào tuần nào?", "GET_SCHEDULE"),
-    ("{topic} được học ở đâu?", "GET_SCHEDULE"),
+    ("{topic} được học ở đâu?", "GET_TOPIC"),
     ("{topic} được học vào tuần nào?", "GET_SCHEDULE"),
     ("Lịch học tuần {week} là gì?", "GET_SCHEDULE"),
 

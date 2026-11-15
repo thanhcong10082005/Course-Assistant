@@ -1,10 +1,12 @@
 # ===== COURSE ASSISTANT - CONTEXT-FREE GRAMMAR =====
 # Domain: Vietnamese questions about the NLP course (CO3085)
 # Format: <non-terminal> -> <symbol> ...   [# comment]
+# Generation uses the typed question subset marked 'sinh có ràng buộc'.
+# The parser reads all productions, including that generation subset.
 
-# Non-terminals (36): ADJ, ADV, ASSIGNMENT_NAME, ATTR_NOUN, AUX, CHAPTER_NUM, CHAPTER_REF, COURSE_MOD, COURSE_NAME, COURSE_REF, DET, LO_ID, MODS, NOMINAL, NOUN, NP, NUM, PART_NUM, PART_REF, PP, PREP, PRONOUN, PUNCT, QUANT, QUESTION, S, TECH_NAME, TOPIC_NAME, VERB, VP, WEEK_NUM, WEEK_REF, WH_PHRASE, WH_QUESTION, WH_QWORD, YES_NO_QUESTION
+# Non-terminals (40): ADJ, ADV, ASSIGNMENT_NAME, ATTR_NOUN, AUX, CHAPTER_NUM, CHAPTER_REF, COURSE_MOD, COURSE_NAME, COURSE_REF, DET, GEN_LOCATION, GEN_SUBJECT, GEN_WH_PRED, GEN_YN_PRED, LO_ID, MODS, NOMINAL, NOUN, NP, NUM, PART_NUM, PART_REF, PP, PREP, PRONOUN, PUNCT, QUANT, QUESTION, S, TECH_NAME, TOPIC_NAME, VERB, VP, WEEK_NUM, WEEK_REF, WH_PHRASE, WH_QUESTION, WH_QWORD, YES_NO_QUESTION
 
-# Terminals (182): !, 1, 10, 11, 12, 13, 14, 15, 2, 3, 30, 4, 5, 6, 60, 7, 8, 9, 90, ?, ai, anaphora, assignment, atn, bao, bao_giờ, bao_gồm, bao_nhiêu, best_first, biết, bottom_up, btl, bài, bài_giảng, bài_tập_lớn, báo_cáo, bị, centering, cfg, cho, chính_sách, chương, co3085, cuối_kỳ, các, còn, có, cần, của, deadline, dependency, disambiguation, discourse, dùng, feature, file, final, ghi_chú, giới_thiệu, giữa_kỳ, grammar, gì, gồm, hãy, hạn_nộp, học, học_kỳ, học_phần, học_về, hỏi, hỏi_đáp, i, ii, iii, iv, khi_nào, không, kiểm_tra, kéo_dài, l.o.1.1, l.o.1.2, l.o.1.3, l.o.1.4, l.o.1.5, l.o.2.1, l.o.2.2, l.o.2.3, l.o.2.4, l.o.2.5, l.o.3.1, l.o.3.2, l.o.3.3, l.o.3.4, l.o.3.5, l.o.4.1, l.o.4.2, lexicon, liên_quan, llm_rag, là, làm_quen, lịch_học, midterm, muốn, mình, môn, môn_học, mấy, mới, nhiêu, nhóm, những, nlp, nào, này, nên, nó, nói, nói_về, nằm, nội_dung, output, parser, parsing, pcfg, phút, phương_pháp, phải, phần, phần_hẹn, phần_này, pos, python_nlp, quan_trọng, question_answering, quy_định, reference, rồi, sau, selectional_restriction, semantic, semantic_grammar, statistical_nlp, syntax, sẽ, sử_dụng, tagging, tham_khảo, thành_viên, thông_tin, thế_nào, thời_hạn, tiêu_chí, top_down, tra, trong, trình_bày, tuần, tài_liệu, tìm, tín_chỉ, tôi, tớ, unification, vào, vậy, về, với, wsd, xem, xuất, xây_dựng, xử_lý_ngôn_ngữ_tự_nhiên, yêu_cầu, đó, được, đến, đề_bài, định_nghĩa, đồ_án, ở, ở_đâu
+# Terminals (183): !, 1, 10, 11, 12, 13, 14, 15, 2, 3, 30, 4, 5, 6, 60, 7, 8, 9, 90, ?, ai, anaphora, assignment, atn, bao, bao_giờ, bao_gồm, bao_nhiêu, best_first, biết, bottom_up, btl, bài, bài_giảng, bài_tập_lớn, báo_cáo, bị, centering, cfg, cho, chính_sách, chương, co3085, cuối_kỳ, các, còn, có, cần, của, deadline, dependency, disambiguation, discourse, dùng, feature, file, final, ghi_chú, giới_thiệu, giữa_kỳ, grammar, gì, gồm, hãy, hạn_nộp, học, học_kỳ, học_phần, học_về, hỏi, hỏi_đáp, i, ii, iii, iv, khi_nào, không, kiểm_tra, kéo_dài, l.o.1.1, l.o.1.2, l.o.1.3, l.o.1.4, l.o.1.5, l.o.2.1, l.o.2.2, l.o.2.3, l.o.2.4, l.o.2.5, l.o.3.1, l.o.3.2, l.o.3.3, l.o.3.4, l.o.3.5, l.o.4.1, l.o.4.2, lexicon, liên_quan, llm_rag, là, làm_quen, lịch_học, midterm, muốn, mình, môn, môn_học, mấy, mới, nhiêu, nhóm, như_thế_nào, những, nlp, nào, này, nên, nó, nói, nói_về, nằm, nội_dung, output, parser, parsing, pcfg, phút, phương_pháp, phải, phần, phần_hẹn, phần_này, pos, python_nlp, quan_trọng, question_answering, quy_định, reference, rồi, sau, selectional_restriction, semantic, semantic_grammar, statistical_nlp, syntax, sẽ, sử_dụng, tagging, tham_khảo, thành_viên, thông_tin, thế_nào, thời_hạn, tiêu_chí, top_down, tra, trong, trình_bày, tuần, tài_liệu, tìm, tín_chỉ, tôi, tớ, unification, vào, vậy, về, với, wsd, xem, xuất, xây_dựng, xử_lý_ngôn_ngữ_tự_nhiên, yêu_cầu, đó, được, đến, đề_bài, định_nghĩa, đồ_án, ở, ở_đâu
 
 # --- ADJ ---
 ADJ -> mới    # tính từ
@@ -87,6 +89,42 @@ DET -> bao    # từ hỏi
 DET -> mấy    # từ hỏi
 DET -> này    # từ hỏi
 DET -> đó    # từ hỏi
+
+# --- GEN_LOCATION ---
+GEN_LOCATION -> trong chương CHAPTER_NUM    # sinh có ràng buộc: phạm vi nội dung
+GEN_LOCATION -> trong tuần WEEK_NUM    # sinh có ràng buộc: phạm vi nội dung
+
+# --- GEN_SUBJECT ---
+GEN_SUBJECT -> chương CHAPTER_NUM    # sinh có ràng buộc: chủ ngữ kèm số hợp lệ
+GEN_SUBJECT -> tuần WEEK_NUM    # sinh có ràng buộc: chủ ngữ kèm số hợp lệ
+
+# --- GEN_WH_PRED ---
+GEN_WH_PRED -> học gì    # sinh có ràng buộc: vị ngữ hỏi nội dung / tài liệu
+GEN_WH_PRED -> học những gì    # sinh có ràng buộc: vị ngữ hỏi nội dung / tài liệu
+GEN_WH_PRED -> nói_về gì    # sinh có ràng buộc: vị ngữ hỏi nội dung / tài liệu
+GEN_WH_PRED -> có nội_dung gì    # sinh có ràng buộc: vị ngữ hỏi nội dung / tài liệu
+GEN_WH_PRED -> có những nội_dung nào    # sinh có ràng buộc: vị ngữ hỏi nội dung / tài liệu
+GEN_WH_PRED -> có những phương_pháp gì    # sinh có ràng buộc: vị ngữ hỏi nội dung / tài liệu
+GEN_WH_PRED -> học những gì về TOPIC_NAME    # sinh có ràng buộc: vị ngữ hỏi nội dung / tài liệu
+GEN_WH_PRED -> trình_bày nội_dung gì về TOPIC_NAME    # sinh có ràng buộc: vị ngữ hỏi nội dung / tài liệu
+GEN_WH_PRED -> giới_thiệu nội_dung gì về TOPIC_NAME    # sinh có ràng buộc: vị ngữ hỏi nội dung / tài liệu
+GEN_WH_PRED -> có những nội_dung nào về TOPIC_NAME    # sinh có ràng buộc: vị ngữ hỏi nội dung / tài liệu
+GEN_WH_PRED -> có những phần nào về TOPIC_NAME    # sinh có ràng buộc: vị ngữ hỏi nội dung / tài liệu
+GEN_WH_PRED -> có những tài_liệu nào về TOPIC_NAME    # sinh có ràng buộc: vị ngữ hỏi nội dung / tài liệu
+GEN_WH_PRED -> có những bài_giảng nào về TOPIC_NAME    # sinh có ràng buộc: vị ngữ hỏi nội dung / tài liệu
+GEN_WH_PRED -> nói_về TOPIC_NAME như_thế_nào    # sinh có ràng buộc: vị ngữ hỏi nội dung / tài liệu
+GEN_WH_PRED -> trình_bày TOPIC_NAME như_thế_nào    # sinh có ràng buộc: vị ngữ hỏi nội dung / tài liệu
+GEN_WH_PRED -> giới_thiệu TOPIC_NAME như_thế_nào    # sinh có ràng buộc: vị ngữ hỏi nội dung / tài liệu
+
+# --- GEN_YN_PRED ---
+GEN_YN_PRED -> có học_về TOPIC_NAME không    # sinh có ràng buộc: vị ngữ nghi vấn có / không
+GEN_YN_PRED -> có nói_về TOPIC_NAME không    # sinh có ràng buộc: vị ngữ nghi vấn có / không
+GEN_YN_PRED -> có giới_thiệu TOPIC_NAME không    # sinh có ràng buộc: vị ngữ nghi vấn có / không
+GEN_YN_PRED -> có trình_bày TOPIC_NAME không    # sinh có ràng buộc: vị ngữ nghi vấn có / không
+GEN_YN_PRED -> có nội_dung về TOPIC_NAME không    # sinh có ràng buộc: vị ngữ nghi vấn có / không
+GEN_YN_PRED -> có phần về TOPIC_NAME không    # sinh có ràng buộc: vị ngữ nghi vấn có / không
+GEN_YN_PRED -> có tài_liệu về TOPIC_NAME không    # sinh có ràng buộc: vị ngữ nghi vấn có / không
+GEN_YN_PRED -> có bài_giảng về TOPIC_NAME không    # sinh có ràng buộc: vị ngữ nghi vấn có / không
 
 # --- LO_ID ---
 LO_ID -> l.o.1.1    # mã mục tiêu học tập
@@ -366,6 +404,20 @@ WH_QUESTION -> NP MODS VP PUNCT    # NP + PP + VP + ?
 WH_QUESTION -> VP PUNCT    # VP + ? (câu hỏi không có chủ ngữ rõ ràng)
 WH_QUESTION -> NP PUNCT    # NP + ? (câu hỏi rút gọn)
 WH_QUESTION -> WH_QWORD NP PUNCT    # từ hỏi + NP + ?
+WH_QUESTION -> GEN_SUBJECT GEN_WH_PRED ?    # sinh có ràng buộc: chủ ngữ + câu hỏi nội dung
+WH_QUESTION -> nội_dung về TOPIC_NAME GEN_LOCATION là gì ?    # sinh có ràng buộc: danh ngữ chủ đề có phạm vi
+WH_QUESTION -> nội_dung về TOPIC_NAME GEN_LOCATION gồm những gì ?    # sinh có ràng buộc: danh ngữ chủ đề có phạm vi
+WH_QUESTION -> nội_dung về TOPIC_NAME GEN_LOCATION được trình_bày như_thế_nào ?    # sinh có ràng buộc: danh ngữ chủ đề có phạm vi
+WH_QUESTION -> tài_liệu về TOPIC_NAME GEN_LOCATION là gì ?    # sinh có ràng buộc: danh ngữ chủ đề có phạm vi
+WH_QUESTION -> tài_liệu về TOPIC_NAME GEN_LOCATION gồm những gì ?    # sinh có ràng buộc: danh ngữ chủ đề có phạm vi
+WH_QUESTION -> bài_giảng về TOPIC_NAME GEN_LOCATION gồm những nội_dung nào ?    # sinh có ràng buộc: danh ngữ chủ đề có phạm vi
+WH_QUESTION -> môn COURSE_NAME có bao_nhiêu tín_chỉ ?    # sinh có ràng buộc: câu hỏi độc lập trong miền môn học
+WH_QUESTION -> môn COURSE_NAME gồm những phần nào ?    # sinh có ràng buộc: câu hỏi độc lập trong miền môn học
+WH_QUESTION -> chương nào nói_về TOPIC_NAME ?    # sinh có ràng buộc: câu hỏi độc lập trong miền môn học
+WH_QUESTION -> tài_liệu về TOPIC_NAME ở_đâu ?    # sinh có ràng buộc: câu hỏi độc lập trong miền môn học
+WH_QUESTION -> bài_tập_lớn gồm những phần nào ?    # sinh có ràng buộc: câu hỏi độc lập trong miền môn học
+WH_QUESTION -> hạn_nộp bài_tập_lớn là khi_nào ?    # sinh có ràng buộc: câu hỏi độc lập trong miền môn học
+WH_QUESTION -> quy_định về sử_dụng llm_rag trong môn COURSE_NAME là gì ?    # sinh có ràng buộc: câu hỏi độc lập trong miền môn học
 
 # --- WH_QWORD ---
 WH_QWORD -> gì    # từ hỏi nội dung
@@ -384,3 +436,4 @@ YES_NO_QUESTION -> VP PUNCT    # VP + ?
 YES_NO_QUESTION -> ADV NP PUNCT    # ADV + NP + ? (câu hỏi rút gọn 'Còn ...?')
 YES_NO_QUESTION -> ADV NP VP PUNCT    # ADV + NP + VP + ?
 YES_NO_QUESTION -> NP PUNCT    # NP + ?
+YES_NO_QUESTION -> GEN_SUBJECT GEN_YN_PRED ?    # sinh có ràng buộc: chủ ngữ + có ... không
