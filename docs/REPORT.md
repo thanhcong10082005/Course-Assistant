@@ -128,7 +128,7 @@ vì phải xử lý hậu kỳ bằng bộ lọc.
 #### 2.1.2 Văn phạm được cài đặt
 
 Văn phạm nằm trong `src/grammar.py` (lớp `CFG`), được sinh ra file
-`output/grammar.txt` (386 dòng, 36 non-terminal, 182 terminal). Cấu trúc cốt lõi:
+`output/grammar.txt` (439 dòng, 40 non-terminal, 183 terminal, 350 production). Cấu trúc cốt lõi:
 
 ```
 # Cấp câu
@@ -180,8 +180,8 @@ LO_ID          → "l.o.1.1" | "l.o.1.2" | … | "l.o.4.2"
 PUNCT          → "?" | "!"
 ```
 
-> Trên đây là phần **rút gọn** cho dễ đọc; toàn bộ văn phạm (36 non-terminal,
-> 182 terminal, 307 production) nằm trong `output/grammar.txt`.
+> Trên đây là phần **rút gọn** cho dễ đọc; toàn bộ văn phạm (40 non-terminal,
+> 183 terminal, 350 production) nằm trong `output/grammar.txt`.
 
 
 
@@ -337,7 +337,8 @@ vẫn trả lời được, khi Earley parser thất bại, parser chuyển sang
 mẫu (`WH_WORD` | `NP` | `VP` | `PUNCT`).
 
 Cơ chế này giữ cho **intent accuracy cao** ngay cả khi strict parse thấp — vì
-tầng semantic làm việc trên văn bản, không phụ thuộc cây cú pháp.
+tầng semantic nhận cả văn bản lẫn cây: lexicon trên văn bản là nguồn chính,
+cây chỉ là nguồn bù nên một cây fallback cũng không làm mất entity.
 
 #### 2.3.3 Kết quả trên tập kiểm thử chính thức
 
@@ -574,7 +575,7 @@ phạm vi**.
 
 #### 3.2.1 Đặc tả pipeline
 
-Pipeline dưới đây mô tả thứ tự xử lý của `process_query()`. Cây cú pháp được lưu riêng để trình bày kết quả Phần I; semantic hiện sử dụng văn bản và ngữ cảnh, không lấy cây làm đầu vào. Khi có tham chiếu, DialogueManager bổ sung entity/cờ ngữ cảnh trước bước nhận diện intent/entity. Hai bước intent/entity và tạo biểu diễn ngữ nghĩa cùng nằm trong `SemanticAnalyzer.analyze()`.
+Pipeline dưới đây mô tả thứ tự xử lý của `process_query()`. Cây cú pháp được parse một lần và truyền thẳng vào `SemanticAnalyzer.analyze(..., tree=tree)` — nối chuỗi Parsing → Semantic Representation; lexicon trên văn bản vẫn là nguồn entity chính, cây chỉ bù các slot lexicon bỏ lỡ (ghi log vào `query_type`). Khi có tham chiếu, DialogueManager bổ sung entity/cờ ngữ cảnh trước bước nhận diện intent/entity. Hai bước intent/entity và tạo biểu diễn ngữ nghĩa cùng nằm trong `SemanticAnalyzer.analyze()`.
 
 ```
 Input (câu hỏi tiếng Việt)
@@ -896,7 +897,7 @@ python -m pytest                                   # chạy bộ test
 | Strict parse (Earley chart)     | 31/34   | **91.18 %** |
 | Pattern fallback parse          | 3/34    | 8.82 %      |
 | Parse failure                   | 0/34    | 0 %         |
-| **Bộ test (`pytest`)**          | 158 pass | 0 failed, 0 xfailed |
+| **Bộ test (`pytest`)**          | 168 pass | 0 failed, 0 xfailed |
 
 > Các chỉ số trên là số liệu mới nhất (đo tự động bằng
 > `python scripts/baseline.py`). Trước đó: intent 88.24 %, entity 55.88 %,

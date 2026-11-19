@@ -29,11 +29,14 @@ The analyzer implemented here
 """
 
 import re
-from typing import Any, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 
 from .lexicon import Lexicon, get_lexicon
+
+if TYPE_CHECKING:  # pragma: no cover - import cycle guard
+    from .parser import ParseNode
 
 
 class IntentType(Enum):
@@ -360,6 +363,7 @@ class SemanticAnalyzer:
         text: str,
         tokens: Optional[List[str]] = None,
         context: Optional[Dict[str, Any]] = None,
+        tree: Optional["ParseNode"] = None,
     ) -> SemanticRepresentation:
         """
         Perform the full semantic analysis.
@@ -382,10 +386,24 @@ class SemanticAnalyzer:
                     *not* been resolved.  The intent then becomes
                     ``CONTEXT_DEPENDENT`` so that the pipeline asks for
                     clarification instead of guessing.
+            tree: the parse tree produced by :class:`src.parser.Parser`.
+                The tree is the *second* source of entities: the lexicon
+                stays authoritative and the tree only fills the slots the
+                lexicon could not see (see :meth:`_entities_from_tree`).
+                ``None`` is accepted so that callers which only have text
+                (the legacy API, the tests) keep working unchanged.
         """
         context = context or {}
 
         entities = self.extract_entities(text)
+
+        # Parsing -> Semantic: the tree contributes whatever the surface
+        # lexicon missed.  ``setdefault`` guarantees that the lexicon
+        # (the primary source) always wins on a conflict.
+        if tree is not None:
+            for key, value in self._entities_from_tree(tree).items():
+                entities.setdefault(key, value)
+
         intent = self.extract_intent(text, tokens, entities)
 
         # The entities that the dialogue manager could resolve are injected
@@ -417,8 +435,112 @@ class SemanticAnalyzer:
             intent=intent,
             entities=entities,
             raw_query=text,
+            # The root symbol of the tree that produced this analysis
+            # ("WH_QUESTION", "YES_NO_QUESTION", ...).  Empty when the
+            # caller did not pass a tree.
+            query_type=tree.symbol if tree is not None else "",
         )
         return sem_rep
+
+    # ------------------------------------------------------------------
+    # Tree-driven entity extraction (Parsing -> Semantic)
+    # ------------------------------------------------------------------
+    # The node symbols below come from ``output/grammar.txt``.  Two groups
+    # are distinguished:
+    #
+    # * *typed nodes* -- the value is derived structurally from the number
+    #   or identifier the grammar inserted (``CH04``, ``WEEK_03``,
+    #   ``LO1.2``).  They do not depend on the lexicon at all;
+    # * *lexical nodes* -- the subtree is a surface form that is
+    #   canonicalised through the very same lexicon the string-based
+    #   extraction uses, so both paths agree on the canonical value.
+    _TREE_TYPED_NODES = ("CHAPTER_REF", "WEEK_REF", "GEN_SUBJECT", "GEN_LOCATION")
+    _TREE_LEXICAL_NODES = {
+        "COURSE_REF": ("course",),
+        "COURSE_NAME": ("course",),
+        "TOPIC_NAME": ("topic",),
+        "TOPIC": ("topic",),
+        "ASSIGNMENT_NAME": ("assignment",),
+        "ASSIGNMENT": ("assignment",),
+        "ATTR_NOUN": ("attribute",),
+        "PART_REF": ("assignment_part", "part_of_assignment"),
+        "LO_ID": ("learning_outcome",),
+        "TECH_NAME": ("rule",),
+    }
+
+    def _entities_from_tree(self, tree: "ParseNode") -> Dict[str, Any]:
+        """
+        Derive the entities that the parse tree makes explicit.
+
+        The tree is a *backoff* source: it is only consulted for the slots
+        that the surface lexicon could not fill, and every value is
+        canonicalised exactly like :meth:`extract_entities` does, so the
+        two sources never disagree on the format of a value.
+        """
+        entities: Dict[str, Any] = {}
+
+        for node in self._walk(tree):
+            # -- typed nodes: CH{nn} / WEEK_{nn} / LO{x.y} --------------
+            if node.symbol in self._TREE_TYPED_NODES:
+                for key, value in self._typed_entity(node):
+                    entities.setdefault(key, value)
+                continue
+
+            # -- lexical nodes: canonicalise the subtree via the lexicon -
+            groups = self._TREE_LEXICAL_NODES.get(node.symbol)
+            if not groups:
+                continue
+            surface = self._surface_of(node)
+            if not surface:
+                continue
+            for match in self.lexicon.lookup(surface, groups=list(groups)):
+                entities.setdefault(match.entity_type, match.canonical)
+                break
+
+        return entities
+
+    @classmethod
+    def _walk(cls, node: "ParseNode"):
+        """Yield ``node`` and all of its descendants, depth first."""
+        yield node
+        for child in node.children:
+            yield from cls._walk(child)
+
+    @staticmethod
+    def _surface_of(node: "ParseNode") -> str:
+        """The surface form spelled out by the subtree of ``node``."""
+        return " ".join(
+            word for word in (leaf.strip() for leaf in node.leaves()) if word
+        ).replace("_", " ").strip()
+
+    @classmethod
+    def _typed_entity(cls, node: "ParseNode") -> List[Tuple[str, str]]:
+        """
+        Read the identifier out of a typed subtree.
+
+        ``(CHAPTER_REF chương (CHAPTER_NUM 4))`` -> ``("chapter", "CH04")``,
+        ``(WEEK_REF tuần (WEEK_NUM 3))``         -> ``("week", "WEEK_03")``,
+        ``(LO_ID l.o.1.2)``                      -> ``("lo", "LO1.2")``.
+        """
+        surface = cls._surface_of(node)
+        if not surface:
+            return []
+
+        # "trong chương 4" / "chương 4" -> chapter, "tuần 3" -> week.
+        if node.symbol in ("CHAPTER_REF", "GEN_SUBJECT", "GEN_LOCATION"):
+            match = re.search(r"chương\s+(\d+)", surface)
+            if match:
+                return [("chapter", f"CH{int(match.group(1)):02d}")]
+        if node.symbol in ("WEEK_REF", "GEN_SUBJECT", "GEN_LOCATION"):
+            match = re.search(r"tuần\s+(\d+)", surface)
+            if match:
+                return [("week", f"WEEK_{int(match.group(1)):02d}")]
+
+        # "l.o.1.2" is handled by the lexical path (``LO_ID`` is
+        # canonicalised through the lexicon's ``learning_outcome`` group).
+        return []
+
+    # ------------------------------------------------------------------
 
     def analyze_batch(self, texts: List[str]) -> List[SemanticRepresentation]:
         """Analyze multiple texts"""

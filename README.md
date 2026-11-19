@@ -94,7 +94,7 @@ python -m src.main --mode interactive
 # Sinh lại toàn bộ file trong output/ (tất định, seed=42)
 python -m src.main --mode generate
 
-# Chạy bộ test (158 test)
+# Chạy bộ test (168 test)
 python -m pytest
 
 # Chạy báo cáo đánh giá (57 câu kiểm thử)
@@ -112,9 +112,9 @@ python scripts/check_submission.py
 | File                | Nội dung                                        | Sinh bởi              |
 | ------------------- | ----------------------------------------------- | --------------------- |
 | `grammar.txt`       | Bộ văn phạm CFG có trọng số và chú thích        | `src.grammar`         |
-| `samples.txt`       | 95 câu mẫu có nhãn intent + 10 000 câu sinh từ văn phạm | `src.grammar`   |
-| `parse-results.txt` | Cây phân tích cú pháp + nhãn `[STRICT]`/`[FALLBACK]`/`[INVALID]` | `src.parser` |
-| `semantic.txt`      | Biểu diễn ngữ nghĩa (dạng logic)                | `src.semantic`        |
+| `samples.txt`       | 10 000 câu sinh từ văn phạm (1 dòng = 1 câu)     | `src.grammar`   |
+| `parse-results.txt` | Cây phân tích cú pháp; câu ngoài văn phạm = `()` | `src.parser` |
+| `semantic.txt`      | Cây cú pháp + biểu diễn ngữ nghĩa (dạng logic)   | `src.semantic`        |
 | `intent-entity.txt` | Intent & entity nhận diện được                  | `src.semantic`        |
 | `query.txt`         | Truy vấn gửi tới knowledge base                 | `src.knowledge_base`  |
 | `answer.txt`        | Câu trả lời cho người dùng                      | `src.knowledge_base`  |
@@ -142,7 +142,8 @@ Input (câu hỏi tiếng Việt)
       (có cơ chế fallback dựng cây theo mẫu khi không khớp văn phạm)
    │
    ▼  [3] Semantic Representation  (src/semantic.py)
-   └─ Parse tree / văn bản → dạng logic   GET_INTENT(entity=value)
+   └─ Parse tree + văn bản → dạng logic   GET_INTENT(entity=value)
+      (lexicon là nguồn chính; cây cú pháp bù các entity mà lexicon bỏ lỡ)
    │
    ▼  [4] Intent & Entity
    ├─ Intent : khớp luật theo thứ tự ưu tiên + chấm điểm từ khoá
@@ -184,7 +185,7 @@ Course_Assistant_Sample/
 │   ├── baseline.py          # Đo chỉ số chất lượng
 │   ├── check_submission.py  # Kiểm tra gói nộp bài
 │   └── generate_outputs.py  # Sinh lại output/ một cách tất định
-├── tests/                   # 158 test pytest
+├── tests/                   # 168 test pytest
 │   ├── conftest.py          # Fixture dùng chung
 │   ├── known_issues.py      # Sổ đăng ký lỗi còn lại (xfail)
 │   └── data/                # Bản sao dữ liệu mẫu chính thức
@@ -212,7 +213,7 @@ phạm, thay vì hard-code một bản sao. Nhờ vậy khi văn phạm thay đ�
 ### 5.1 Cấu trúc
 
 Văn phạm nằm trong `src/grammar.py` (lớp `CFG`), xuất ra `output/grammar.txt`
-(386 dòng, **36 non-terminal**, **182 terminal**, **307 production**).
+(439 dòng, **40 non-terminal**, **183 terminal**, **350 production**).
 
 ```
 S              → WH_QUESTION | YES_NO_QUESTION
@@ -281,22 +282,24 @@ Earley: productions, terminal classes và tập từ vựng đều được đ�
 Khi câu không khớp văn phạm nghiêm ngặt, `_parse_fallback()` phân loại từng
 token theo bảng từ khoá rồi dựng cây theo mẫu (`WH_WORD` | `NP` | `VP` |
 `PUNCT`). Cơ chế này giữ intent accuracy cao ngay cả khi strict parse thấp, vì
-tầng semantic làm việc trực tiếp trên văn bản chứ không phụ thuộc cây cú pháp.
+tầng semantic nhận **cả văn bản lẫn cây** — cây chỉ là nguồn bù, nên một cây
+fallback cũng không làm mất entity mà lexicon đã trích được từ văn bản.
 
 ### 6.3 Định dạng đầu ra
 
-Kết quả ghi ra `output/parse-results.txt`, mỗi câu kèm nhãn chế độ parse:
+Kết quả ghi ra `output/parse-results.txt` đúng theo yêu cầu 3.3 của đề bài:
+**mỗi dòng một câu**, câu thuộc văn phạm thì in cây, câu không hợp lệ hoặc
+ngoài văn phạm thì in `()`:
 
 ```
-Môn NLP có bao nhiêu tín chỉ?
-[STRICT]
 (WH_QUESTION (NP (COURSE_REF (COURSE_MOD (môn)) (COURSE_NAME (nlp))))
              (VP (VERB (có)) (NP (QUANT (bao_nhiêu)) (ATTR_NOUN (tín_chỉ))))
              (PUNCT (?)))
+()
 ```
 
-Nhãn: `[STRICT]` = parse bằng Earley theo văn phạm · `[FALLBACK]` = ngoài văn
-phạm, dựng theo mẫu · `[INVALID]` = không dựng được cây.
+Không có header và không có nhãn chế độ parse trong tệp — thống kê
+strict/fallback được ghi ở `output/evaluation.txt` và ở mục 6.4 dưới đây.
 
 ### 6.4 Kết quả đo
 
@@ -332,7 +335,34 @@ class SemanticRepresentation:
 
 Cấu trúc dạng logic: `GET_INTENT(entity₁=value₁, entity₂=value₂, …)`
 
-### 7.2 Ví dụ
+### 7.2 Nguồn vào: văn bản **và** cây cú pháp
+
+`analyze()` nhận thêm tham số `tree` — cây do tầng Parsing trả về, nối chuỗi
+`Parsing → Semantic Representation` của đề bài:
+
+```python
+sem_rep = analyzer.analyze(query, tokens, context=context, tree=tree)
+```
+
+Hai nguồn được kết hợp theo thứ tự ưu tiên:
+
+| Nguồn | Vai trò | Ví dụ |
+| ----- | ------- | ----- |
+| **Lexicon** (văn bản) | **Nguồn chính** — luôn thắng khi xung đột | `"Chương 4"` → `chapter=CH04` |
+| **Cây cú pháp** | **Nguồn bù** — chỉ lấp slot mà lexicon bỏ lỡ | `(CHAPTER_REF chương (CHAPTER_NUM 4))` → `CH07` khi văn bản không nêu số |
+
+Cây được đọc theo hai cách: nút **có kiểu** (`CHAPTER_REF`, `WEEK_REF`,
+`GEN_SUBJECT`, `GEN_LOCATION`) suy ra giá trị trực tiếp từ số mà văn phạm đã
+chèn vào (`CH04`, `WEEK_03`); nút **từ vựng** (`COURSE_REF`, `TOPIC_NAME`,
+`ATTR_NOUN`, `PART_REF`, `LO_ID`, `TECH_NAME`) được chuẩn hoá qua chính
+lexicon nên hai nguồn không bao giờ lệch định dạng giá trị.
+
+Nhờ `setdefault`, việc thêm cây **không thể làm mất** entity nào mà lexicon
+đã trích — 34 câu kiểm thử chính thức giữ nguyên intent và entity
+(test `tests/test_semantic_tree.py`). Cây cũng điền vào slot `query_type`
+(`WH_QUESTION`, `YES_NO_QUESTION`) vốn để trống trước đây.
+
+### 7.3 Ví dụ
 
 | Câu hỏi                         | Dạng logic                                       |
 | ------------------------------- | ------------------------------------------------ |
@@ -344,7 +374,7 @@ Cấu trúc dạng logic: `GET_INTENT(entity₁=value₁, entity₂=value₂, �
 | "Có được dùng LLM không?"       | `GET_RULE(rule=LLM_RAG)`                         |
 | "L.O.4.2 là gì?"                | `GET_LO(lo=LO4.2)`                               |
 
-### 7.3 Tập Intent
+### 7.4 Tập Intent
 
 Hệ thống hỗ trợ **11 intent**:
 
@@ -391,7 +421,8 @@ phải cố đặt một thứ tự tuần tự.
 
 ### 8.2 Entity — trích xuất theo luật + lexicon
 
-Entity được trích xuất qua **3 lớp**, tất cả đều dựa trên `src/lexicon.py`
+Entity được trích xuất qua **3 lớp chính + 1 lớp bù từ cây cú pháp**, tất cả
+dựa trên `src/lexicon.py`
 (`models/lexicon.json` là nguồn sự thật duy nhất):
 
 ```
@@ -416,7 +447,16 @@ Lớp 3 — Thuộc tính của câu hỏi
     "tín chỉ"   → attribute=credits
     "giữa kỳ"   → attribute=midterm_duration
     "cuối kỳ"   → attribute=final_duration
+
+Lớp 4 (bù) — Cây cú pháp, chỉ khi tầng Parsing truyền cây vào analyze()
+    (CHAPTER_REF chương (CHAPTER_NUM 7)) → chapter=CH07   [nếu lexicon chưa có]
+    (PART_REF phần i)                    → part=PART_I
+    (TOPIC_NAME parser)                  → topic=PARSING
 ```
+
+Lớp 4 là **nguồn bù**: mọi giá trị đều đi qua `setdefault`, nên lexicon (lớp
+1–3) luôn giữ giá trị đã trích được — thêm cây không làm thay đổi kết quả của
+34 câu kiểm thử chính thức.
 
 Bảng lexicon được kiểm thử tự động bằng `tests/test_lexicon.py` (11 test),
 bao gồm kiểm tra mọi surface form đều ở dạng chữ thường để tra cứu không phân
@@ -598,7 +638,7 @@ Ngoài ra còn có **5 kịch bản hội thoại** đầy đủ trong `tests/da
 ### 12.2 Công cụ đánh giá
 
 ```bash
-# Chạy bộ test đầy đủ (158 test)
+# Chạy bộ test đầy đủ (168 test)
 python -m pytest
 
 # Báo cáo đánh giá đầy đủ (6 mục, ghi ra output/evaluation.txt)
@@ -652,7 +692,7 @@ chấp nhận khi pipeline trích ra `NLP`.
 | Strict parse (Earley chart)   | 31/34 — **91.18 %**   |
 | Pattern fallback parse        | 3/34 — 8.82 %         |
 | Parse failure                 | 0/34 — 0 %            |
-| Bộ test                       | **158 passed — 0 failed, 0 xfailed** |
+| Bộ test                       | **168 passed — 0 failed, 0 xfailed** |
 
 **Chất lượng bộ sinh câu (10 000 câu):** 0 câu chứa `_`, 0 câu rò non-terminal,
 0 câu mở sai, 0 câu thiếu dấu câu.

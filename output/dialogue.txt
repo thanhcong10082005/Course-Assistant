@@ -104,19 +104,19 @@ DIALOGUE 04
 Turn 1
   User      : Bài tập lớn có phần parser không?
   Context   : (không có - lượt đầu tiên của hội thoại)
-  Interpret : GET_ASSIGNMENT(assignment=BTL01, part=PART_I)
+  Interpret : GET_ASSIGNMENT(assignment=BTL01, part=PART_I, topic=PARSING)
   Answer    : Grammar and Parser: Xây dựng văn phạm (grammar) cho câu hỏi tiếng Việt về môn học và xây dựng bộ phân tích cú pháp (parser) trên văn phạm đó. Hệ thống phải sinh được tập câu hỏi mẫu và phân tích cú pháp được các câu hỏi thực tế.
 File cần xuất: grammar.txt (văn phạm dạng text); samples.txt (tập câu hỏi mẫu sinh từ văn phạm); parse-results.txt (kết quả phân tích cú pháp).
-  State     : turn=1, last_intent=GET_ASSIGNMENT, entities=2
+  State     : turn=1, last_intent=GET_ASSIGNMENT, entities=3
 
 Turn 2
   User      : Phần này cần xuất file gì?
-  Context   : last_intent=GET_ASSIGNMENT, part=PART_I, assignment=BTL01
+  Context   : last_intent=GET_ASSIGNMENT, part=PART_I, topic=PARSING, assignment=BTL01
   Interpret : GET_ASSIGNMENT(part=PART_I)
   Reference : "phần này" → part=PART_I (loại: definite | nguồn: discourse state | độ tin cậy: 1.00)
   Answer    : Grammar and Parser: Xây dựng văn phạm (grammar) cho câu hỏi tiếng Việt về môn học và xây dựng bộ phân tích cú pháp (parser) trên văn phạm đó. Hệ thống phải sinh được tập câu hỏi mẫu và phân tích cú pháp được các câu hỏi thực tế.
 File cần xuất: grammar.txt (văn phạm dạng text); samples.txt (tập câu hỏi mẫu sinh từ văn phạm); parse-results.txt (kết quả phân tích cú pháp).
-  State     : turn=2, last_intent=GET_ASSIGNMENT, entities=2
+  State     : turn=2, last_intent=GET_ASSIGNMENT, entities=3
 
 -------------------------------------------------------------------------
 

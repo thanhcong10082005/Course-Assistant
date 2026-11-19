@@ -180,7 +180,12 @@ class CourseAssistant:
         result['tokens'] = preprocessed['tokens']
 
         # Step 2: Parsing (optional - for grammar demonstration)
-        parse_result = self.parser.get_parse_result(query)
+        #
+        # The tree is parsed **once** and reused: it is what the semantic
+        # analyzer receives in step 3 (Parsing -> Semantic Representation),
+        # and it is also what gets printed into ``parse-result``.
+        tree, _errors = self.parser.parse(query)
+        parse_result = str(tree) if tree is not None else "()"
         result['parse_result'] = parse_result
 
         # Step 3: Semantic Analysis
@@ -220,7 +225,7 @@ class CourseAssistant:
                 context['context_dependent'] = True
 
         sem_rep = self.semantic_analyzer.analyze(query, preprocessed['tokens'],
-                                                  context=context)
+                                                  context=context, tree=tree)
         result['semantic_rep'] = str(sem_rep)
         result['intent'] = sem_rep.intent.value
         result['entities'] = sem_rep.entities
@@ -260,12 +265,17 @@ class CourseAssistant:
             user_input
         )
 
-        # Step 2: Preprocessing + semantic analysis on the resolved query.
+        # Step 2: Preprocessing + parsing + semantic analysis on the
+        # resolved query.  The tree of the *resolved* query is what the
+        # analyzer receives, so the dialogue turns have the same
+        # Parsing -> Semantic link as the standalone queries.
         preprocessed = self.preprocessor.preprocess(resolved_input)
+        tree, _errors = self.parser.parse(resolved_input)
         sem_rep = self.semantic_analyzer.analyze(
             resolved_input,
             preprocessed['tokens'],
             context=resolved_entities,
+            tree=tree,
         )
 
         # Step 3: Answer.
@@ -585,43 +595,43 @@ def write_samples(output_dir: str) -> None:
 
 
 def write_parse_results(output_dir: str, sentences: List[str]) -> None:
-    """Artefact 3/9 -- the parse trees with an explicit parse-mode label."""
+    """
+    Artefact 3/9 -- one parse tree per sentence, as required by 3.3 of the
+    assignment: a sentence that belongs to the grammar is printed as its
+    tree, anything else (invalid or outside the grammar) is printed as
+    ``()``.  There is no header and no mode label: the file is a plain
+    list of trees, one per line, in the same order as ``samples.txt``.
+    """
     parser = Parser()
     with open(os.path.join(output_dir, 'parse-results.txt'), 'w', encoding='utf-8') as fh:
-        fh.write("PARSE RESULTS\n")
-        fh.write("=" * 70 + "\n")
-        fh.write("Label: [STRICT] = parsed by the grammar-driven chart parser,\n")
-        fh.write("       [FALLBACK] = outside the grammar, matched by the\n")
-        fh.write("                    pattern-based fallback,\n")
-        fh.write("       [INVALID]  = no tree could be produced.\n")
-        fh.write("=" * 70 + "\n\n")
-
         for sentence in sentences:
-            tree, errors = parser.parse(sentence)
-            if tree is None:
-                label = "[INVALID]"
-            elif parser.parse_strict(sentence) is not None:
-                label = "[STRICT]"
+            tree, _errors = parser.parse(sentence)
+            # ``parse_strict`` distinguishes a real grammar derivation from
+            # the pattern-based fallback: only the former is a tree of the
+            # context-free grammar, the latter is reported as "()".
+            if tree is None or parser.parse_strict(sentence) is None:
+                fh.write("()\n")
             else:
-                label = "[FALLBACK]"
-
-            fh.write(f"{sentence}\n")
-            fh.write(f"{label}\n")
-            fh.write(f"{tree if tree is not None else '()'}\n")
-            if errors:
-                fh.write(f"Errors: {errors}\n")
-            fh.write("\n")
+                fh.write(f"{tree}\n")
 
 
 def write_semantic(output_dir: str, sentences: List[str]) -> None:
-    """Artefact 4/9 -- the semantic representation of every sentence."""
+    """Artefact 4/9 -- the semantic representation of every sentence.
+
+    Every record shows the two sources the analysis is built from: the
+    parse tree (``Syntactic:``) and the semantic representation derived
+    from it (``Intent`` / ``Entities`` / ``Logical Form``).
+    """
     analyzer = SemanticAnalyzer()
+    parser = Parser()
     with open(os.path.join(output_dir, 'semantic.txt'), 'w', encoding='utf-8') as fh:
         fh.write("SEMANTIC REPRESENTATION\n")
         fh.write("=" * 70 + "\n\n")
         for sentence in sentences:
-            sem_rep = analyzer.analyze(sentence)
+            tree, _errors = parser.parse(sentence)
+            sem_rep = analyzer.analyze(sentence, tree=tree)
             fh.write(f"Query: {sentence}\n")
+            fh.write(f"Syntactic: {tree.symbol if tree is not None else '()'}\n")
             fh.write(f"Intent: {sem_rep.intent.value}\n")
             fh.write(f"Entities: {sem_rep.entities}\n")
             fh.write(f"Logical Form: {sem_rep.to_logical_form()}\n\n")
