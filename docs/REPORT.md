@@ -372,6 +372,10 @@ Kết quả được ghi ra `output/parse-results.txt` theo dạng cây lồng:
 
 Câu không thuộc văn phạm được xuất `()` theo yêu cầu đề bài.
 
+Tệp có **34 dòng**, tương ứng 34 câu trong `input/sentences.txt` — đúng input mà
+yêu cầu 3.3 của đề bài chỉ định. Đây **không phải** `output/samples.txt` (10.000 câu
+sinh ra ở yêu cầu 3.2): mỗi tệp phục vụ một yêu cầu khác nhau.
+
 ---
 
 
@@ -408,7 +412,7 @@ class SemanticRepresentation:
         return f"{self.intent.value}({entity_str})"
 ```
 
-Trong `analyze()`, `attributes` và `query_type` giữ giá trị mặc định; thuộc tính được hỏi nằm trong `entities["attribute"]`. Chuỗi dạng logic mô tả truy vấn, không được thực thi như mã hay SQL.
+Trong `analyze()`, `attributes` giữ giá trị mặc định; thuộc tính được hỏi nằm trong `entities["attribute"]`. `query_type` được điền bằng symbol gốc của cây cú pháp khi có cây (`WH_QUESTION`, `YES_NO_QUESTION`) — đây là **nhãn cấu trúc cây**, không phải intent. Chuỗi dạng logic mô tả truy vấn, không được thực thi như mã hay SQL.
 
 Ví dụ thực tế từ hệ thống:
 
@@ -575,7 +579,7 @@ phạm vi**.
 
 #### 3.2.1 Đặc tả pipeline
 
-Pipeline dưới đây mô tả thứ tự xử lý của `process_query()`. Cây cú pháp được parse một lần và truyền thẳng vào `SemanticAnalyzer.analyze(..., tree=tree)` — nối chuỗi Parsing → Semantic Representation; lexicon trên văn bản vẫn là nguồn entity chính, cây chỉ bù các slot lexicon bỏ lỡ (ghi log vào `query_type`). Khi có tham chiếu, DialogueManager bổ sung entity/cờ ngữ cảnh trước bước nhận diện intent/entity. Hai bước intent/entity và tạo biểu diễn ngữ nghĩa cùng nằm trong `SemanticAnalyzer.analyze()`.
+Pipeline dưới đây mô tả thứ tự xử lý của `process_query()`. Cây cú pháp được parse một lần và truyền thẳng vào `SemanticAnalyzer.analyze(..., tree=tree)` — nối chuỗi Parsing → Semantic Representation; lexicon trên văn bản vẫn là nguồn entity chính, cây chỉ bù các slot lexicon bỏ lỡ (ghi log vào `query_type` — **nhãn cấu trúc cây**, tức symbol gốc như `WH_QUESTION`; muốn biết ý định thật sự hãy đọc `entities["intent"]`, vì câu fallback ngoài văn phạm vẫn có symbol gốc hợp lệ). Khi có tham chiếu, DialogueManager bổ sung entity/cờ ngữ cảnh trước bước nhận diện intent/entity. Hai bước intent/entity và tạo biểu diễn ngữ nghĩa cùng nằm trong `SemanticAnalyzer.analyze()`.
 
 ```
 Input (câu hỏi tiếng Việt)

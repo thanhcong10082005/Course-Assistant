@@ -12,25 +12,33 @@ tiêu học tập.
 
 ## 1. Thành viên nhóm
 
-| STT | Họ và tên         | MSSV    |
-| --- | ----------------- | ------- |
-| 1   | Nguyễn Thành Công | 2310373 |
-| 2   | -                 | -       |
-| 3   | -                 | -       |
-| 4   | -                 | -       |
+
+| STT | Họ và tên                     | MSSV    |
+| --- | ----------------------------- | ------- |
+| 1   | Nguyễn Thành Công             | 2310373 |
+| 2   | Nguyễn Thành Phát             | 2312593 |
+| 3   | Bùi Trọng Nguyên              | 2312329 |
+| 4   | Thái Văn Quân                 |         |
+
 
 ---
 
+
+
 ## 2. Cài đặt
 
+
+
 ### 2.1 Yêu cầu môi trường
+
 
 | Thành phần        | Yêu cầu                                                 |
 | ----------------- | ------------------------------------------------------- |
 | Hệ điều hành      | Windows / Linux / macOS                                 |
-| Python            | 3.9 trở lên (đã kiểm thử trên 3.14)                    |
+| Python            | 3.9 trở lên (đã kiểm thử trên 3.14)                     |
 | Thư viện ngoài    | **Không** — phần lõi chỉ dùng thư viện chuẩn của Python |
 | Thư viện cho test | `pytest` (tuỳ chọn)                                     |
+
 
 Hệ thống được viết **không phụ thuộc thư viện bên ngoài** (không cần NLTK,
 spaCy, hay bất kỳ framework NLP nào) để bảo đảm chạy được trong bất kỳ môi
@@ -54,6 +62,16 @@ pip install -r tests/requirements-test.txt
 
 Không cần bước cài đặt nào khác — toàn bộ mã nguồn dùng thư viện chuẩn.
 
+> **Lưu ý Windows (mã hoá console):** console mặc định của Windows dùng code page
+> cũ (`cp1252` với console Western, `cp437` với console cổ), nên in một ký tự có
+> dấu tiếng Việt sẽ báo lỗi `UnicodeEncodeError: 'charmap' codec can't encode character`. Chương trình đã tự cấu hình lại `stdin`/`stdout`/`stderr` sang UTF-8 ngay
+> khi khởi động (`_force_utf8_stdio()` trong `src/main.py`), nên `python -m src.main --mode demo` và `--mode interactive` chạy được trực tiếp trên Windows mà **không
+> cần** đặt biến môi trường `PYTHONIOENCODING=utf-8`. Nếu vẫn gặp lỗi (ví dụ
+> terminal cũ của `cmd.exe`), chạy `chcp 65001` trước, hoặc dùng Windows Terminal /
+> PowerShell 7.
+
+
+
 ### 2.3 Chạy bằng Docker (tuỳ chọn)
 
 ```bash
@@ -75,9 +93,26 @@ Image không cài thêm gói NLP nào — chỉ dùng thư viện chuẩn của 
 `docker build` báo lỗi kéo image `python:3.11-slim`, chạy lại lần hai (lần đầu
 thường chậm vì tải base image ~130 MB).
 
+> **Lưu ý khi kiểm tra gói nộp bài trong container:** `output/` bị loại khỏi image
+> bằng `.dockerignore` (để image luôn nhỏ và luôn khớp với mã nguồn mới nhất), vì
+> vậy một container mới **không có** sẵn 9 file kết quả. Muốn chạy
+> `scripts/check_submission.py` bên trong container thì phải sinh kết quả trước:
+>
+> ```bash
+> docker run --rm course-assistant \
+>   sh -c "python -m src.main --mode generate && python scripts/check_submission.py"
+> ```
+>
+> Lệnh trên phải in `ALL CHECKS PASSED (38 / 38)`. Nếu báo `output/*.txt thiếu`
+> thì đó là do quên bước `--mode generate`, **không** phải lỗi đóng gói.
+
 ---
 
+
+
 ## 3. Chạy chương trình
+
+
 
 ### 3.1 Các lệnh chính
 
@@ -107,21 +142,27 @@ python scripts/baseline.py --out docs/baseline.txt
 python scripts/check_submission.py
 ```
 
+
+
 ### 3.2 Các file trong `output/`
 
-| File                | Nội dung                                        | Sinh bởi              |
-| ------------------- | ----------------------------------------------- | --------------------- |
-| `grammar.txt`       | Bộ văn phạm CFG có trọng số và chú thích        | `src.grammar`         |
-| `samples.txt`       | 10 000 câu sinh từ văn phạm (1 dòng = 1 câu)     | `src.grammar`   |
-| `parse-results.txt` | Cây phân tích cú pháp; câu ngoài văn phạm = `()` | `src.parser` |
-| `semantic.txt`      | Cây cú pháp + biểu diễn ngữ nghĩa (dạng logic)   | `src.semantic`        |
-| `intent-entity.txt` | Intent & entity nhận diện được                  | `src.semantic`        |
-| `query.txt`         | Truy vấn gửi tới knowledge base                 | `src.knowledge_base`  |
-| `answer.txt`        | Câu trả lời cho người dùng                      | `src.knowledge_base`  |
-| `dialogue.txt`      | 5 hội thoại, mỗi lượt có đủ 4 phần             | `src.dialogue`        |
-| `evaluation.txt`    | Báo cáo đánh giá hệ thống (6 mục)               | `src.evaluation`      |
+
+| File                | Nội dung                                                                                | Sinh bởi             |
+| ------------------- | --------------------------------------------------------------------------------------- | -------------------- |
+| `grammar.txt`       | Bộ văn phạm CFG có trọng số và chú thích                                                | `src.grammar`        |
+| `samples.txt`       | 10 000 câu sinh từ văn phạm (1 dòng = 1 câu)                                            | `src.grammar`        |
+| `parse-results.txt` | Cây phân tích cú pháp của 34 câu trong `input/sentences.txt`; câu ngoài văn phạm = `()` | `src.parser`         |
+| `semantic.txt`      | Cây cú pháp + biểu diễn ngữ nghĩa (dạng logic)                                          | `src.semantic`       |
+| `intent-entity.txt` | Intent & entity nhận diện được                                                          | `src.semantic`       |
+| `query.txt`         | Truy vấn gửi tới knowledge base                                                         | `src.knowledge_base` |
+| `answer.txt`        | Câu trả lời cho người dùng                                                              | `src.knowledge_base` |
+| `dialogue.txt`      | 5 hội thoại, mỗi lượt có đủ 4 phần                                                      | `src.dialogue`       |
+| `evaluation.txt`    | Báo cáo đánh giá hệ thống (6 mục)                                                       | `src.evaluation`     |
+
 
 ---
+
+
 
 ## 4. Mô tả kiến trúc hệ thống
 
@@ -199,6 +240,8 @@ Course_Assistant_Sample/
 └── .gitignore
 ```
 
+
+
 ### 4.2 Đặc điểm thiết kế đáng chú ý
 
 `src/grammar.py` **là nguồn sự thật duy nhất cho ngôn ngữ.** Bộ phân tích cú
@@ -208,7 +251,11 @@ phạm, thay vì hard-code một bản sao. Nhờ vậy khi văn phạm thay đ�
 
 ---
 
+
+
 ## 5. Mô tả grammar
+
+
 
 ### 5.1 Cấu trúc
 
@@ -233,7 +280,10 @@ LO_ID          → "l.o.1.1" … "l.o.4.2"
 PUNCT          → "?" | "!"
 ```
 
+
+
 ### 5.2 Đặc điểm thiết kế
+
 
 | Đặc điểm                     | Giải thích                                                                                                                         |
 | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
@@ -241,6 +291,9 @@ PUNCT          → "?" | "!"
 | **Head noun luôn đi kèm số** | `CHAPTER_REF → "chương" CHAPTER_NUM` đảm bảo số trần không bao giờ đứng một mình (*"10 nói nào?"*)                                 |
 | **Luật có trọng số**         | Biến CFG thành PCFG nhẹ: động từ `học` (3.0) sinh nhiều hơn `tra` (0.3) → câu nghe tự nhiên                                        |
 | **Luật có chú thích**        | Mỗi luật có comment tiếng Việt, `output/grammar.txt` tự giải thích được                                                            |
+
+
+
 
 ### 5.3 Ví dụ đọc văn phạm
 
@@ -254,7 +307,11 @@ Câu `"Chương 4 nói về gì?"` được suy ra theo cây:
 
 ---
 
+
+
 ## 6. Mô tả parser
+
+
 
 ### 6.1 Thuật toán
 
@@ -301,13 +358,24 @@ ngoài văn phạm thì in `()`:
 Không có header và không có nhãn chế độ parse trong tệp — thống kê
 strict/fallback được ghi ở `output/evaluation.txt` và ở mục 6.4 dưới đây.
 
+> **Lưu ý về độ dài của hai tệp:** `parse-results.txt` có **34 dòng** — một dòng cho
+> mỗi câu trong `input/sentences.txt`, đúng như yêu cầu 3.3 của đề bài (*"Input:*
+> `input/sentences.txt` *— Mỗi dòng là một câu cần phân tích"*). Nó **không** cùng thứ
+> tự với `samples.txt` (10.000 câu): `samples.txt` là corpus mà bộ **sinh câu** tạo ra
+> theo yêu cầu 3.2, còn `parse-results.txt` là kết quả **phân tích** 34 câu đầu vào
+> của 3.3. Hai tệp phục vụ hai yêu cầu khác nhau nên độ dài khác nhau là chủ ý.
+
+
+
 ### 6.4 Kết quả đo
 
-| Chế độ                    | Số câu | Tỉ lệ (34 câu kiểm thử chính thức) |
-| ------------------------- | ------ | ---------------------------------- |
-| Strict (Earley chart)     | 31     | **91.18 %**                       |
-| Pattern fallback          | 3      | 8.82 %                            |
-| Thất bại                  | 0      | 0 %                               |
+
+| Chế độ                | Số câu | Tỉ lệ (34 câu kiểm thử chính thức) |
+| --------------------- | ------ | ---------------------------------- |
+| Strict (Earley chart) | 31     | **91.18 %**                        |
+| Pattern fallback      | 3      | 8.82 %                             |
+| Thất bại              | 0      | 0 %                                |
+
 
 3 câu rơi vào fallback là `Q026` ("Hôm nay ở TP.HCM có mưa không?"), `Q027`
 ("Ai là tổng thống của Pháp?") và `Q028` ("Hãy giải bài tập xác suất này giúp
@@ -316,7 +384,11 @@ strict parse đạt **100 %**.
 
 ---
 
+
+
 ## 7. Mô tả semantic representation
+
+
 
 ### 7.1 Dạng logic
 
@@ -346,10 +418,12 @@ sem_rep = analyzer.analyze(query, tokens, context=context, tree=tree)
 
 Hai nguồn được kết hợp theo thứ tự ưu tiên:
 
-| Nguồn | Vai trò | Ví dụ |
-| ----- | ------- | ----- |
-| **Lexicon** (văn bản) | **Nguồn chính** — luôn thắng khi xung đột | `"Chương 4"` → `chapter=CH04` |
-| **Cây cú pháp** | **Nguồn bù** — chỉ lấp slot mà lexicon bỏ lỡ | `(CHAPTER_REF chương (CHAPTER_NUM 4))` → `CH07` khi văn bản không nêu số |
+
+| Nguồn                 | Vai trò                                      | Ví dụ                                                                    |
+| --------------------- | -------------------------------------------- | ------------------------------------------------------------------------ |
+| **Lexicon** (văn bản) | **Nguồn chính** — luôn thắng khi xung đột    | `"Chương 4"` → `chapter=CH04`                                            |
+| **Cây cú pháp**       | **Nguồn bù** — chỉ lấp slot mà lexicon bỏ lỡ | `(CHAPTER_REF chương (CHAPTER_NUM 4))` → `CH07` khi văn bản không nêu số |
+
 
 Cây được đọc theo hai cách: nút **có kiểu** (`CHAPTER_REF`, `WEEK_REF`,
 `GEN_SUBJECT`, `GEN_LOCATION`) suy ra giá trị trực tiếp từ số mà văn phạm đã
@@ -362,39 +436,58 @@ Nhờ `setdefault`, việc thêm cây **không thể làm mất** entity nào m�
 (test `tests/test_semantic_tree.py`). Cây cũng điền vào slot `query_type`
 (`WH_QUESTION`, `YES_NO_QUESTION`) vốn để trống trước đây.
 
+> `query_type` **là nhãn *cấu trúc cây*, không phải nhãn intent.** Giá trị của nó là
+> symbol gốc của cây cú pháp (`WH_QUESTION`, `YES_NO_QUESTION`, …). Với câu thuộc văn
+> phạm, symbol gốc trùng với intent — nhưng với câu **fallback** (ngoài văn phạm) thì
+> parser vẫn dựng được cây theo mẫu, nên `query_type` sẽ là `WH_QUESTION` dù câu đó
+> có thể ngoài phạm vi. Vì vậy hãy đọc **intent** (`entities["intent"]`) khi cần biết
+> ý định thật sự, đừng dùng `query_type` cho mục đích đó.
+
+
+
 ### 7.3 Ví dụ
 
-| Câu hỏi                         | Dạng logic                                       |
-| ------------------------------- | ------------------------------------------------ |
-| "Môn NLP có bao nhiêu tín chỉ?" | `GET_COURSE_INFO(course=CO3085, attribute=credits)` |
-| "Tuần 3 học gì?"                | `GET_SCHEDULE(week=WEEK_03)`                     |
-| "Chương 4 nói về gì?"           | `GET_TOPIC(chapter=CH04)`                        |
-| "Chương nào học về CFG?"        | `GET_TOPIC(topic=CFG)`                           |
+
+| Câu hỏi                         | Dạng logic                                           |
+| ------------------------------- | ---------------------------------------------------- |
+| "Môn NLP có bao nhiêu tín chỉ?" | `GET_COURSE_INFO(course=CO3085, attribute=credits)`  |
+| "Tuần 3 học gì?"                | `GET_SCHEDULE(week=WEEK_03)`                         |
+| "Chương 4 nói về gì?"           | `GET_TOPIC(chapter=CH04)`                            |
+| "Chương nào học về CFG?"        | `GET_TOPIC(topic=CFG)`                               |
 | "Deadline BTL là khi nào?"      | `GET_DEADLINE(attribute=deadline, assignment=BTL01)` |
-| "Có được dùng LLM không?"       | `GET_RULE(rule=LLM_RAG)`                         |
-| "L.O.4.2 là gì?"                | `GET_LO(lo=LO4.2)`                               |
+| "Có được dùng LLM không?"       | `GET_RULE(rule=LLM_RAG)`                             |
+| "L.O.4.2 là gì?"                | `GET_LO(lo=LO4.2)`                                   |
+
+
+
 
 ### 7.4 Tập Intent
 
 Hệ thống hỗ trợ **11 intent**:
 
-| Intent            | Mô tả                                                                |
-| ----------------- | -------------------------------------------------------------------- |
-| `GET_COURSE_INFO` | Thông tin chung môn học (tín chỉ, mô tả, mục tiêu, giữa kỳ, cuối kỳ) |
-| `GET_SCHEDULE`    | Lịch học theo tuần, hoặc tuần dạy một chương/chủ đề                  |
-| `GET_TOPIC`       | Nội dung / chủ đề của chương                                         |
-| `GET_ASSIGNMENT`  | Thông tin bài tập lớn và các phần                                    |
-| `GET_DEADLINE`    | Mốc thời gian nộp bài                                                |
-| `GET_RESOURCE`    | Tài liệu tham khảo                                                   |
-| `GET_RULE`        | Quy định môn học                                                     |
-| `GET_LO`          | Mục tiêu học tập (Learning Outcome)                                  |
-| `GET_INSTRUCTOR`  | Giảng viên phụ trách và giờ gặp trực tiếp                             |
-| `CONTEXT_DEPENDENT` | Câu hỏi phụ thuộc lượt trước — cần ngữ cảnh để trả lời            |
-| `UNKNOWN`         | Ngoài phạm vi hệ thống                                               |
+
+| Intent              | Mô tả                                                                |
+| ------------------- | -------------------------------------------------------------------- |
+| `GET_COURSE_INFO`   | Thông tin chung môn học (tín chỉ, mô tả, mục tiêu, giữa kỳ, cuối kỳ) |
+| `GET_SCHEDULE`      | Lịch học theo tuần, hoặc tuần dạy một chương/chủ đề                  |
+| `GET_TOPIC`         | Nội dung / chủ đề của chương                                         |
+| `GET_ASSIGNMENT`    | Thông tin bài tập lớn và các phần                                    |
+| `GET_DEADLINE`      | Mốc thời gian nộp bài                                                |
+| `GET_RESOURCE`      | Tài liệu tham khảo                                                   |
+| `GET_RULE`          | Quy định môn học                                                     |
+| `GET_LO`            | Mục tiêu học tập (Learning Outcome)                                  |
+| `GET_INSTRUCTOR`    | Giảng viên phụ trách và giờ gặp trực tiếp                            |
+| `CONTEXT_DEPENDENT` | Câu hỏi phụ thuộc lượt trước — cần ngữ cảnh để trả lời               |
+| `UNKNOWN`           | Ngoài phạm vi hệ thống                                               |
+
 
 ---
 
+
+
 ## 8. Mô tả phương pháp xử lý intent / entity
+
+
 
 ### 8.1 Intent — phương pháp dựa trên luật
 
@@ -464,23 +557,29 @@ biệt hoa thường.
 
 ---
 
+
+
 ## 9. Knowledge base và cách truy vấn
+
+
 
 ### 9.1 Cấu trúc knowledge base
 
 Dữ liệu môn học nằm ngay trong `src/knowledge_base.py` (một module Python với
 các hằng dict có cấu trúc), được nạp vào lớc `KnowledgeBase` dưới dạng dict:
 
-| Nhóm          | Nội dung                                                                       |
-| ------------- | ------------------------------------------------------------------------------ |
-| `COURSE_INFO` | Thông tin chung: tên, mã, số tín chỉ, mô tả, mục tiêu, thời lượng giữa/cuối kỳ, giảng viên |
-| `SCHEDULE`    | 15 tuần, ánh xạ tuần ↔ chương ↔ nội dung ↔ hoạt động ↔ mốc nộp                 |
-| `CHAPTERS`    | 12 chương: tóm tắt, chủ đề con, tuần dạy, phương pháp, mục tiêu học tập phục vụ |
-| `ASSIGNMENT`  | BTL: 4 phần (PART_I…PART_IV), yêu cầu, file phải xuất, checkpoint, tiêu chí    |
-| `RESOURCES`   | Danh mục 7 tài liệu tham khảo, slide, ghi chú — kèm chủ đề liên quan            |
-| `REGULATIONS` | 7 nhóm quy định: tham dự, liêm chính học thuật, dùng AI, LLM/RAG, bản quyền, chính sách, phạm vi |
-| `FAQ`         | 7 câu hỏi thường gặp                                                             |
-| `TOPIC_TO_CHAPTER` / `LO_TO_CHAPTERS` | Ánh xạ ngược: chủ đề → chương, LO → chương |
+
+| Nhóm                                  | Nội dung                                                                                         |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `COURSE_INFO`                         | Thông tin chung: tên, mã, số tín chỉ, mô tả, mục tiêu, thời lượng giữa/cuối kỳ, giảng viên       |
+| `SCHEDULE`                            | 15 tuần, ánh xạ tuần ↔ chương ↔ nội dung ↔ hoạt động ↔ mốc nộp                                   |
+| `CHAPTERS`                            | 12 chương: tóm tắt, chủ đề con, tuần dạy, phương pháp, mục tiêu học tập phục vụ                  |
+| `ASSIGNMENT`                          | BTL: 4 phần (PART_I…PART_IV), yêu cầu, file phải xuất, checkpoint, tiêu chí                      |
+| `RESOURCES`                           | Danh mục 7 tài liệu tham khảo, slide, ghi chú — kèm chủ đề liên quan                             |
+| `REGULATIONS`                         | 7 nhóm quy định: tham dự, liêm chính học thuật, dùng AI, LLM/RAG, bản quyền, chính sách, phạm vi |
+| `FAQ`                                 | 7 câu hỏi thường gặp                                                                             |
+| `TOPIC_TO_CHAPTER` / `LO_TO_CHAPTERS` | Ánh xạ ngược: chủ đề → chương, LO → chương                                                       |
+
 
 Ngoài ra có các hàm trả lời theo ngữ cảnh:
 `ask_for_clarification()` (câu cần ngữ cảnh), `unknown_answer()` (không hiểu),
@@ -490,6 +589,8 @@ Ngoài ra có các hàm trả lời theo ngữ cảnh:
 > cương môn CO3085 và tài liệu giảng viên cung cấp (`data/course_data.txt` là
 > bản tóm tắt dạng văn bản của cùng bộ dữ liệu đó). Không sử dụng dữ liệu từ
 > nguồn bên ngoài nào khác.
+
+
 
 ### 9.2 Cách truy vấn
 
@@ -521,11 +622,13 @@ miền dữ liệu hẹp.
 
 Hệ thống có **hai** thông báo chuẩn, tùy nguyên nhân:
 
-| Tình huống                              | Thông báo trả về                                              |
-| --------------------------------------- | ------------------------------------------------------------- |
+
+| Tình huống                                   | Thông báo trả về                                               |
+| -------------------------------------------- | -------------------------------------------------------------- |
 | Ngoài phạm vi môn học (`scope=OUT_OF_SCOPE`) | "Hệ thống chỉ chịu trách nhiệm trong phạm vi dữ liệu môn học…" |
-| Câu hỏi phụ thuộc ngữ cảnh chưa đủ      | "Tôi cần thêm ngữ cảnh để trả lời câu hỏi này…"             |
-| Không xác định được ý định              | "Xin lỗi, tôi không hiểu câu hỏi này…"                       |
+| Câu hỏi phụ thuộc ngữ cảnh chưa đủ           | "Tôi cần thêm ngữ cảnh để trả lời câu hỏi này…"                |
+| Không xác định được ý định                   | "Xin lỗi, tôi không hiểu câu hỏi này…"                         |
+
 
 Ngoài ra, câu hỏi trong phạm vi nhưng knowledge base không có dữ liệu được trả
 lời rõ ràng, ví dụ *"Chương 99 nói về gì?"* → "Không tìm thấy thông tin Chương
@@ -536,24 +639,32 @@ buộc của đề bài (mục 4.1.5).
 
 ---
 
+
+
 ## 10. Xử lý ngữ cảnh hội thoại
 
 Tầng ngữ cảnh nằm trong `src/dialogue.py`, gồm hai lớc:
 
-- **`DialogueState`** — trạng thái diễn ngôn: số lượt, ý định cuối, và các
-  thực thể đang "nổi bật" (`last_topic`, `last_chapter`, `last_week`,
-  `last_part`, `last_assignment`, `last_lo`) cùng bảng discourse entity.
-- **`DialogueManager`** — bộ giải tham chiếu, chạy **trước** bước phân tích
-  ngữ nghĩa để câu hỏi trở nên tự chứa.
+- `DialogueState` — trạng thái diễn ngôn: số lượt, ý định cuối, và các
+thực thể đang "nổi bật" (`last_topic`, `last_chapter`, `last_week`,
+`last_part`, `last_assignment`, `last_lo`) cùng bảng discourse entity.
+- `DialogueManager` — bộ giải tham chiếu, chạy **trước** bước phân tích
+ngữ nghĩa để câu hỏi trở nên tự chứa.
+
+
 
 ### 10.1 Bốn loại tham chiếu được hỗ trợ
 
-| Loại                       | Ví dụ                        | Cách giải                                     |
-| -------------------------- | ---------------------------- | --------------------------------------------- |
-| **Đại từ** (pronoun)       | "Nó có liên quan đến parsing không?" | Thay bằng thực thể nổi bật nhất (ưu tiên chương) |
-| **Mô tả xác định** (definite) | "Tài liệu của **chương này** là gì?" | Thay bằng chương/tuần/phần vừa nói |
-| **Cấu trúc rút gọn** (ellipsis) | "Còn **chương sau**?"      | Quan hệ "kế tiếp" — cần tri thức miền (12 chương, 15 tuần) |
-| **Mô tả xác định + kế tiếp** | "**Phần này** cần xuất file gì?" | Suy ra phần của bài tập đang bàn |
+
+| Loại                            | Ví dụ                                | Cách giải                                                  |
+| ------------------------------- | ------------------------------------ | ---------------------------------------------------------- |
+| **Đại từ** (pronoun)            | "Nó có liên quan đến parsing không?" | Thay bằng thực thể nổi bật nhất (ưu tiên chương)           |
+| **Mô tả xác định** (definite)   | "Tài liệu của **chương này** là gì?" | Thay bằng chương/tuần/phần vừa nói                         |
+| **Cấu trúc rút gọn** (ellipsis) | "Còn **chương sau**?"                | Quan hệ "kế tiếp" — cần tri thức miền (12 chương, 15 tuần) |
+| **Mô tả xác định + kế tiếp**    | "**Phần này** cần xuất file gì?"     | Suy ra phần của bài tập đang bàn                           |
+
+
+
 
 ### 10.2 Hai chế độ xử lý
 
@@ -581,25 +692,32 @@ Assistant: Chương 05 - Grammar for Natural Language ...
 
 ---
 
+
+
 ## 11. Lựa chọn hướng thực hiện
 
 Nhóm thực hiện theo **Lựa chọn 1: Classical / Statistical NLP**.
 
 ### 11.1 Nội dung đã dùng
 
-| Kỹ thuật                                        | Nơi áp dụng                              |
-| ----------------------------------------------- | ---------------------------------------- |
-| Văn phạm CFG có trọng số (PCFG-lite)            | `src/grammar.py`                         |
-| Sinh câu bằng mở rộng đệ quy theo trọng số      | `src/grammar.py`                         |
-| Phân tích cú pháp Earley chart (bottom-up)      | `src/parser.py`                          |
-| Tính FIRST/FOLLOW cho văn phạm                  | `src/grammar.py`                         |
-| Biểu diễn ngữ nghĩa dạng logic form             | `src/semantic.py`                        |
-| Nhận diện intent bằng luật có trọng số          | `src/semantic.py`                        |
-| Trích xuất entity bằng lexicon longest-match     | `src/lexicon.py`, `models/lexicon.json`   |
-| Truy vấn knowledge base theo mẫu có tham số     | `src/knowledge_base.py`                  |
-| Giải quyết tham chiếu ngữ cảnh cục bộ bằng luật | `src/dialogue.py`                        |
+
+| Kỹ thuật                                        | Nơi áp dụng                             |
+| ----------------------------------------------- | --------------------------------------- |
+| Văn phạm CFG có trọng số (PCFG-lite)            | `src/grammar.py`                        |
+| Sinh câu bằng mở rộng đệ quy theo trọng số      | `src/grammar.py`                        |
+| Phân tích cú pháp Earley chart (bottom-up)      | `src/parser.py`                         |
+| Tính FIRST/FOLLOW cho văn phạm                  | `src/grammar.py`                        |
+| Biểu diễn ngữ nghĩa dạng logic form             | `src/semantic.py`                       |
+| Nhận diện intent bằng luật có trọng số          | `src/semantic.py`                       |
+| Trích xuất entity bằng lexicon longest-match    | `src/lexicon.py`, `models/lexicon.json` |
+| Truy vấn knowledge base theo mẫu có tham số     | `src/knowledge_base.py`                 |
+| Giải quyết tham chiếu ngữ cảnh cục bộ bằng luật | `src/dialogue.py`                       |
+
+
+
 
 ### 11.2 Lựa chọn phương pháp phân loại intent
+
 
 | Phương án                            | Đánh giá                                                                                               |
 | ------------------------------------ | ------------------------------------------------------------------------------------------------------ |
@@ -607,31 +725,40 @@ Nhóm thực hiện theo **Lựa chọn 1: Classical / Statistical NLP**.
 | Học máy thống kê (Naive Bayes / SVM) | Có thể thêm sau để tăng độ bao phủ; luật giữ vai trò fallback khi độ tin cậy thấp.                     |
 | LLM / RAG                            | Là **phần mở rộng**, không bắt buộc, và không thay thế được các thành phần NLP cốt lõi.                |
 
+
 Hệ thống **không dùng LLM ở bất kỳ đâu** — toàn bộ pipeline xử lý ngôn ngữ
 bằng luật, đúng như yêu cầu của Lựa chọn 1.
 
 ---
 
+
+
 ## 12. Mô tả cách đánh giá
+
+
 
 ### 12.1 Tập kiểm thử
 
 Bộ đánh giá gồm **57 câu** từ **3 nguồn** (`src/evaluation.py`):
 
-| Nguồn                                          | Số câu | Vai trò                                                  |
-| ---------------------------------------------- | ------ | -------------------------------------------------------- |
-| `tests/data/sample_queries.txt` (chính thức)   | 34     | Câu hỏi có nhãn của đề bài                                |
-| Câu biến thể (`PARAPHRASE_CASES`)               | 15     | Cùng ý nhưng cách diễn đạt khác — chống "học thuộc"        |
-| Câu hội thoại nhiều lượt (`DIALOGUE_EVAL_CASES`) | 8      | Chứng minh ngữ cảnh hội thoại thực sự được dùng          |
+
+| Nguồn                                            | Số câu | Vai trò                                             |
+| ------------------------------------------------ | ------ | --------------------------------------------------- |
+| `tests/data/sample_queries.txt` (chính thức)     | 34     | Câu hỏi có nhãn của đề bài                          |
+| Câu biến thể (`PARAPHRASE_CASES`)                | 15     | Cùng ý nhưng cách diễn đạt khác — chống "học thuộc" |
+| Câu hội thoại nhiều lượt (`DIALOGUE_EVAL_CASES`) | 8      | Chứng minh ngữ cảnh hội thoại thực sự được dùng     |
+
 
 Phân loại theo bản chất:
 
-| Nhóm                                                  | Số câu |
-| ---------------------------------------------------- | ------ |
-| Câu hỏi hợp lệ trong miền                            | 38     |
-| Câu hỏi ngoài phạm vi                                 | 5      |
-| Câu hỏi phụ thuộc ngữ cảnh                            | 11     |
-| Câu hỏi trong phạm vi nhưng KB không có dữ liệu      | 3      |
+
+| Nhóm                                            | Số câu |
+| ----------------------------------------------- | ------ |
+| Câu hỏi hợp lệ trong miền                       | 38     |
+| Câu hỏi ngoài phạm vi                           | 5      |
+| Câu hỏi phụ thuộc ngữ cảnh                      | 11     |
+| Câu hỏi trong phạm vi nhưng KB không có dữ liệu | 3      |
+
 
 Ngoài ra còn có **5 kịch bản hội thoại** đầy đủ trong `tests/data/dialogues.txt`.
 
@@ -669,30 +796,36 @@ chấp nhận khi pipeline trích ra `NLP`.
 4. **Chất lượng parse** — tỉ lệ strict / fallback / failure
 5. **Chất lượng sinh câu** — số câu chứa `_`, rò non-terminal, sai dấu câu
 
+
+
 ### 12.3 Kết quả hiện tại
 
 **Trên 57 câu kiểm thử (34 chính thức + 15 biến thể + 8 hội thoại):**
 
-| Chỉ số                        | Kết quả               |
-| ----------------------------- | --------------------- |
-| Intent accuracy               | 57/57 — **100.00 %**  |
-| Entity accuracy (alias-aware) | 57/57 — **100.00 %**  |
-| **Intent + Entity accuracy**  | 57/57 — **100.00 %**  |
-| Câu trả lời đúng              | 57/57 — **100.00 %**  |
-| Phát hiện ngoài phạm vi       | **100.00 %**          |
+
+| Chỉ số                        | Kết quả              |
+| ----------------------------- | -------------------- |
+| Intent accuracy               | 57/57 — **100.00 %** |
+| Entity accuracy (alias-aware) | 57/57 — **100.00 %** |
+| **Intent + Entity accuracy**  | 57/57 — **100.00 %** |
+| Câu trả lời đúng              | 57/57 — **100.00 %** |
+| Phát hiện ngoài phạm vi       | **100.00 %**         |
+
 
 **Trên 34 câu hỏi chính thức:**
 
-| Chỉ số                        | Kết quả               |
-| ----------------------------- | --------------------- |
-| Intent accuracy               | 34/34 — **100.00 %**  |
-| Entity accuracy (alias-aware) | 34/34 — **100.00 %**  |
-| Entity accuracy (khớp thô)    | 32/34 — 94.12 %       |
-| **Intent + Entity accuracy**  | 34/34 — **100.00 %**  |
-| Strict parse (Earley chart)   | 31/34 — **91.18 %**   |
-| Pattern fallback parse        | 3/34 — 8.82 %         |
-| Parse failure                 | 0/34 — 0 %            |
+
+| Chỉ số                        | Kết quả                              |
+| ----------------------------- | ------------------------------------ |
+| Intent accuracy               | 34/34 — **100.00 %**                 |
+| Entity accuracy (alias-aware) | 34/34 — **100.00 %**                 |
+| Entity accuracy (khớp thô)    | 32/34 — 94.12 %                      |
+| **Intent + Entity accuracy**  | 34/34 — **100.00 %**                 |
+| Strict parse (Earley chart)   | 31/34 — **91.18 %**                  |
+| Pattern fallback parse        | 3/34 — 8.82 %                        |
+| Parse failure                 | 0/34 — 0 %                           |
 | Bộ test                       | **168 passed — 0 failed, 0 xfailed** |
+
 
 **Chất lượng bộ sinh câu (10 000 câu):** 0 câu chứa `_`, 0 câu rò non-terminal,
 0 câu mở sai, 0 câu thiếu dấu câu.
@@ -702,6 +835,8 @@ chấp nhận khi pipeline trích ra `NLP`.
 > Việt nói chung. 15 câu biến thể được cố ý thêm vào để phát hiện trường hợp
 > hệ thống chỉ nhớ đúng câu chữ của đề bài. Ba câu parse fallback là ba câu
 > **ngoài phạm vi** cố ý — trên 31 câu in-scope, strict parse đạt **100 %**.
+
+
 
 ### 12.4 Quản lý lỗi tồn đọng
 
@@ -718,25 +853,29 @@ chạy và không thể bị "quên".
 
 ---
 
+
+
 ## 13. Hạn chế của hệ thống
 
 1. **Lexicon là bảng tra thủ công.** Một cách diễn đạt mới sẽ không được nhận
-   diện; mở rộng miền tri thức đòi hỏi thêm surface form thủ công.
+  diện; mở rộng miền tri thức đòi hỏi thêm surface form thủ công.
 2. **Tham chiếu ngữ cảnh theo bộ quy tắc cố định.** Hệ thống xử lý được 4 loại
-   tham chiếu (đại từ, mô tả xác định, cấu trúc rút gọn, quan hệ kế tiếp) nhưng
+  tham chiếu (đại từ, mô tả xác định, cấu trúc rút gọn, quan hệ kế tiếp) nhưng
    chưa xử lý được tham chiếu mơ hồ khi có nhiều ứng viên.
 3. **Knowledge base chỉ trả lời truy vấn đơn.** Chưa suy luận nhiều bước (ví dụ
-   so sánh, tổng hợp, hoặc kết hợp thông tin từ nhiều nguồn trong một câu hỏi).
+  so sánh, tổng hợp, hoặc kết hợp thông tin từ nhiều nguồn trong một câu hỏi).
 4. **Độ phủ đo được trên tập kiểm thử, không phải trên tiếng Việt nói chung.**
-   100 % là kết quả trên 57 câu của đề bài và nhóm tự bổ sung; chưa có tập dữ
+  100 % là kết quả trên 57 câu của đề bài và nhóm tự bổ sung; chưa có tập dữ
    liệu lớn hơn để đo độ tổng quát.
 5. **Không có phân tích ngữ nghĩa (Word Sense Disambiguation) độc lập.**
-   Việc chọn nghĩa của từ đa nghĩa được giải quyết bằng lexicon theo nhóm ưu
+  Việc chọn nghĩa của từ đa nghĩa được giải quyết bằng lexicon theo nhóm ưu
    tiên, chưa phải bằng thuật toán WSD chuyên dụng.
 6. **Chưa mở rộng LLM/RAG.** Đây là phần mở rộng không bắt buộc của đề bài; hệ
-   thống hiện hoàn toàn rule-based theo Lựa chọn 1.
+  thống hiện hoàn toàn rule-based theo Lựa chọn 1.
 
 ---
+
+
 
 ## 14. Ghi chú về tính trung thực học thuật
 

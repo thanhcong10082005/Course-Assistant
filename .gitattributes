@@ -1,0 +1,28 @@
+# Normalise line endings so that a checkout on Windows produces exactly the
+# same bytes as the generator (which writes with newline="\n").  Without this
+# file every `git diff` on Windows shows the whole artefact as modified.
+* text=auto eol=lf
+
+# The generated artefacts of output/ are compared byte by byte by
+# scripts/check_submission.py and by the graders.
+output/*.txt text eol=lf
+
+# Sources and documentation.
+*.py text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.cfg text eol=lf
+*.ini text eol=lf
+
+# Binary assets must never be touched.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.pdf binary
+*.zip binary
+*.pt binary
+*.bin binary

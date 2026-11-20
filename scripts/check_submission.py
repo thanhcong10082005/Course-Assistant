@@ -17,6 +17,23 @@ import os
 import sys
 from typing import List, Tuple
 
+
+def _force_utf8_stdio() -> None:
+    """
+    Print the Vietnamese report correctly on a Windows console.
+
+    Without this the script dies with ``UnicodeEncodeError`` on cp1252
+    before it can print a single line, which hides the real check results.
+    """
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, ValueError, OSError):
+            pass
+
+
+_force_utf8_stdio()
+
 # The root of the repository (the parent of ``scripts/``).
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 

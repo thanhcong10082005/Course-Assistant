@@ -39,6 +39,37 @@ from .semantic import SemanticAnalyzer, SemanticRepresentation, IntentType
 from .knowledge_base import KnowledgeBase
 from .dialogue import DialogueManager
 
+
+def _force_utf8_stdio() -> None:
+    """
+    Make the CLI print Vietnamese correctly on every platform.
+
+    On Windows the interpreter starts with a legacy code page (cp1252 on a
+    Western console), and printing a single accented character then raises::
+
+        UnicodeEncodeError: 'charmap' codec can't encode character '\\u1ec7'
+
+    The Docker image sets ``PYTHONIOENCODING=utf-8``, so the problem only
+    shows up when the program is started directly on Windows -- exactly the
+    way the demo video is recorded.  Reconfiguring the three standard
+    streams fixes it for good, so nobody has to remember to export an
+    environment variable.
+
+    ``errors="replace"`` keeps the program alive even on a console that
+    genuinely cannot represent a character: an unprintable glyph becomes
+    ``?`` instead of a crash.
+    """
+    for stream in (sys.stdin, sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, ValueError, OSError):
+            # A stream that does not support reconfiguration (for example the
+            # object pytest installs while capturing output) is left alone.
+            pass
+
+
+_force_utf8_stdio()
+
 # The nine artefacts required by the assignment.
 OUTPUT_FILES = (
     "grammar.txt",
@@ -599,8 +630,16 @@ def write_parse_results(output_dir: str, sentences: List[str]) -> None:
     Artefact 3/9 -- one parse tree per sentence, as required by 3.3 of the
     assignment: a sentence that belongs to the grammar is printed as its
     tree, anything else (invalid or outside the grammar) is printed as
-    ``()``.  There is no header and no mode label: the file is a plain
-    list of trees, one per line, in the same order as ``samples.txt``.
+    ``()``.
+
+    There is no header and no mode label: the file is a plain list of trees,
+    one per line.
+
+    The sentences are the ones of ``input/sentences.txt`` (see
+    :func:`load_analysis_sentences`), i.e. the input the assignment
+    prescribes in 3.3 -- **not** the 10,000 sentences of ``samples.txt``,
+    which is the corpus of the *generator* (3.2).  The two artefacts
+    therefore have different lengths on purpose.
     """
     parser = Parser()
     with open(os.path.join(output_dir, 'parse-results.txt'), 'w', encoding='utf-8') as fh:
