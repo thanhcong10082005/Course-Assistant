@@ -48,6 +48,33 @@ class DiscourseEntity:
     salience: float = 1.0  # Importance score
 
 
+# The slots the discourse state tracks, in the order a reference prefers
+# them when no more precise information is available.
+REFERENCE_SLOTS = ("chapter", "topic", "week", "part", "assignment", "lo")
+
+# The ``DialogueState`` attribute that holds the "last value" of a slot.
+_STATE_FIELDS = {
+    "topic": "last_topic",
+    "chapter": "last_chapter",
+    "week": "last_week",
+    "part": "last_part",
+    "assignment": "last_assignment",
+    "lo": "last_lo",
+}
+
+# A pronoun continues the thread of the *previous turn*.  The slots of that
+# turn are searched in the order implied by its intent, so that "Nó cần
+# xuất file gì?" (after a turn about the assignment) picks the assignment
+# instead of a chapter that was merely mentioned several turns earlier.
+_INTENT_SLOT_ORDER = {
+    "GET_ASSIGNMENT": ("assignment", "part"),
+    "GET_TOPIC": ("chapter", "topic"),
+    "GET_SCHEDULE": ("week", "chapter"),
+    "GET_LO": ("lo", "chapter"),
+    "GET_RESOURCE": ("chapter", "topic"),
+}
+
+
 @dataclass
 class DialogueState:
     """Current state of dialogue"""
@@ -61,6 +88,10 @@ class DialogueState:
     last_lo: Optional[str] = None
     entities: Dict[str, DiscourseEntity] = field(default_factory=dict)
     history: List[Dict] = field(default_factory=list)
+    # The entities of the immediately preceding turn.  A pronoun continues
+    # *that* thread; the per-slot ``last_*`` values can be several turns old
+    # ("Chương 4 ..." in turn 1 must not win over the assignment of turn 2).
+    last_turn_entities: Dict[str, str] = field(default_factory=dict)
     # Turns that have already been interpreted: raw query -> interpretation.
     resolved_turns: Dict[str, Dict[str, Any]] = field(default_factory=dict)
 
@@ -121,7 +152,7 @@ class DialogueManager:
     # ------------------------------------------------------------------
     # Context update
     # ------------------------------------------------------------------
-    def note_context(self, entities: Dict[str, Any], query: str = "") -> None:
+    def note_context(self, entities: Dict[str, Any], query: str = "", intent: str = "") -> None:
         """
         Remember the entities of a turn **without** opening a session.
 
@@ -131,6 +162,8 @@ class DialogueManager:
         a contextual reference -- while the question itself stays
         context-dependent.
         """
+        if intent:
+            self.state.last_intent = intent
         if not entities:
             return
 
@@ -145,6 +178,8 @@ class DialogueManager:
             if key in entities:
                 setattr(self.state, state_key, entities[key])
                 self._add_entity(key, entities[key], query)
+
+        self._remember_turn_entities(entities)
 
     def update_context(self, intent: str, entities: Dict[str, Any], query: str):
         """
@@ -183,6 +218,10 @@ class DialogueManager:
             self.state.last_lo = entities['lo']
             self._add_entity('lo', entities['lo'], query)
 
+        # Remember which slots *this* turn contributed: a pronoun in the
+        # next turn continues this thread.
+        self._remember_turn_entities(entities)
+
         # Add to history
         self.state.history.append({
             'turn': self.state.turn,
@@ -191,13 +230,33 @@ class DialogueManager:
             'query': query
         })
 
+    def _remember_turn_entities(self, entities: Dict[str, Any]) -> None:
+        """
+        Record the tracked slots of a turn as the *current thread*.
+
+        A turn that carries no tracked entity leaves the previous thread in
+        place: a filler turn ("Cảm ơn") must not erase what was being
+        discussed.
+        """
+        tracked = {key: entities[key] for key in REFERENCE_SLOTS if key in entities}
+        if tracked:
+            self.state.last_turn_entities = tracked
+
     def _add_entity(self, entity_type: str, value: str, mention: str):
         """Add an entity to the discourse context"""
+        existing = self.state.entities.get(entity_type)
+        # ``introduced_at`` is the turn the *value* first appeared.  Re-using
+        # an entity as a referent must not make it look newly introduced.
+        introduced_at = (
+            existing.introduced_at
+            if existing is not None and existing.value == value
+            else self.state.turn
+        )
         entity = DiscourseEntity(
             entity_type=entity_type,
             value=value,
             mention=mention,
-            introduced_at=self.state.turn,
+            introduced_at=introduced_at,
             last_mentioned_at=self.state.turn,
             salience=1.0
         )
@@ -354,33 +413,31 @@ class DialogueManager:
                     inferred['assignment'] = self.state.last_assignment
 
         # -- pronouns ("nó") ---------------------------------------------
-        # The pronoun refers to the most salient discourse entity.  A
-        # chapter is preferred over a topic because a question like
-        # "Chương 4 nói về gì?" / "Nó có liên quan đến parsing không?"
-        # continues the *chapter* thread.
+        # The pronoun continues the thread of the *previous turn*.  That
+        # thread is searched first (ordered by the intent of the turn that
+        # opened it), so "Chương 4 nói về gì?" / "Nó có liên quan đến
+        # parsing không?" still resolves to the chapter, while
+        # "Bài tập lớn ..." / "Nó cần xuất file gì?" resolves to the
+        # assignment instead of the stale chapter of an earlier turn.
         if self._contains_pronoun(query_lower):
             has_reference = True
-            if self.state.last_chapter:
-                resolved_entities['chapter'] = self.state.last_chapter
-                inferred['chapter'] = self.state.last_chapter
-            elif self.state.last_topic:
-                resolved_entities['topic'] = self.state.last_topic
-                inferred['topic'] = self.state.last_topic
-            elif self.state.last_week:
-                resolved_entities['week'] = self.state.last_week
-                inferred['week'] = self.state.last_week
+            referent = self._pronoun_referent()
+            if referent:
+                key, value = referent
+                resolved_entities[key] = value
+                inferred[key] = value
 
         # -- ellipsis ("Vậy thì ...?") -----------------------------------
+        # The omitted subject is the thread of the previous turn -- the same
+        # referent a pronoun would get.  Without this the branch would drag
+        # an old ``last_chapter`` into a turn that continues another topic.
         if self._is_ellipsis(query_lower):
             has_reference = True
-            if self.state.last_chapter:
-                resolved_entities.setdefault('chapter', self.state.last_chapter)
-                inferred.setdefault('chapter', self.state.last_chapter)
-            elif self.state.last_topic:
-                resolved_entities.setdefault('topic', self.state.last_topic)
-                inferred.setdefault('topic', self.state.last_topic)
-            elif self.state.last_week:
-                resolved_entities.setdefault('week', self.state.last_week)
+            referent = self._pronoun_referent()
+            if referent:
+                key, value = referent
+                resolved_entities.setdefault(key, value)
+                inferred.setdefault(key, value)
 
         if inferred:
             resolved_entities['inferred_entities'] = inferred
@@ -407,6 +464,39 @@ class DialogueManager:
     # ------------------------------------------------------------------
     # Helpers
     # ------------------------------------------------------------------
+    def _pronoun_referent(self) -> Optional[Tuple[str, str]]:
+        """
+        The ``(slot, value)`` that a pronoun such as ``"nó"`` refers to.
+
+        Resolution order:
+
+        1. the slots of the **previous turn**, searched in the order
+           implied by that turn's intent (``GET_ASSIGNMENT`` ->
+           ``assignment`` then ``part``, ``GET_TOPIC`` -> ``chapter`` then
+           ``topic``, ...).  This keeps a pronoun on the thread that is
+           actually being continued;
+        2. failing that, the per-slot ``last_*`` values in the default
+           order -- the behaviour used when no previous turn is available
+           (the state is empty, or the previous turn carried no entity).
+
+        ``None`` means the discourse state holds nothing a pronoun could
+        point at; the caller then reports ``unresolved_reference``.
+        """
+        previous = self.state.last_turn_entities or {}
+        order = list(_INTENT_SLOT_ORDER.get(self.state.last_intent, ()))
+        order += [slot for slot in REFERENCE_SLOTS if slot not in order]
+
+        for slot in order:
+            if slot in previous:
+                return slot, previous[slot]
+
+        if not previous:
+            for slot in REFERENCE_SLOTS:
+                value = getattr(self.state, _STATE_FIELDS[slot], None)
+                if value:
+                    return slot, value
+        return None
+
     @staticmethod
     def _contains_pronoun(query_lower: str) -> bool:
         """True when the query contains a third-person pronoun."""

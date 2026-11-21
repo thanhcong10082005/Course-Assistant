@@ -206,3 +206,81 @@ def test_next_chapter_reference_stops_at_the_last_chapter(fresh_assistant):
     answer, _context = assistant.process_dialogue("Còn chương sau?")
     # There is no chapter 13 -- the assistant must not invent one.
     assert "Chương 13" not in answer
+
+
+# ---------------------------------------------------------------------------
+# Pronoun resolution -- a pronoun continues the thread of the *previous*
+# turn, it does not pick the oldest non-empty slot of the state.
+# ---------------------------------------------------------------------------
+def test_pronoun_continues_the_previous_turn_thread(manager):
+    """
+    Turn 1 names a chapter, turn 2 the assignment.  "Nó cần xuất file gì?"
+    must resolve to the assignment of turn 2 -- not to the chapter that is
+    still sitting in ``last_chapter`` from turn 1.
+    """
+    manager.update_context("GET_TOPIC", {"chapter": "CH04"}, "Chương 4 nói về gì?")
+    manager.update_context(
+        "GET_ASSIGNMENT",
+        {"assignment": "BTL01", "part": "PART_I", "topic": "PARSING"},
+        "Bài tập lớn có phần parser không?",
+    )
+
+    _query, resolved = manager.resolve_reference("Nó cần xuất file gì?")
+
+    assert resolved["inferred_entities"] == {"assignment": "BTL01"}
+
+
+def test_pronoun_keeps_the_chapter_thread(manager):
+    """DIALOGUE_02: a chapter turn followed by a pronoun stays on the chapter."""
+    manager.update_context("GET_TOPIC", {"chapter": "CH04"}, "Chương 4 nói về gì?")
+
+    _query, resolved = manager.resolve_reference("Nó có liên quan đến parsing không?")
+
+    assert resolved["inferred_entities"] == {"chapter": "CH04"}
+
+
+def test_pronoun_falls_back_to_the_last_slots_without_a_thread(manager):
+    """
+    With no previous turn recorded the per-slot ``last_*`` values remain
+    the fallback, so a state seeded by the legacy API still resolves.
+    """
+    manager.state.last_chapter = "CH04"
+
+    _query, resolved = manager.resolve_reference("Nó nói về gì?")
+
+    assert resolved["inferred_entities"] == {"chapter": "CH04"}
+
+
+def test_pronoun_in_the_pipeline_resolves_to_the_assignment(fresh_assistant):
+    """
+    End-to-end version of the same conversation: the stale chapter must not
+    leak into the analysis of the third turn.
+    """
+    assistant = fresh_assistant
+    assistant.process_dialogue("Chương 4 nói về gì?")
+    assistant.process_dialogue("Bài tập lớn có phần parser không?")
+
+    answer, context = assistant.process_dialogue("Nó cần xuất file gì?")
+
+    assert context["last_intent"] == "GET_ASSIGNMENT"
+    assert context["entities"].get("assignment") == "BTL01"
+    assert "chapter" not in context["entities"]
+    assert answer.startswith("Bài tập lớn")
+
+
+def test_entity_introduction_is_not_restamped(manager):
+    """
+    Re-using an entity as a referent must not make it look newly
+    introduced -- otherwise ``last_mentioned_at`` reports the referencing
+    turn instead of the turn that actually introduced the value.
+    """
+    manager.update_context("GET_TOPIC", {"chapter": "CH04"}, "Chương 4 nói về gì?")
+    first = manager.state.entities["chapter"].introduced_at
+
+    manager.update_context(
+        "GET_TOPIC", {"chapter": "CH04"}, "Nó có liên quan đến parsing không?"
+    )
+
+    entity = manager.state.entities["chapter"]
+    assert entity.introduced_at == first == 1
+    assert entity.last_mentioned_at == 2

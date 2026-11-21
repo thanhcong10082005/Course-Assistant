@@ -606,6 +606,7 @@ def main():
         "Chương 4 nói về gì?",
         "Deadline BTL là khi nào?",
         "Tài liệu về CFG ở đâu?",
+        "NLP có những phần chính nào?",
     ]
 
     print("Parser Test Results")
@@ -613,7 +614,7 @@ def main():
 
     for sentence in test_sentences:
         print(f"\nInput: {sentence}")
-        result = parser.get_parse_result(sentence)
+        result = parser.parse_strict(sentence)
         print(f"Output: {result}")
         print("-" * 60)
 

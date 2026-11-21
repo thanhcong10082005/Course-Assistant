@@ -266,7 +266,8 @@ class CourseAssistant:
 
         # Step 5: Remember the entities of this turn so that a later
         # question can refer to them ("Nó ...", "Phần này ...").
-        self.dialogue_manager.note_context(sem_rep.entities, query)
+        self.dialogue_manager.note_context(sem_rep.entities, query,
+                                            intent=sem_rep.intent.value)
 
         return result
 
