@@ -37,6 +37,7 @@ RUN mkdir -p output
 
 ENV PYTHONPATH=/app
 ENV PYTHONIOENCODING=utf-8
+ENV PYTHONUTF8=1
 ENV PYTHONUNBUFFERED=1
 
 # Generate the nine artefacts of output/ and then verify the installation.

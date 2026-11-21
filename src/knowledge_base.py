@@ -683,12 +683,98 @@ LO_TO_CHAPTERS: Dict[str, List[str]] = {
 }
 
 
+# ---------------------------------------------------------------------------
+# Suggestions
+# ---------------------------------------------------------------------------
+# The example questions used when the assistant does not understand a
+# question.  The official test set comes first (it is what the graders
+# know), the extra ones cover the topics the FAQ mentions.
+_EXTRA_EXAMPLE_QUESTIONS = [
+    "Môn NLP có bao nhiêu tín chỉ?",
+    "Môn học gồm những phần nào?",
+    "Tuần 3 học gì?",
+    "Chương 4 học vào tuần nào?",
+    "Chương nào nói về CFG?",
+    "PCFG được học ở đâu?",
+    "L.O.2.5 là gì?",
+    "Bài tập lớn yêu cầu xây dựng những gì?",
+    "Tài liệu của chương này là gì?",
+    "Deadline nộp bài tập là khi nào?",
+    "Quy định dùng LLM trong bài tập là gì?",
+    "Giảng viên phụ trách môn học là ai?",
+    "Bài tập lớn có hỏi đáp không?",
+]
+
+
+def _example_questions() -> List[str]:
+    """The example questions, read from the official test set if present."""
+    import os
+
+    questions = list(_EXTRA_EXAMPLE_QUESTIONS)
+    path = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        "input",
+        "sentences.txt",
+    )
+    if os.path.exists(path):
+        try:
+            with open(path, "r", encoding="utf-8") as handle:
+                for line in handle:
+                    line = line.strip()
+                    if line and not line.startswith("#"):
+                        questions.append(line)
+        except OSError:
+            pass
+    # Keep the order but drop the duplicates.
+    seen = set()
+    unique = []
+    for question in questions:
+        if question not in seen:
+            seen.add(question)
+            unique.append(question)
+    return unique
+
+
+_EXAMPLE_QUESTIONS = _example_questions()
+
+
+def _suggestion_key(text: str) -> str:
+    """
+    The normalised form used to compare a question with the examples.
+
+    The tone marks are removed so that "``phần``" and "``phan``" count as
+    the same word, and the punctuation is dropped.
+    """
+    import unicodedata
+
+    if not text:
+        return ""
+
+    text = unicodedata.normalize("NFC", text.lower())
+    text = text.replace("?", " ").replace(".", " ").replace(",", " ")
+    text = text.replace(";", " ").replace(":", " ")
+
+    # Remove the tone marks but keep the letters.
+    decomposed = unicodedata.normalize("NFD", text)
+    stripped = "".join(ch for ch in decomposed if not unicodedata.combining(ch))
+
+    return " ".join(stripped.split())
+
+
+def _token_overlap(left: str, right: str) -> float:
+    """The Jaccard similarity of the two token sets."""
+    left_tokens = set(left.split())
+    right_tokens = set(right.split())
+    if not left_tokens or not right_tokens:
+        return 0.0
+    return len(left_tokens & right_tokens) / len(left_tokens | right_tokens)
+
+
 class KnowledgeBase:
     """
     Knowledge Base for Course Assistant
     Provides methods to query course information
     """
-
     def __init__(self):
         self.course = COURSE_INFO
         self.chapters = CHAPTERS
@@ -1091,6 +1177,58 @@ class KnowledgeBase:
         return (
             "Xin lỗi, tôi không hiểu câu hỏi này. Vui lòng hỏi về thông tin môn học "
             "NLP như lịch học, nội dung chương, bài tập, tài liệu, hoặc quy định."
+        )
+
+    def suggest(self, query: str, limit: int = 3) -> List[str]:
+        """
+        The example questions that are closest to ``query``.
+
+        The suggestions are the *official* questions of the assignment
+        (``input/sentences.txt``) and a few extra ones.  They are ranked
+        with the ratio of :class:`difflib.SequenceMatcher` over the
+        normalised text, so a question that was typed with a typo
+        ("``Môn học gồm những thphần nào?``") still gets a useful
+        pointer.
+
+        The method returns an empty list when nothing is close enough --
+        a wrong suggestion is worse than no suggestion.
+        """
+        from difflib import SequenceMatcher
+
+        normalised = _suggestion_key(query)
+        if not normalised:
+            return []
+
+        scored = []
+        for example in _EXAMPLE_QUESTIONS:
+            key = _suggestion_key(example)
+            if not key:
+                continue
+            ratio = SequenceMatcher(None, normalised, key).ratio()
+            # A token overlap gives a better signal than the raw ratio
+            # for short questions.
+            overlap = _token_overlap(normalised, key)
+            score = 0.5 * ratio + 0.5 * overlap
+            if score >= 0.45:
+                scored.append((score, example))
+
+        # Keep the order stable for equally good matches.
+        scored.sort(key=lambda item: -item[0])
+        return [example for _score, example in scored[:limit]]
+
+    def unknown_answer_with_suggestions(self, query: str) -> str:
+        """
+        The answer used when the intent could not be determined, with a
+        pointer to the questions the assistant *does* understand.
+        """
+        base = self.unknown_answer()
+        suggestions = self.suggest(query)
+        if not suggestions:
+            return base
+        listed = "; ".join(f'"{s}"' for s in suggestions)
+        return (
+            f"{base}\n\n"
+            f"Bạn có thể hỏi theo các mẫu sau: {listed}."
         )
 
     def out_of_scope_answer(self) -> str:

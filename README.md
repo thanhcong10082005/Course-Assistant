@@ -70,6 +70,35 @@ Không cần bước cài đặt nào khác — toàn bộ mã nguồn dùng th�
 > terminal cũ của `cmd.exe`), chạy `chcp 65001` trước, hoặc dùng Windows Terminal /
 > PowerShell 7.
 
+> **Lưu ý Windows (đọc câu hỏi trong chế độ interactive):** chế độ `--mode interactive`
+> đọc dòng nhập qua `src/console.py`, với **4 lớp phòng vệ**:
+>
+> 1. **Console Windows thật** → đọc bằng `ReadConsoleW` (API Win32 trả về UTF-16),
+>    nên **không đi qua code page của console** — tiếng Việt luôn đúng.
+> 2. **stdin bị redirect** (pipe, file, Docker) → đọc **byte thô** từ
+>    `sys.stdin.buffer` và tự quyết định cách giải mã, vì lớp text của Python đã
+>    giải mã sai và **giải mã sai thì không thể đảo ngược**.
+> 3. **Sửa mojibake** — đặt lại byte đúng chỗ (round-trip code page; với `cp1252`
+>    còn khôi phục được cả 5 byte đã mất nhờ từ vựng của dự án).
+> 4. **Sửa lỗ hổng `?`** — khi console bị redirect, nó encode theo code page của
+>    console (`cp437`), mà code page đó **không có glyph** cho `ọ`, `ầ`, `ồ`… nên
+>    console ghi `?` thật (`"Môn học"` → `"Môn h?c"`). Byte đã mất ở tầng hệ điều
+>    hành nên không sửa được ở mức byte, nhưng **từ** thì khôi phục được nhờ
+>    từ vựng (`"Môn học gồm những phần nào?"` → `"Môn học gồm những phần nào?"`).
+>
+> Ngoài ra chương trình còn tự sửa ba lỗi gõ tay thường gặp: ký tự điều khiển ẩn do
+> terminal để lại (`ESC`, `DEL`, bracketed paste), âm tiết bộ gõ Telex/VNI bị bỏ
+> dấu (`"phan"` → `"phần"`), và chữ gõ thừa bên trong từ (`"thphần"` → `"phần"`).
+> Nhờ vậy **cùng một câu hỏi cho cùng một câu trả lời**, dù copy–paste hay gõ tay,
+> và dù chạy trong terminal hay trong Docker. Câu hỏi mà hệ thống không hiểu sẽ
+> kèm theo gợi ý các câu hỏi tương tự mà hệ thống *có* hiểu, thay vì chỉ trả lời
+> "không hiểu".
+>
+> Mọi sửa đổi đều **bảo thủ**: một từ đơn giản là lạ thì **không** bị đụng tới, vì
+> đoán sai còn tệ hơn không đoán. Từ vựng của dự án (lexicon + corpus) là nguồn
+> sự thật duy nhất quyết định từ nào đúng — không có bảng tra thủ công nào được
+> thêm vào.
+
 
 
 ### 2.3 Chạy bằng Docker (tuỳ chọn)
@@ -129,7 +158,7 @@ python -m src.main --mode interactive
 # Sinh lại toàn bộ file trong output/ (tất định, seed=42)
 python -m src.main --mode generate
 
-# Chạy bộ test (168 test)
+# Chạy bộ test (245 test)
 python -m pytest
 
 # Chạy báo cáo đánh giá (57 câu kiểm thử)
@@ -214,6 +243,7 @@ Course_Assistant_Sample/
 │   ├── knowledge_base.py    # Tầng 5-6: dữ liệu môn học, query engine, câu trả lời
 │   ├── dialogue.py          # Tầng ngữ cảnh: DialogueState, DialogueManager
 │   ├── evaluation.py        # Sinh báo cáo đánh giá (output/evaluation.txt)
+│   ├── console.py           # Đọc dòng nhập trên console Windows (ReadConsoleW) + sửa lỗi gõ tay
 │   └── main.py              # CourseAssistant — điều phối pipeline + CLI
 ├── models/
 │   └── lexicon.json         # Bảng tra cứu surface form → canonical value
@@ -226,9 +256,12 @@ Course_Assistant_Sample/
 │   ├── baseline.py          # Đo chỉ số chất lượng
 │   ├── check_submission.py  # Kiểm tra gói nộp bài
 │   └── generate_outputs.py  # Sinh lại output/ một cách tất định
-├── tests/                   # 168 test pytest
+├── tests/                   # 245 test pytest
 │   ├── conftest.py          # Fixture dùng chung
 │   ├── known_issues.py      # Sổ đăng ký lỗi còn lại (xfail)
+│   ├── test_console_input.py   # Hồi quy: ký tự điều khiển, mojibake, typo
+│   ├── test_console_encoding.py # Hồi quy: lỗ hổng code page + đọc byte thô
+│   ├── test_console_windows.py  # Hồi quy: ReadConsoleW trên Windows
 │   └── data/                # Bản sao dữ liệu mẫu chính thức
 ├── docs/
 │   ├── REPORT.md            # Báo cáo bài tập lớn
@@ -765,7 +798,7 @@ Ngoài ra còn có **5 kịch bản hội thoại** đầy đủ trong `tests/da
 ### 12.2 Công cụ đánh giá
 
 ```bash
-# Chạy bộ test đầy đủ (168 test)
+# Chạy bộ test đầy đủ (245 test)
 python -m pytest
 
 # Báo cáo đánh giá đầy đủ (6 mục, ghi ra output/evaluation.txt)
@@ -824,7 +857,7 @@ chấp nhận khi pipeline trích ra `NLP`.
 | Strict parse (Earley chart)   | 31/34 — **91.18 %**                  |
 | Pattern fallback parse        | 3/34 — 8.82 %                        |
 | Parse failure                 | 0/34 — 0 %                           |
-| Bộ test                       | **168 passed — 0 failed, 0 xfailed** |
+| Bộ test                       | **245 passed — 0 failed, 0 xfailed** |
 
 
 **Chất lượng bộ sinh câu (10 000 câu):** 0 câu chứa `_`, 0 câu rò non-terminal,
