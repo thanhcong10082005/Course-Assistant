@@ -4,6 +4,7 @@ services:
     container_name: course-assistant
     environment:
       - PYTHONIOENCODING=utf-8
+      - PYTHONUTF8=1
       - PYTHONPATH=/app
     volumes:
       # The generated artefacts are written back to the host so that the

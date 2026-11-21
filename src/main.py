@@ -38,6 +38,7 @@ from .parser import Parser
 from .semantic import SemanticAnalyzer, SemanticRepresentation, IntentType
 from .knowledge_base import KnowledgeBase
 from .dialogue import DialogueManager
+from .console import read_line
 
 
 def _force_utf8_stdio() -> None:
@@ -58,6 +59,14 @@ def _force_utf8_stdio() -> None:
     ``errors="replace"`` keeps the program alive even on a console that
     genuinely cannot represent a character: an unprintable glyph becomes
     ``?`` instead of a crash.
+
+    The same reconfiguration is applied to ``stdin``.  It does not
+    influence the interactive mode at all: :mod:`src.console` reads the
+    **raw bytes** of a redirected stream (``sys.stdin.buffer``) and
+    decides itself how they have to be decoded, because the code page of
+    the console is not known to Python.  On a real Windows console the
+    input is read with ``ReadConsoleW``, which does not go through a
+    code page either.
     """
     for stream in (sys.stdin, sys.stdout, sys.stderr):
         try:
@@ -262,7 +271,7 @@ class CourseAssistant:
         result['entities'] = sem_rep.entities
 
         # Step 4: Query Knowledge Base
-        result['answer'] = self._answer_for(sem_rep.intent, sem_rep.entities)
+        result['answer'] = self._answer_for(sem_rep.intent, sem_rep.entities, query)
 
         # Step 5: Remember the entities of this turn so that a later
         # question can refer to them ("Nó ...", "Phần này ...").
@@ -311,7 +320,7 @@ class CourseAssistant:
         )
 
         # Step 3: Answer.
-        answer = self._answer_for(sem_rep.intent, sem_rep.entities)
+        answer = self._answer_for(sem_rep.intent, sem_rep.entities, resolved_input)
 
         # Step 4: Update the discourse state.
         self.dialogue_manager.update_context(
@@ -356,11 +365,21 @@ class CourseAssistant:
     # ------------------------------------------------------------------
     # Helpers
     # ------------------------------------------------------------------
-    def _answer_for(self, intent: IntentType, entities: Dict) -> str:
-        """The answer text for a resolved intent."""
+    def _answer_for(self, intent: IntentType, entities: Dict,
+                    query: str = "") -> str:
+        """
+        The answer text for a resolved intent.
+
+        When the intent is ``UNKNOWN`` the answer carries a pointer to the
+        questions the assistant *does* understand: a question that was
+        typed with a typo ("``Môn học gồm những thphần nào?``") then
+        still leads the user to the right answer instead of a dead end.
+        """
         if intent == IntentType.CONTEXT_DEPENDENT:
             return self.knowledge_base.ask_for_clarification()
         if intent == IntentType.UNKNOWN:
+            if query:
+                return self.knowledge_base.unknown_answer_with_suggestions(query)
             return self.knowledge_base.unknown_answer()
         return self.knowledge_base.query(intent.value, entities)
 
@@ -407,7 +426,17 @@ class CourseAssistant:
 
         while True:
             try:
-                user_input = input("\nBạn: ").strip()
+                # ``read_line`` instead of ``input``: on a real Windows
+                # console it uses ReadConsoleW (UTF-16, immune to the
+                # console code page) and it removes the control characters
+                # a terminal may leave in the line.  See src/console.py.
+                user_input = read_line("\nBạn: ")
+
+                if user_input is None:
+                    # The input stream was closed (piped input, CI, ...).
+                    break
+
+                user_input = user_input.strip()
 
                 if not user_input:
                     continue
@@ -452,6 +481,12 @@ class CourseAssistant:
             except (EOFError, OSError):
                 # The input stream was closed (piped input, CI, ...).
                 break
+            except UnicodeDecodeError as e:
+                # The console produced bytes that are not valid UTF-8 and
+                # not valid in the console code page either.  The line is
+                # unusable, but the session must survive.
+                print(f"\nLỗi: không đọc được dòng nhập ({e}). "
+                      "Hãy thử lại hoặc dùng terminal hỗ trợ Unicode.")
             except Exception as e:
                 print(f"\nLỗi: {str(e)}")
 
