@@ -18,7 +18,7 @@ tiêu học tập.
 | 1   | Nguyễn Thành Công             | 2310373 |
 | 2   | Nguyễn Thành Phát             | 2312593 |
 | 3   | Bùi Trọng Nguyên              | 2312329 |
-| 4   | Thái Văn Quân                 |         |
+| 4   | Văn Thái Quân                 | 2312861 |
 
 
 ---
